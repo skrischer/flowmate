@@ -27,11 +27,15 @@ completed spec is moved to `docs/specs/archive/`.
 ### In scope
 
 - A `supabase/migrations/` migration creating the owner-keyed cycle-logging
-  table(s) with own-row RLS policies (`owner_id = auth.uid()` for select /
-  insert / update / delete).
+  table with own-row RLS policies (`owner_id = auth.uid()` for select / insert /
+  update / delete). Candidate name: `periods(owner_id, start_date, end_date)`
+  (per-period) or `bleeding_days(owner_id, date, intensity)` (per-day) — fixed
+  with the granularity decision at the gate.
 - Typed CRUD in `lib/data/` for logging entries.
 - A "log period" flow (create) plus edit and delete of a logged entry.
-- A basic chronological history list of the logged entries.
+- A basic chronological history list, **descending by date**; no pagination in v1.
+- Phase 2 UI is exclusively the **Flower's** logging flow; the Mate has no view
+  in this phase (the Mate experience is Phase 6).
 
 ### Out of scope
 
@@ -48,12 +52,18 @@ References `docs/constitution.md` rather than restating it.
 - Cycle data is **owner-keyed**; every cycle table carries `owner_id` from day
   one so Phase 5 can extend SELECT to followers without a backfill (constitution:
   edge-based substrate, n:m-capable).
-- RLS in this phase is **own-row only** (`owner_id = auth.uid()`); the
-  pairing-membership extension is Phase 5.
+- RLS in this phase is **own-row only** (`owner_id = auth.uid()`). Phase 5 adds a
+  **separate additional** SELECT policy for follower access via shared views; the
+  owner-only SELECT policy written here is **not** modified or replaced.
+- A "cycle" is a **derived** concept, not a stored row: cycle length is computed
+  from consecutive period starts. If the gate picks per-day granularity, Phase 2
+  ships the grouping mechanism (a derived `cycles` view or a documented query) so
+  Phase 3 prediction reads cycle boundaries without a new migration.
 - Logged days are stored as `DATE` (local calendar day, no time) to avoid
   timezone drift.
 - Components never call Supabase directly — only through `lib/data/`; TS
-  `strict`, no `any`, functions ≤ 50 lines, files ≤ 300 (constitution).
+  `strict` + `noUncheckedIndexedAccess: true`, no `any`, functions ≤ 50 lines,
+  files ≤ 300 (constitution).
 - Migrations live in `supabase/migrations/`, applied via the Supabase CLI.
 
 ## Prior art
@@ -73,10 +83,11 @@ References `docs/constitution.md` rather than restating it.
 
 | Decision | Rationale | Date |
 |---|---|---|
-| Owner-keyed tables; own-row RLS (`owner_id = auth.uid()`) | Constitution edge-based substrate; follower access added in Phase 5 without backfill | 2026-06-19 |
+| Owner-keyed tables; own-row RLS (`owner_id = auth.uid()`) | Constitution edge-based substrate; follower access added in Phase 5 as a separate SELECT policy, no backfill | 2026-06-19 |
+| A "cycle" is derived, not stored — length computed from consecutive period starts | Avoids denormalized/stale length; Phase 3 reads raw entries | 2026-06-19 |
 | Logged days stored as `DATE` (local), no timestamps | Avoids timezone drift on a calendar-day concept | 2026-06-19 |
-| Full CRUD (the Flower can edit/delete her entries) | Data sovereignty — she owns and corrects her data | 2026-06-19 |
-| OPEN — logging granularity: per-period (start + optional end) vs per-day bleeding entries (with optional intensity) | resolved at the spec-acceptance gate | — |
+| The Flower can edit/delete her entries (full CRUD) | Data sovereignty — she owns and corrects her data | 2026-06-19 |
+| OPEN — logging granularity AND its edit unit: per-period (edit start/end of one row) vs per-day bleeding entries with optional intensity (edit/add/remove day rows) | resolved together at the spec-acceptance gate; drives the schema and the edit flow | — |
 
 ## Tracking
 
@@ -101,7 +112,8 @@ behavioral items below are the script for the human milestone-QA gate.
       two sessions).
 - [ ] No cycle table has a `role` column; every cycle table has `owner_id` +
       RLS (schema check).
-- [ ] No direct Supabase import exists outside `lib/data/` (grep).
+- [ ] No `createClient` / direct Supabase import exists outside `lib/data/`
+      (grep — same check as Phase 1).
 
 ## Risks and mitigations
 
@@ -114,3 +126,7 @@ behavioral items below are the script for the human milestone-QA gate.
 ## Decision log
 
 - 2026-06-19: Spec drafted; logging granularity left OPEN for the acceptance gate.
+- 2026-06-19: Addressed spec review (PR #9) — pinned "cycle is derived, not stored";
+  tied the edit unit to the granularity decision; added `noUncheckedIndexedAccess`;
+  pinned Phase 5's RLS extension as a separate SELECT policy; named candidate
+  tables; set history sort descending; scoped Phase 2 UI to the Flower only.
