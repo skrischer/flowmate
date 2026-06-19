@@ -30,7 +30,10 @@ GitHub issues and milestone. A completed spec is moved to `docs/specs/archive/`.
 - Migrations for the **edge-based, n:m-capable** schema (v1 UI is 1:1):
   - `pairing(owner_id, follower_id, status, created_at)`.
   - `invites(id, owner_id, token_hash, expires_at, used_at)`.
-  - `shared_state(owner_id, …derived fields…, updated_at)` — content at the gate.
+  - `shared_state(owner_id, current_phase, next_period_date, updated_at)` — the
+    derived current phase + a next-period heads-up. The phase-typical attunement
+    hint is derived from `current_phase` in the Mate UI (Phase 6), **not stored**;
+    her raw mood stays in `daily_logs` (follower-inaccessible).
 - The token-secured invite flow (UX form factor at the gate) + the
   `accept_invite(token)` RPC.
 - The owner-side write path that updates `shared_state` from `lib/prediction`.
@@ -119,8 +122,8 @@ References `docs/constitution.md` rather than restating it.
 | `shared_state` write requires `owner_id = auth.uid()`; follower read via separate active-pairing policy | Only the owner writes; follower reads derived-only | 2026-06-19 |
 | `status` = `active` / `revoked`; revoke = flip to `revoked` (history kept); re-pair = new active row | Immediate cut; auditable; re-pairing supported | 2026-06-19 |
 | Partial unique index `(owner_id, follower_id) WHERE status='active'`; n:m-capable, v1 1:1 by UI | No duplicate active edges; future Phase 8 without backfill | 2026-06-19 |
-| OPEN — invite UX form factor (code / link / QR) AND its token storage/expiry params | resolved at the spec-acceptance gate (security shape is pinned above) | — |
-| OPEN — `shared_state` content (what the Mate sees): phase only / + current mood / + next-period heads-up | the core data-sovereignty decision; resolved at the gate | — |
+| Invite UX = short **code** (hashed, single-use, 24h expiry) the owner shares out-of-band; the Mate types it | Local-friendly; no deep-link config or QR dependency (minimal-deps) | 2026-06-19 |
+| `shared_state` = `current_phase` + `next_period_date` heads-up + a phase-derived attunement hint (not her raw mood) | Vision-aligned attunement; her actual mood stays in `daily_logs`, follower-inaccessible | 2026-06-19 |
 
 ## Tracking
 
@@ -166,3 +169,6 @@ Uses the workflow contract's Verify + Test commands.
   verification (self-insert denied, shared_state write denied, correct-row read,
   token rejection); narrowed the OPEN items to the invite UX form factor and the
   `shared_state` content.
+- 2026-06-19: Acceptance gate — invite = short code (hashed/single-use/24h);
+  `shared_state` = phase + next-period heads-up + phase-derived attunement hint
+  (no raw mood shared); spec accepted and merged.
