@@ -28,9 +28,8 @@ completed spec is moved to `docs/specs/archive/`.
 
 - A `supabase/migrations/` migration creating the owner-keyed cycle-logging
   table with own-row RLS policies (`owner_id = auth.uid()` for select / insert /
-  update / delete). Candidate name: `periods(owner_id, start_date, end_date)`
-  (per-period) or `bleeding_days(owner_id, date, intensity)` (per-day) — fixed
-  with the granularity decision at the gate.
+  update / delete). Table: `periods(owner_id, start_date, end_date)` — `end_date`
+  nullable (per-period, decided at the gate).
 - Typed CRUD in `lib/data/` for logging entries.
 - A "log period" flow (create) plus edit and delete of a logged entry.
 - A basic chronological history list, **descending by date**; no pagination in v1.
@@ -56,9 +55,8 @@ References `docs/constitution.md` rather than restating it.
   **separate additional** SELECT policy for follower access via shared views; the
   owner-only SELECT policy written here is **not** modified or replaced.
 - A "cycle" is a **derived** concept, not a stored row: cycle length is computed
-  from consecutive period starts. If the gate picks per-day granularity, Phase 2
-  ships the grouping mechanism (a derived `cycles` view or a documented query) so
-  Phase 3 prediction reads cycle boundaries without a new migration.
+  from consecutive `periods.start_date` values. With per-period granularity no
+  grouping mechanism is needed — Phase 3 reads `periods` directly.
 - Logged days are stored as `DATE` (local calendar day, no time) to avoid
   timezone drift.
 - Components never call Supabase directly — only through `lib/data/`; TS
@@ -87,7 +85,7 @@ References `docs/constitution.md` rather than restating it.
 | A "cycle" is derived, not stored — length computed from consecutive period starts | Avoids denormalized/stale length; Phase 3 reads raw entries | 2026-06-19 |
 | Logged days stored as `DATE` (local), no timestamps | Avoids timezone drift on a calendar-day concept | 2026-06-19 |
 | The Flower can edit/delete her entries (full CRUD) | Data sovereignty — she owns and corrects her data | 2026-06-19 |
-| OPEN — logging granularity AND its edit unit: per-period (edit start/end of one row) vs per-day bleeding entries with optional intensity (edit/add/remove day rows) | resolved together at the spec-acceptance gate; drives the schema and the edit flow | — |
+| Logging granularity = **per-period**: `periods(owner_id, start_date, end_date)`; the edit unit is one period row's start/end. Per-day/intensity deferred. | Faithful to the pitch's minimal-effort "log the start" promise; sufficient for prediction; per-day/intensity can be added later without a backfill | 2026-06-19 |
 
 ## Tracking
 
@@ -130,3 +128,5 @@ behavioral items below are the script for the human milestone-QA gate.
   tied the edit unit to the granularity decision; added `noUncheckedIndexedAccess`;
   pinned Phase 5's RLS extension as a separate SELECT policy; named candidate
   tables; set history sort descending; scoped Phase 2 UI to the Flower only.
+- 2026-06-19: Acceptance gate — granularity = per-period (`periods` table); spec
+  accepted and merged.
