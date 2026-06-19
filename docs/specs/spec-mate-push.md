@@ -99,7 +99,7 @@ References `docs/constitution.md` rather than restating it.
 | DB webhook authenticated by a shared secret; Edge Function rejects unauthenticated calls | Without it, anyone with the function URL could trigger pushes | 2026-06-19 |
 | Transition from `old_record` vs `new_record` in the webhook body; service-role dispatch guarded by `status='active'` | Race-free; revoked followers get no push | 2026-06-19 |
 | Mate view reachable when the user is a follower on an active pairing; no calendar merge | v1 stays 1:1 and role-framed; merge is Phase 8 | 2026-06-19 |
-| OPEN — which events push: phase change only vs + period/PMS heads-up (a heads-up would put the derived `next_period_date` on the lock screen — a deliberate discretion call, not raw logs) | resolved at the spec-acceptance gate | — |
+| Push events = phase change AND a period/PMS heads-up, framed discreetly ("~N days", no exact date string) | Vision: phase changes + relevant heads-ups; kept discreet on the lock screen | 2026-06-19 |
 
 ## Tracking
 
@@ -146,3 +146,6 @@ Uses the workflow contract's Verify + Test commands.
   guarded by `status='active'`, push_tokens self-ownership, Mate-shell activation
   query, and Expo-Go-vs-prod as a v1 limit; added webhook-auth + payload-log
   verification; quiet hours/dedupe out of scope.
+- 2026-06-19: Acceptance gate — push events = phase change + a discreet period/PMS
+  heads-up; the Expo-account prerequisite is parked `blocked:human` on the Expo
+  delivery issue; spec accepted and merged.
