@@ -45,17 +45,27 @@ truth, milestones and issues are created on GitHub from them.
 > **intended** contract; they become runnable once Phase 1 (Foundation & Auth)
 > scaffolds the Expo + Supabase project and adds the `verify` / `build` scripts.
 > Verify's duration must be measured and recorded here at the end of Phase 1.
+>
+> v1 target is **local execution**: the app runs against the **local Supabase
+> stack** (`supabase start`, Docker) and an Android emulator via WSLg. A hosted
+> Supabase project, production env, and EAS / app-store distribution are
+> live-operation concerns deferred to Phase 7 — issues for them may be planned
+> earlier but are NOT required for v1 local testing.
 
-- Bootstrap: `npm ci && cp .env.example .env`
+- Bootstrap: `npm ci && cp .env.example .env && supabase start` (brings up the
+  local Supabase stack)
 - Verify: `npm run verify` (= `eslint . && tsc --noEmit`)
   (measured duration: `to be measured after Phase 1; target < 30s`)
+- Run (local): `npm run android` — launches an Android emulator on the Windows
+  host via WSLg and runs the app in it (requires KVM + an Android SDK/AVD in WSL;
+  fall back to Expo Go on a device or `expo start --web` for smoke)
 - Test: `none yet` (target: Jest + React Native Testing Library)
-- Build: `npx expo prebuild && npm run build` (EAS)
+- Build: `npx expo prebuild && npm run build` (EAS — live/Phase 7, not v1)
 
 Verify is the per-iteration gate: run it after every change set and fix until
-green. Run Build additionally before opening an app-affecting PR. While Test is
-`none yet`, every acceptance item no machine check covers is verified at the
-human milestone-QA gate instead.
+green. Run is the local-test loop for app-affecting changes (Build/EAS is a
+live-operation concern, Phase 7). While Test is `none yet`, every acceptance item
+no machine check covers is verified at the human milestone-QA gate instead.
 
 ## Branch and spec naming
 

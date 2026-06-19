@@ -71,6 +71,8 @@ Measurable. Each checkable with a number or a yes/no observation.
 - Multiple Mates or group sharing.
 - A dedicated conception / pregnancy mode.
 - Community / social features.
+- Live / public deployment (hosted backend, app-store / F-Droid distribution) —
+  deferred to a later phase; v1's bar is local testability.
 
 ## Non-goals
 
