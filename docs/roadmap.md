@@ -12,7 +12,7 @@
 | Phase | Name | Spec | Milestone |
 |---|---|---|---|
 | 1 | Foundation & Auth — Expo + Supabase, accounts, roles, navigation | [spec](specs/spec-foundation-auth.md) | [#1](https://github.com/skrischer/flowmate/milestone/1) |
-| 2 | Cycle logging & history — period start, schema + RLS | — | — |
+| 2 | Cycle logging & history — period start, schema + RLS | [spec](specs/spec-cycle-logging.md) | [#2](https://github.com/skrischer/flowmate/milestone/2) |
 | 3 | Prediction engine — phases, period prediction, fertile window | — | — |
 | 4 | Flower experience — phase view, predictions + disclaimer, mood/symptom logging | — | — |
 | 5 | Pairing & data sovereignty — invite, shared views, revoke | — | — |
