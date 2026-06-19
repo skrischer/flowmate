@@ -16,6 +16,8 @@ completed spec is moved to `docs/specs/archive/`.
       auth.uid()`).
 - [ ] The Flower can log a period, edit it, and delete it (create / update /
       delete).
+- [ ] The Flower can log a **past** period (historical backfill) — `start_date`
+      may be any past date, not only today.
 - [ ] A chronological history view lists the logged entries.
 - [ ] `lib/data/` exposes typed CRUD for the cycle tables; components make no
       direct Supabase calls.
@@ -31,7 +33,9 @@ completed spec is moved to `docs/specs/archive/`.
   update / delete). Table: `periods(owner_id, start_date, end_date)` — `end_date`
   nullable (per-period, decided at the gate).
 - Typed CRUD in `lib/data/` for logging entries.
-- A "log period" flow (create) plus edit and delete of a logged entry.
+- A "log period" flow (create) plus edit and delete of a logged entry; the start
+  date may be **in the past** (historical backfill via a date picker), not only
+  today.
 - A basic chronological history list, **descending by date**; no pagination in v1.
 - Phase 2 UI is exclusively the **Flower's** logging flow; the Mate has no view
   in this phase (the Mate experience is Phase 6).
@@ -85,6 +89,7 @@ References `docs/constitution.md` rather than restating it.
 | A "cycle" is derived, not stored — length computed from consecutive period starts | Avoids denormalized/stale length; Phase 3 reads raw entries | 2026-06-19 |
 | Logged days stored as `DATE` (local), no timestamps | Avoids timezone drift on a calendar-day concept | 2026-06-19 |
 | The Flower can edit/delete her entries (full CRUD) | Data sovereignty — she owns and corrects her data | 2026-06-19 |
+| Past-period backfill supported — `start_date` may be any past date | Lets the Flower reach Phase 3's ≥3-period prediction threshold immediately by entering history, not over months | 2026-06-19 |
 | Logging granularity = **per-period**: `periods(owner_id, start_date, end_date)`; the edit unit is one period row's start/end. Per-day/intensity deferred. | Faithful to the pitch's minimal-effort "log the start" promise; sufficient for prediction; per-day/intensity can be added later without a backfill | 2026-06-19 |
 
 ## Tracking
