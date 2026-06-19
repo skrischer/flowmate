@@ -17,12 +17,17 @@
 | 4 | Flower experience — phase view, predictions + disclaimer, mood/symptom logging | — | — |
 | 5 | Pairing & data sovereignty — invite, shared views, revoke | — | — |
 | 6 | Mate attunement & push — Mate view, Expo Push, Edge Function dispatcher | — | — |
-| 7 | Hardening & release — onboarding, a11y, store/F-Droid, GPL packaging | — | — |
+| 7 | Hardening & release (live operation) — hosted Supabase + prod env, onboarding, a11y, EAS builds, store/F-Droid, GPL packaging | — | — |
 | 8 | Mutual pairing & mixed calendar (n:m) — bidirectional invite, multi-pairing, unified shell (Flower/Mate navigation merges), aggregated mixed-calendar view | — | — |
 
 A phase gets a Spec link once `/plan` drafts it, and a Milestone link once the
 spec is merged. The milestone (open/closed + issue progress) is where status
 lives.
+
+v1's bar is **local testability**: Phases 1–6 run against the local Supabase
+stack and an Android emulator (WSLg). Live operation — hosted Supabase, prod env,
+EAS builds, store/F-Droid distribution — is consolidated in Phase 7; its issues
+may be planned earlier but are never a v1 gate.
 
 Phase 8 is a deliberate future direction, not v1 scope. It is a product/UI
 project (mixed calendar, multi-pairing, bidirectional invite) — not a

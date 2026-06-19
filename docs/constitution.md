@@ -10,7 +10,7 @@
 | ---- | ------ | --------- |
 | Client | React Native + Expo (TypeScript) | One codebase iOS+Android; native Expo push (the USP); TS-aligned |
 | Language | TypeScript, `strict: true`, `noUncheckedIndexedAccess: true` | Type safety; `any` forbidden |
-| Backend | Supabase (managed Postgres) | Free tier, open source, one platform for DB + auth + realtime + functions |
+| Backend | Supabase (Postgres) | v1 on the local Supabase stack (Docker, `supabase start`); hosted free tier for live (Phase 7) — open source, one platform for DB + auth + realtime + functions |
 | Data sovereignty | Postgres Row-Level Security (RLS) | The Flower's control is enforced at the DB layer, not in app code |
 | Auth & pairing | Supabase Auth | Integrates with RLS; invite-based Flower↔Mate pairing |
 | Sync | Supabase Realtime | Flower→Mate attunement updates |
@@ -34,6 +34,10 @@
   views the owner opted into.
 - A follower (the Mate role in v1) has **zero write paths** to the owner's cycle
   data — informed, not managing.
+- v1 is **locally runnable end-to-end**: the app boots against the local Supabase
+  stack (`supabase start`) and an Android emulator (WSLg) with no hosted service.
+  Local vs hosted is an env swap only — `lib/data/` reads the Supabase URL/key
+  from env, never hard-codes a target.
 - Push payloads and server logs carry **no raw health data** — only
   phase/attunement-level information.
 - Cycle data is accessed only through a typed data layer — no ad-hoc queries in
