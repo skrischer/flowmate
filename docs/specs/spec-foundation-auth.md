@@ -39,16 +39,18 @@ issues and milestone. A completed spec is moved to `docs/specs/archive/`.
   `supabase/migrations/` migration. No `role` column.
 - A base navigation shell: an unauthenticated auth stack vs an authenticated app
   stack, with an owner/Flower home placeholder.
+- A read-only profile screen rendering the authenticated user's `profiles` row —
+  the minimum that proves the table + RLS end-to-end; no edit form.
 - README with bootstrap instructions; the existing GPL-3.0 LICENSE stays.
 
 ### Out of scope
 
 - Cycle logging and its schema (Phase 2).
-- The `pairing` edge table, the Mate shell, and data sovereignty (Phases 5/6) —
-  Phase 1 establishes `profiles` with no role column; the role substrate's
-  pairing edges land when pairing is built.
+- The `pairing` edge table and data sovereignty (Phase 5), and the Mate shell +
+  push (Phase 6) — Phase 1 establishes `profiles` with no role column; the role
+  substrate's pairing edges land in Phase 5.
 - Prediction, push, and Edge Functions (Phases 3/6).
-- Profile-editing UI beyond the minimum needed to prove the table.
+- A profile **edit** form — Phase 1 displays the row read-only only.
 
 ## Constraints
 
@@ -58,7 +60,9 @@ References `docs/constitution.md` rather than restating it.
   (constitution: edge-based role substrate). v1 navigation boots into the
   owner/Flower shell by default; the Mate shell is activated by a pairing edge
   in a later phase.
-- Every table touching personal data ships an RLS policy (constitution).
+- **Every** table introduced in this phase that touches personal data ships an
+  RLS policy — not only `profiles` (constitution). If session persistence or
+  device registration needs a helper table, it gets RLS too.
 - Components never call Supabase directly — only through `lib/data/`
   (architecture).
 - TypeScript `strict` + `noUncheckedIndexedAccess`; no `any`; functions ≤ 50
@@ -81,6 +85,8 @@ References `docs/constitution.md` rather than restating it.
       `EXPO_PUBLIC_SUPABASE_ANON_KEY` are present in `.env` (needed to wire auth
       and run the app). The `SUPABASE_SERVICE_ROLE_KEY` is **not** needed until
       Edge Functions arrive (Phase 6).
+- [ ] The Supabase CLI is installed locally — migrations in
+      `supabase/migrations/` are created and applied through it.
 - [ ] An Expo / EAS account for `npm run build` (EAS). Local dev and
       `npm run verify` work without it; the build outcome is the only part that
       depends on it.
@@ -90,9 +96,10 @@ References `docs/constitution.md` rather than restating it.
 | Decision | Rationale | Date |
 |---|---|---|
 | Expo Router (file-based) | Modern Expo default; maps cleanly onto the constitution's `features/` layout | 2026-06-19 |
-| No `profiles.role` column; v1 boots the owner/Flower shell | Constitution mandates edge-based roles; the Mate shell activates via a pairing edge later (Phase 6) | 2026-06-19 |
+| No `profiles.role` column; v1 boots the owner/Flower shell | Constitution mandates edge-based roles; the pairing edge lands in Phase 5 and activates the Mate shell in Phase 6 | 2026-06-19 |
 | `lib/data/` is the sole Supabase access path | Architecture boundary | 2026-06-19 |
 | `verify` = `eslint . && tsc --noEmit` | Workflow contract's per-iteration gate | 2026-06-19 |
+| Session token stored via Expo SecureStore (SecureStore adapter backs the Supabase client) | Privacy-aligned (constitution); secrets do not sit in plain AsyncStorage | 2026-06-19 |
 | OPEN — auth method (email+password / magic link / anonymous) | resolved at the spec-acceptance gate | — |
 
 ## Tracking
@@ -116,6 +123,9 @@ behavioral items below are the script for the human milestone-QA gate.
 - [ ] A second user cannot read the first user's `profiles` row (RLS smoke via
       SQL / two sessions).
 - [ ] The `profiles` table has no `role` column (schema check).
+- [ ] No `createClient` / direct Supabase import exists outside `lib/data/`
+      (grep — proves the architecture boundary).
+- [ ] `.env.example` lists every variable `.env` needs — no missing keys.
 
 ## Risks and mitigations
 
@@ -128,3 +138,7 @@ behavioral items below are the script for the human milestone-QA gate.
 ## Decision log
 
 - 2026-06-19: Spec drafted; auth method left OPEN for the acceptance gate.
+- 2026-06-19: Addressed spec review (PR #1) — broadened RLS to every personal-data
+  table in the phase; decided session storage = Expo SecureStore; defined the
+  read-only profile screen as the minimum UI; added the Supabase CLI prerequisite;
+  added `lib/data/` boundary and `.env.example` verification steps.
