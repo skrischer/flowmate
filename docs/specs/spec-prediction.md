@@ -27,8 +27,19 @@ issues and milestone. A completed spec is moved to `docs/specs/archive/`.
 - `lib/prediction/` pure functions: cycle-length statistics from `periods`,
   current-phase determination, next-period prediction, and fertile-window /
   ovulation prediction.
-- A typed result interface (e.g. `{ currentPhase, nextPeriodDate, fertileWindow,
-  confidence }`) for Phase 4 to consume.
+- A typed result contract for Phase 4 to consume (the cross-phase API — Phase 4
+  renders it, Phase 6 pushes on `currentPhase` changes):
+
+  ```ts
+  type Phase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal'
+  type Confidence = 'none' | 'low' | 'medium' | 'high'
+  type Prediction = {
+    currentPhase: Phase
+    nextPeriodDate: string                                // ISO DATE
+    fertileWindow: { start: string; end: string } | null  // null when withheld
+    confidence: Confidence
+  }
+  ```
 - Jest setup + `npm test`; unit tests covering regular cycles, insufficient
   history, and irregular cycles.
 - Update `docs/workflow.md`: Test command `none yet` → `npm test` (with measured
@@ -52,6 +63,10 @@ References `docs/constitution.md` rather than restating it.
   `periods` history **and the reference "today"** as arguments — never reads the
   system clock — so it is deterministic and unit-testable (constitution:
   prediction engine is pure, unit-testable in isolation).
+- The engine **sorts the input `periods` ascending by `start_date` internally**;
+  callers need not pre-sort (the history UI shows descending).
+- `end_date` is **not** a prediction input in v1 — cycle length is computed from
+  `start_date` values only.
 - Rule-based **calendar method**, client-side, explainable; no ML or sensors
   (constitution).
 - Predictions are **derived, not stored** (consistent with Phase 2).
@@ -75,11 +90,12 @@ References `docs/constitution.md` rather than restating it.
 
 | Decision | Rationale | Date |
 |---|---|---|
-| Calendar method: average cycle length from `periods` history; ovulation = next-period estimate − 14 days (luteal ~14d); fertile window = ovulation −5 .. +1 | Standard, explainable calendar/NFP rules (prior art); sperm ~5d + ovum ~1d survival | 2026-06-19 |
+| Calendar method: cycle length = **median of the last ≤6 cycle lengths**; ovulation = next-period estimate − 14 days (luteal ~14d); fertile window = ovulation −5 .. +1 | Standard, explainable calendar/NFP rules (prior art); median resists one-off irregular outliers; sperm ~5d + ovum ~1d survival | 2026-06-19 |
+| Result type pinned (`currentPhase` enum, `nextPeriodDate`, `fertileWindow` or null, `confidence` enum — see Scope) | Cross-phase API rendered in Phase 4, pushed on in Phase 6; typed here, no `any` | 2026-06-19 |
 | Pure engine takes `periods` + reference "today" as args; never reads the clock | Determinism + unit-testability (constitution) | 2026-06-19 |
 | Predictions derived, not stored | Consistent with Phase 2; avoids staleness | 2026-06-19 |
 | Phase 3 establishes Jest + `npm test`; contract Test command updated | The pure engine is the ideal first machine test; closes `none yet` | 2026-06-19 |
-| OPEN — insufficient / irregular data behavior: minimum cycles before predicting, default-28 assumption vs withholding a prediction, and how low confidence is expressed | resolved at the spec-acceptance gate | — |
+| OPEN — insufficient / irregular-data policy: (a) minimum cycles before emitting a prediction, (b) below-minimum behavior (withhold → `confidence:'none'` vs default-28 assumption), (c) the "irregular" criterion (spread of recent cycle lengths), (d) how confidence levels map | resolved at the spec-acceptance gate | — |
 
 ## Tracking
 
@@ -100,8 +116,9 @@ most outcomes are covered by `npm test`, not the human QA gate.
 - [ ] Unit tests cover: a regular history (predicts next period + fertile
       window), insufficient history (the defined behavior), and irregular cycles
       (the defined behavior / low confidence).
-- [ ] The engine is pure: no Supabase / network / clock import in
-      `lib/prediction/` (grep), and `today` is a parameter, not `new Date()`.
+- [ ] The engine is pure: no Supabase / network import in `lib/prediction/`, and
+      no `new Date()` anywhere under `lib/prediction/` (recursive grep) — `today`
+      is a parameter.
 - [ ] `docs/workflow.md` Test command reads `npm test` with a measured duration.
 
 ## Risks and mitigations
@@ -116,3 +133,9 @@ most outcomes are covered by `npm test`, not the human QA gate.
 
 - 2026-06-19: Spec drafted; insufficient/irregular-data behavior left OPEN for the
   acceptance gate.
+- 2026-06-19: Addressed spec review (PR #15) — pinned the result type
+  (`currentPhase` enum, `fertileWindow` shape, `confidence` enum), input
+  sort-order normalization, `end_date` excluded from prediction, and the
+  median-of-≤6 cycle-length method; expanded the OPEN item to the full
+  insufficient/irregular policy (min cycles, withhold-vs-default, irregularity
+  criterion, confidence mapping).
