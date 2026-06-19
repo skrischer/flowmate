@@ -67,6 +67,9 @@ References `docs/constitution.md` rather than restating it.
   callers need not pre-sort (the history UI shows descending).
 - `end_date` is **not** a prediction input in v1 — cycle length is computed from
   `start_date` values only.
+- The engine consumes the full `periods` history regardless of when each entry
+  was made, so **backfilled past periods** (Phase 2) count toward the ≥3-period
+  threshold — the Flower can unlock predictions immediately by entering history.
 - Rule-based **calendar method**, client-side, explainable; no ML or sensors
   (constitution).
 - Predictions are **derived, not stored** (consistent with Phase 2).
@@ -95,7 +98,7 @@ References `docs/constitution.md` rather than restating it.
 | Pure engine takes `periods` + reference "today" as args; never reads the clock | Determinism + unit-testability (constitution) | 2026-06-19 |
 | Predictions derived, not stored | Consistent with Phase 2; avoids staleness | 2026-06-19 |
 | Phase 3 establishes Jest + `npm test`; contract Test command updated | The pure engine is the ideal first machine test; closes `none yet` | 2026-06-19 |
-| OPEN — insufficient / irregular-data policy: (a) minimum cycles before emitting a prediction, (b) below-minimum behavior (withhold → `confidence:'none'` vs default-28 assumption), (c) the "irregular" criterion (spread of recent cycle lengths), (d) how confidence levels map | resolved at the spec-acceptance gate | — |
+| Insufficient/irregular policy = **conservative**: ≥3 logged periods before any prediction; below that withhold (`confidence:'none'`, `fertileWindow:null`); "irregular" = spread of the last ≤6 cycle lengths > 9 days → `confidence:'low'`; else `medium` (3–5 cycles) / `high` (≥6 regular). Reachable immediately by backfilling past periods (Phase 2). | Honest, no over-claiming (vision/disclaimer); backfill avoids a months-long wait | 2026-06-19 |
 
 ## Tracking
 
@@ -139,3 +142,6 @@ most outcomes are covered by `npm test`, not the human QA gate.
   median-of-≤6 cycle-length method; expanded the OPEN item to the full
   insufficient/irregular policy (min cycles, withhold-vs-default, irregularity
   criterion, confidence mapping).
+- 2026-06-19: Acceptance gate — policy = conservative (≥3 periods, withhold below,
+  irregular → low confidence), with past-period backfill (Phase 2) as the on-ramp;
+  spec accepted and merged.
