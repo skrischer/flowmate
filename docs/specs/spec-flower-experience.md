@@ -106,6 +106,7 @@ issues own progress.
 
 - Milestone: Flower experience (created on merge; `Depends on milestone: #2, #3`)
 - Issues: created from this spec once it is merged (one per implementable step)
+- Design: `docs/design.md` (Heather · Dark) — surfaces: Flower-Home, Monatskalender, Mood-Logging
 
 ## Verification
 

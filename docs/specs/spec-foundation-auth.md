@@ -130,6 +130,7 @@ issues own progress.
 
 - Milestone: Foundation & Auth (created on merge)
 - Issues: created from this spec once it is merged (one per implementable step)
+- Design: `docs/design.md` (Heather · Dark) — surfaces: Auth Sign-in, Profil
 
 ## Verification
 

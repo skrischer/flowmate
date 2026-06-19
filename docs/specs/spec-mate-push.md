@@ -108,6 +108,7 @@ issue per step, grouped under the milestone.
 
 - Milestone: Mate attunement & push (created on merge; `Depends on milestone: #5`)
 - Issues: created from this spec once it is merged (one per implementable step)
+- Design: `docs/design.md` (Heather · Dark) — surface: Mate-View (phase-level, no raw data, no calendar)
 
 ## Verification
 
