@@ -37,8 +37,9 @@ in the GitHub issues and milestone. A completed spec is moved to
   engine provides no bleed length).
 - Daily mood/symptom logging into a new owner-keyed table `daily_logs`: one row
   per `(owner_id, date)` (unique), `date DATE` (a mood may be logged for a past
-  date, like periods), `mood` from a curated set, optional `symptoms`. Own-row
-  RLS, typed CRUD in `lib/data/`, and a logging UI.
+  date, like periods), `mood` from a curated set of 6 (no `symptoms` in v1 —
+  addable later via an additive migration). Own-row RLS, typed CRUD in
+  `lib/data/`, and a logging UI.
 - Wiring: read `periods` (via `lib/data`) → call `lib/prediction` (with `today`)
   → render.
 
@@ -90,12 +91,12 @@ References `docs/constitution.md` rather than restating it.
 | `daily_logs` owner-keyed + own-row RLS; Mate shared view added in Phase 6 | Edge-based substrate; no rewrite when pairing arrives | 2026-06-19 |
 | `confidence: none` → withhold the prediction and show a backfill CTA; `low` → caveat; `medium`/`high` → normal | Honest; no fabricated fertile window (vision/disclaimer) | 2026-06-19 |
 | Visualization = phase summary card + month calendar | Standard, legible; pinned default, confirmable at the gate | 2026-06-19 |
-| `daily_logs`: one row per `(owner_id, date)` unique, `date DATE`, `mood` (curated set), optional `symptoms`; past dates allowed | Mirrors periods backfill; uniqueness avoids duplicate-per-day; stable shape for RLS + CRUD + Phase 6 share | 2026-06-19 |
+| `daily_logs`: one row per `(owner_id, date)` unique, `date DATE`, `mood` (curated set of 6); no `symptoms` in v1; past dates allowed | Mirrors periods backfill; uniqueness avoids duplicate-per-day; stable shape for RLS + CRUD + Phase 6 share | 2026-06-19 |
 | Calendar hand-rolled (no new dependency); marks logged periods, `nextPeriodDate`, `fertileWindow` | Constitution minimal-deps; avoids predicting a bleed span the engine does not provide | 2026-06-19 |
 | Disclaimer = a shared `components/` atom, single fixed text; `today` read in one screen-boundary util | Consistency; one place to change; keeps clock reads out of `lib/prediction` | 2026-06-19 |
 | `daily_logs` introduced in Phase 4 (not Phase 2) | Mood logging belongs to the Flower home, not cycle history | 2026-06-19 |
 | Phase 4 adds unit tests for date/calendar/prediction-mapping helpers; component tests not required; must not break the Phase 3 suite | Pure helpers are unit-testable; RN screens are not the test target | 2026-06-19 |
-| OPEN — mood/symptom model: the curated mood set, and whether symptoms are in v1 (and their set) | resolved at the spec-acceptance gate | — |
+| Mood-only in v1: `mood` from a curated set of 6 (content, calm, sensitive, irritable, low, anxious); no symptoms | USP is *Gemüt*; vision non-goal forbids a quantified-self tracker; symptoms addable later | 2026-06-19 |
 
 ## Tracking
 
@@ -140,3 +141,5 @@ Uses the workflow contract's Verify + Test commands.
   unique, past dates), hand-rolled calendar + predicted-day source, shared
   disclaimer atom, single `today` source, and the Phase-4 test expectation;
   narrowed the OPEN item to the mood set + symptom inclusion only.
+- 2026-06-19: Acceptance gate — mood-only v1 (curated set of 6, no symptoms);
+  spec accepted and merged.
