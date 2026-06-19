@@ -82,3 +82,15 @@ Measurable. Each checkable with a number or a yes/no observation.
   foundation; selling health data would destroy the premise.
 - Not a quantified-self logging powerhouse — depth serves attunement, not
   completeness.
+
+## Future direction
+
+v1 is intentionally 1:1 and role-framed. The data substrate is built n:m-capable
+from the start (roles on the pairing edge, owner-keyed data — see
+`docs/constitution.md`), so a later mutual-pairing phase where Flowers can also be
+Mates (roadmap Phase 8) is a product/UI step, not a rebuild.
+
+That evolution shifts the sovereignty story: once a person is both data subject
+and observer, "data sovereignty stays with her" no longer frames it cleanly. For
+v1 the story stands unchanged — the reframing is a deliberate, open product
+decision deferred to when Phase 8 is planned, not settled here.

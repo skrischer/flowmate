@@ -23,6 +23,12 @@
 - The prediction engine is pure (no I/O) — unit-testable in isolation.
 - RLS is the security boundary; the Edge Function boundary strips raw health data
   from push payloads.
+- Roles live on the **pairing edge** (`owner_id` / `follower_id`), not on the
+  account; cycle/log tables are **owner-keyed**. RLS resolves access through
+  pairing membership, not a global role flag.
+- The v1 UI is deliberately 1:1 and role-framed (Flower vs Mate screens), but the
+  data substrate is **n:m-capable** — the later mutual-pairing phase (roadmap
+  Phase 8) is a product/UI step, not a re-architecture.
 
 ## Key flows
 
@@ -42,4 +48,6 @@
 - New screen → `features/<domain>/screens/`.
 - New table → migration in `supabase/migrations/` + an RLS policy is mandatory.
 - New push trigger → `supabase/functions/`.
+- New pairing / role logic → the `pairing` edge table + membership-checked RLS;
+  never a global `profiles.role` flag.
 - Shared UI → `components/`; data access → `lib/data/`.

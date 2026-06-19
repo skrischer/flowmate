@@ -18,10 +18,18 @@
 | 5 | Pairing & data sovereignty — invite, shared views, revoke | — | — |
 | 6 | Mate attunement & push — Mate view, Expo Push, Edge Function dispatcher | — | — |
 | 7 | Hardening & release — onboarding, a11y, store/F-Droid, GPL packaging | — | — |
+| 8 | Mutual pairing & mixed calendar (n:m) — bidirectional invite, multi-pairing, unified shell (Flower/Mate navigation merges), aggregated mixed-calendar view | — | — |
 
 A phase gets a Spec link once `/plan` drafts it, and a Milestone link once the
 spec is merged. The milestone (open/closed + issue progress) is where status
 lives.
+
+Phase 8 is a deliberate future direction, not v1 scope. It is a product/UI
+project (mixed calendar, multi-pairing, bidirectional invite) — not a
+re-architecture — because Phases 2 and 5 build the role substrate edge-based and
+n:m-capable from the start (see `docs/constitution.md`). The data-sovereignty
+reframing it implies (each person becomes both data subject and observer) is an
+open product decision deferred to when Phase 8 is planned.
 
 ## North star
 

@@ -23,9 +23,17 @@
 
 <Each one checkable in review>
 
-- Every table holding Flower data has RLS enabled; the Mate role has **no SELECT
-  on raw log tables** — only on shared/derived views the Flower opted into.
-- The Mate client has **zero write paths** to cycle data — informed, not managing.
+- Roles are the **direction of a pairing edge** (`pairing(owner_id, follower_id)`
+  = who-tracks / who-follows), never a global account role flag. Cycle data is
+  **owner-keyed**. The v1 UI is deliberately 1:1 and role-framed, but the data
+  substrate stays n:m-capable — a person may be owner on some edges and follower
+  on others (future direction: roadmap Phase 8).
+- Every table holding cycle data has RLS enabled; access is resolved through
+  **pairing-edge membership** (owner ↔ follower), never a global account role
+  flag. A follower has **no SELECT on raw log tables** — only on shared/derived
+  views the owner opted into.
+- A follower (the Mate role in v1) has **zero write paths** to the owner's cycle
+  data — informed, not managing.
 - Push payloads and server logs carry **no raw health data** — only
   phase/attunement-level information.
 - Cycle data is accessed only through a typed data layer — no ad-hoc queries in
@@ -57,6 +65,7 @@
 
 - No raw health data in push payloads, logs, or analytics.
 - No Mate write access to Flower data.
+- No global `profiles.role` flag — roles live on the pairing edge (owner/follower).
 - No third-party ads or analytics SDKs (privacy + the free/OSS premise).
 - No ML or wearable / BBT dependency in v1.
 - No new dependency without justification — prefer native / built-in.
