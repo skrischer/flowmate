@@ -100,6 +100,10 @@ issues own progress.
 
 - Milestone: Cycle logging & history (created on merge; `Depends on milestone: #1`)
 - Issues: created from this spec once it is merged (one per implementable step)
+- Design: `docs/design.md` (Heather · Dark) — surfaces: Periode-Eintragen (log/edit
+  sheet, start-date picker with past-date backfill, optional end-date, delete),
+  Zyklus-Historie (chronological period list, descending); entry points on
+  Flower-Home (CTA) + Monatskalender (tap-a-day)
 
 ## Verification
 

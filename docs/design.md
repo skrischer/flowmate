@@ -82,17 +82,26 @@ Paper file's theme tiles if the theme is revisited.
   **every** prediction/fertility surface (constitution).
 - **Bottom nav:** `#1E1926` bg, `#2A2433` top border; active item `primary`.
 
-## Surfaces (in the Paper file)
+## Surfaces
 
-| Surface | Spec | Notes |
-|---|---|---|
-| Auth Sign-in | `spec-foundation-auth.md` | Wordmark, email+password, trust note |
-| Profil (read-only) | `spec-foundation-auth.md` | Identity + setting rows + sign out |
-| Flower-Home | `spec-flower-experience.md` | Phase card + week glance + mood row |
-| Monatskalender | `spec-flower-experience.md` | Logged solid vs **predicted outlined**; fertile band; disclaimer |
-| Mood-Logging | `spec-flower-experience.md` | 6-mood set, past-date backfill chip |
-| Invite-Code | `spec-pairing.md` | Single-use code, 24h, revocable; "nie deine Einträge" |
-| Mate-View | `spec-mate-push.md` | Phase + heads-up + attunement hint, **no raw data, no calendar** |
+The full surface contract. `build` = added in the design-coherence pass, being
+drawn in the Paper file; `built` = already in Paper; `+variants/+states/+empty` =
+the surface exists but needs the noted state variants.
+
+| Surface | Spec | Status | Notes |
+|---|---|---|---|
+| Auth Sign-in | `spec-foundation-auth.md` | built | Wordmark, email+password, trust note; "Registrieren" link |
+| Profil (Flower) | `spec-foundation-auth.md` | built | Identity + setting rows + sign out; "Mein Mate" row opens Pairing-Management |
+| Flower-Home | `spec-flower-experience.md` | built · +variants | Phase card + **fertile window** + week glance + mood row + "Periode eintragen" CTA; **confidence none/low variants** |
+| Monatskalender | `spec-flower-experience.md` | built | Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** |
+| Periode-Eintragen | `spec-cycle-logging.md` | build | Log/edit sheet: start-date picker (past-date backfill), optional end-date, delete |
+| Zyklus-Historie | `spec-cycle-logging.md` | build | Chronological period list, descending; row → edit/delete |
+| Mood-Logging | `spec-flower-experience.md` | built | 6-mood set, past-date backfill chip — **mood-only, no free-text note** |
+| Invite-Code | `spec-pairing.md` | built · +states | Single-use code, 24h; **"neuen Code generieren" + expired/used states**; "nie deine Einträge" |
+| Code-eingeben | `spec-pairing.md` | build | Mate accept screen — enter code → `accept_invite` |
+| Pairing-Management | `spec-pairing.md` | build | Connected status + **"Mate entfernen"/revoke** + re-invite (from Profil "Mein Mate") |
+| Mate-View | `spec-mate-push.md` | built · +empty | Phase + heads-up + attunement hint, **no raw data, no calendar**; **revoked/empty state** |
+| Mate-Profil | `spec-mate-push.md` | build | Follower identity, Abmelden, **push on/off toggle** |
 
 ## Design rules (from the foundation docs)
 
@@ -104,3 +113,16 @@ Paper file's theme tiles if the theme is revisited.
   deliberate departure from prior-art partner-calendars (Clue/Natural Cycles),
   which sit in `docs/prior-art.md`'s AVOID column.
 - Data-sovereignty language is foreground (invite/revoke/"was mein Mate sieht").
+- **Period logging is always reachable** — a "Periode eintragen" CTA on Flower-Home
+  and a tap-a-day/"+" on the Monatskalender open one shared sheet for create,
+  past-date backfill, and edit; a Zyklus-Historie lists entries for edit/delete.
+- **Every prediction surface handles all confidence states** — `none` → a backfill
+  CTA with no fabricated window; `low` → the prediction with a visible
+  low-confidence caveat (distinct from the always-on disclaimer); `medium`/`high`
+  → normal. The fertile window is surfaced on Flower-Home, not only the calendar.
+- **Pairing is Flower-managed** — the Flower invites, regenerates the code, and
+  revokes ("Mate entfernen"); the Mate only enters a code and toggles push. v1 has
+  **no follower-initiated leave** (Flower-only sovereignty; Phase 8). The revoked
+  state is designed on both sides (Pairing-Management + the empty Mate-View).
+- **Mood logging is mood-only** — the curated set of 6, no free-text note and no
+  symptoms (data minimization + the vision's no-quantified-self non-goal).
