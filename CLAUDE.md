@@ -17,6 +17,7 @@ protect the token budget.
 - `docs/architecture.md` — components, boundaries, flows, where new code goes.
 - `docs/roadmap.md` — the sequenced queue of phases.
 - `docs/workflow.md` — operational contract for the loopkit skills.
+- `docs/design.md` — design contract + Heather Dark token system (UI surfaces).
 
 ## Autonomy (loopkit skills)
 

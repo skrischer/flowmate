@@ -132,6 +132,7 @@ issue per step, grouped under the milestone.
 
 - Milestone: Pairing & data sovereignty (created on merge; `Depends on milestone: #1, #4`)
 - Issues: created from this spec once it is merged (one per implementable step)
+- Design: `docs/design.md` (Heather · Dark) — surface: Invite-Code
 
 ## Verification
 
