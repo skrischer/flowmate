@@ -28,14 +28,21 @@ completed spec is moved to `docs/specs/archive/`.
 
 - The Mate attunement view: reads the owner's `shared_state` (Phase 5 RLS),
   renders phase + heads-up + the phase-derived attunement hint. Read-only.
-- Mate-shell activation: a follower on an active pairing reaches the Mate view
-  (v1 does not merge the Flower/Mate calendars — that is Phase 8).
+- Mate-shell activation: a client query `pairing WHERE follower_id = auth.uid()
+  AND status = 'active'` decides the view — active following → the Mate view, else
+  the Flower view; a user who is both shows the Flower view in v1 (no calendar
+  merge — that is Phase 8).
 - `push_tokens(user_id, token, platform, updated_at)` owner-keyed + own-row RLS;
   register/refresh on app start; a push on/off toggle for the Mate.
 - A Supabase **Edge Function** push dispatcher, invoked by a **DB webhook on
-  `shared_state` UPDATE**, that fires **only on a real `current_phase`
-  transition**, looks up the active follower's token (service role), and sends an
-  Expo push with a discreet, raw-data-free payload.
+  `shared_state` UPDATE**. It: (1) verifies a webhook shared-secret
+  (`Authorization: Bearer`, from env) and rejects otherwise; (2) fires **only on a
+  real transition** — comparing the webhook body's `old_record.current_phase` vs
+  `new_record.current_phase` (no re-read, no race); (3) with the service role,
+  finds the **active** follower via `pairing WHERE owner_id = new_record.owner_id
+  AND status = 'active'`, reads that follower's `push_tokens` row, and sends an
+  Expo push with a discreet, raw-data-free payload. A revoked pairing yields no
+  active follower → no push.
 - `lib/data/` wrappers for the Mate view + token registration.
 
 ### Out of scope
@@ -44,6 +51,9 @@ completed spec is moved to `docs/specs/archive/`.
 - Hosted push credentials (FCM/APNs prod) and store builds — Phase 7 (live); v1
   tests push via Expo Go + the Expo push service.
 - Any Mate write path to owner data (read-only by construction).
+- Quiet hours and push deduplication — out of scope for v1.
+- Production push auth (APNs/FCM credentials, Expo access token) — Phase 7; v1
+  sends to Expo-Go tokens via the Expo push service unauthenticated.
 
 ## Constraints
 
@@ -58,6 +68,11 @@ References `docs/constitution.md` rather than restating it.
 - Push runs server-side (Edge Function) so it works when the Mate's app is
   closed; it must not duplicate prediction logic (it reads `shared_state`, which
   the owner client already derived via `lib/prediction`).
+- The DB webhook authenticates to the Edge Function via a shared secret
+  (`Authorization: Bearer`, in env); unauthenticated calls are rejected.
+- Transition detection uses the webhook body's `old_record` vs `new_record` —
+  never a re-read. The service-role dispatch is guarded by `pairing.status =
+  'active'`; a revoked pairing produces no recipient.
 - Components never call Supabase directly — only `lib/data/`; TS `strict` +
   `noUncheckedIndexedAccess`, no `any`, functions ≤ 50 lines, files ≤ 300.
 
@@ -80,9 +95,11 @@ References `docs/constitution.md` rather than restating it.
 |---|---|---|
 | Dispatcher = DB webhook on `shared_state` UPDATE → Edge Function; fires only on a real phase transition | Server-side so push works app-closed; "on phase change" per architecture | 2026-06-19 |
 | Push payload is discreet and raw-data-free (phase/attunement level only) | Constitution: no raw health data in payloads/logs; lock-screen discretion | 2026-06-19 |
-| `push_tokens(user_id, token, platform, updated_at)` owner-keyed + own-row RLS | Each user manages their own token; service role reads to dispatch | 2026-06-19 |
+| `push_tokens(user_id, token, platform, updated_at)`: each user owns their own row (`user_id = auth.uid()`) — the Mate owns theirs; own-row RLS; service role reads to dispatch | Avoids the "owner-keyed = Flower" misread | 2026-06-19 |
+| DB webhook authenticated by a shared secret; Edge Function rejects unauthenticated calls | Without it, anyone with the function URL could trigger pushes | 2026-06-19 |
+| Transition from `old_record` vs `new_record` in the webhook body; service-role dispatch guarded by `status='active'` | Race-free; revoked followers get no push | 2026-06-19 |
 | Mate view reachable when the user is a follower on an active pairing; no calendar merge | v1 stays 1:1 and role-framed; merge is Phase 8 | 2026-06-19 |
-| OPEN — which events push: phase change only vs phase change + period/PMS heads-up | resolved at the spec-acceptance gate | — |
+| OPEN — which events push: phase change only vs + period/PMS heads-up (a heads-up would put the derived `next_period_date` on the lock screen — a deliberate discretion call, not raw logs) | resolved at the spec-acceptance gate | — |
 
 ## Tracking
 
@@ -104,8 +121,11 @@ Uses the workflow contract's Verify + Test commands.
 - [ ] A push token registers; toggling push off stops delivery.
 - [ ] A `current_phase` transition triggers exactly one push to the Mate; a
       non-phase `shared_state` write triggers none.
-- [ ] The push payload contains no dates, no mood, no raw values (inspection).
-- [ ] After revoke, the Mate view is empty and no push is sent.
+- [ ] An unauthenticated webhook call is rejected by the Edge Function.
+- [ ] The constructed push payload (logged in the Edge Function's local function
+      log before the Expo call) contains no dates, no mood, no raw values.
+- [ ] After revoke, the Mate view is empty and no push is sent (the dispatcher's
+      `status='active'` lookup yields no recipient).
 
 ## Risks and mitigations
 
@@ -115,7 +135,14 @@ Uses the workflow contract's Verify + Test commands.
 | Push fires on every `shared_state` refresh, spamming the Mate | Dispatcher compares old vs new `current_phase`; fires only on transition |
 | Expo push unavailable locally blocks the milestone | The Expo-account prerequisite is parked `blocked:human`; non-push issues proceed |
 | Stale `shared_state` → wrong phase pushed | Inherited Phase 5 mitigation (owner refreshes on open/log); documented v1 limitation |
+| In-flight push already submitted to Expo before revoke cannot be recalled | Documented v1 limit; revoke cuts DB-side access immediately |
+| Production push auth not configured in v1 | Explicit v1 limit: Expo-Go tokens via the Expo push service; APNs/FCM + access token is Phase 7 |
 
 ## Decision log
 
 - 2026-06-19: Spec drafted; push-event set left OPEN for the acceptance gate.
+- 2026-06-19: Addressed security review (PR #36) — pinned webhook shared-secret
+  auth, transition detection from `old_record`/`new_record`, service-role dispatch
+  guarded by `status='active'`, push_tokens self-ownership, Mate-shell activation
+  query, and Expo-Go-vs-prod as a v1 limit; added webhook-auth + payload-log
+  verification; quiet hours/dedupe out of scope.
