@@ -48,6 +48,10 @@ GitHub issues and milestone. A completed spec is moved to `docs/specs/archive/`.
   copy would defeat it.
 - Multiple simultaneous Mates / mixed-calendar n:m UI (Phase 8).
 - Any follower write path — the follower is read-only by construction.
+- **Follower-initiated "leave connection"** — in v1 only the owner (Flower) ends a
+  pairing (revoke). The Mate has no self-exit path; sovereignty is deliberately
+  one-directional. A follower-initiated leave is deferred to Phase 8 (mutual
+  pairing), where each person is both subject and observer.
 
 ## Security model (pinned)
 
@@ -124,6 +128,7 @@ References `docs/constitution.md` rather than restating it.
 | Partial unique index `(owner_id, follower_id) WHERE status='active'`; n:m-capable, v1 1:1 by UI | No duplicate active edges; future Phase 8 without backfill | 2026-06-19 |
 | Invite UX = short **code** (hashed, single-use, 24h expiry) the owner shares out-of-band; the Mate types it | Local-friendly; no deep-link config or QR dependency (minimal-deps) | 2026-06-19 |
 | `shared_state` = `current_phase` + `next_period_date` heads-up + a phase-derived attunement hint (not her raw mood) | Vision-aligned attunement; her actual mood stays in `daily_logs`, follower-inaccessible | 2026-06-19 |
+| Revoke is **Flower-only** in v1; the Mate has no self-exit path (sovereignty deliberately one-directional) | Vision: the Mate is an invited companion, never a co-manager; follower-initiated leave is a Phase 8 concern | 2026-06-19 |
 
 ## Tracking
 
@@ -132,7 +137,10 @@ issue per step, grouped under the milestone.
 
 - Milestone: Pairing & data sovereignty (created on merge; `Depends on milestone: #1, #4`)
 - Issues: created from this spec once it is merged (one per implementable step)
-- Design: `docs/design.md` (Heather · Dark) — surface: Invite-Code
+- Design: `docs/design.md` (Heather · Dark) — surfaces: Invite-Code (incl.
+  expired/used + "neuen Code generieren" states), Code-eingeben (Mate accept
+  screen → `accept_invite`), Pairing-Management (on the Profil "Mein Mate" row —
+  connected status, "Mate entfernen"/revoke, re-invite)
 
 ## Verification
 
@@ -173,3 +181,7 @@ Uses the workflow contract's Verify + Test commands.
 - 2026-06-19: Acceptance gate — invite = short code (hashed/single-use/24h);
   `shared_state` = phase + next-period heads-up + phase-derived attunement hint
   (no raw mood shared); spec accepted and merged.
+- 2026-06-19: Design-coherence pass — pinned the missing Flower-side surfaces
+  (Code-eingeben, Pairing-Management with revoke/re-invite, Invite regenerate +
+  expired/used states); recorded follower-initiated leave as out of scope for v1
+  (Flower-only revoke; Phase 8 concern).
