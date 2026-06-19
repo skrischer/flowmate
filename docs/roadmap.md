@@ -15,7 +15,7 @@
 | 2 | Cycle logging & history — period start, schema + RLS | [spec](specs/spec-cycle-logging.md) | [#2](https://github.com/skrischer/flowmate/milestone/2) |
 | 3 | Prediction engine — phases, period prediction, fertile window | [spec](specs/spec-prediction.md) | [#3](https://github.com/skrischer/flowmate/milestone/3) |
 | 4 | Flower experience — phase view, predictions + disclaimer, mood/symptom logging | [spec](specs/spec-flower-experience.md) | [#4](https://github.com/skrischer/flowmate/milestone/4) |
-| 5 | Pairing & data sovereignty — invite, shared views, revoke | — | — |
+| 5 | Pairing & data sovereignty — invite, shared views, revoke | [spec](specs/spec-pairing.md) | [#5](https://github.com/skrischer/flowmate/milestone/5) |
 | 6 | Mate attunement & push — Mate view, Expo Push, Edge Function dispatcher | — | — |
 | 7 | Hardening & release (live operation) — hosted Supabase + prod env, onboarding, a11y, EAS builds, store/F-Droid, GPL packaging | — | — |
 | 8 | Mutual pairing & mixed calendar (n:m) — bidirectional invite, multi-pairing, unified shell (Flower/Mate navigation merges), aggregated mixed-calendar view | — | — |
