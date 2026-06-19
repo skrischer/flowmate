@@ -84,27 +84,29 @@ Paper file's theme tiles if the theme is revisited.
 
 ## Surfaces
 
-The full surface contract — all built in the Paper file (Heather Dark). Listed
-state variants are separate artboards.
+The full surface contract — all built in the Paper file (Heather Dark), laid out
+as a journey: the **Mate** band on top, **Shared** in the middle, the **Flower**
+band on the bottom. Layer names carry a `Shared ·` / `Flower ·` / `Mate ·`
+prefix; listed state variants are separate artboards.
 
 | Surface | Spec | Notes |
 |---|---|---|
-| Auth Sign-in | `spec-foundation-auth.md` | Wordmark, email+password, trust note; "Registrieren" link |
-| Profil (Flower) | `spec-foundation-auth.md` | Identity + setting rows + sign out; "Mein Mate ›" row opens Pairing-Management |
-| Flower-Home | `spec-flower-experience.md` | Phase card + **fertile window** + week glance + mood row + **"Periode eintragen" CTA** |
-| Flower-Home · Keine Prognose | `spec-flower-experience.md` | `confidence: none` variant — backfill prompt, **no fabricated window**, CTA |
-| Flower-Home · Niedrige Sicherheit | `spec-flower-experience.md` | `confidence: low` variant — prediction (`~`) + a **low-confidence caveat** distinct from the disclaimer |
-| Monatskalender | `spec-flower-experience.md` | Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** affordance |
-| Periode-Eintragen | `spec-cycle-logging.md` | Log/edit sheet: start-date picker (**past-date backfill**), optional end-date, **delete** |
-| Zyklus-Historie | `spec-cycle-logging.md` | Chronological period list (descending) + stats; row → edit/delete |
-| Mood-Logging | `spec-flower-experience.md` | 6-mood set, past-date backfill chip — **mood-only, no free-text note** |
-| Invite-Code | `spec-pairing.md` | Single-use code, 24h; **"Neuen Code generieren"**; "nie deine Einträge" |
-| Invite-Code · Abgelaufen | `spec-pairing.md` | Expired/used state — greyed code, "Code abgelaufen", regenerate as primary |
-| Code-eingeben | `spec-pairing.md` | Mate accept screen — enter code → `accept_invite` |
-| Pairing-Management | `spec-pairing.md` | Connected status + **"Mate entfernen"/revoke** + re-invite + "Was Tom sieht" (from Profil "Mein Mate") |
-| Mate-View | `spec-mate-push.md` | Phase + heads-up + attunement hint, **no raw data, no calendar** |
-| Mate-View · Beendet | `spec-mate-push.md` | Revoked/empty state — "Verbindung beendet", no phase data |
-| Mate-Profil | `spec-mate-push.md` | Follower identity, Abmelden, **push on/off toggle**; Eingestimmt/Profil nav |
+| Shared · Auth | `spec-foundation-auth.md` | Wordmark, email+password, trust note; "Registrieren" link |
+| Flower · Home | `spec-flower-experience.md` | Phase card + **fertile window** + week glance + mood row + **"Periode eintragen" CTA** |
+| Flower · Home (keine Prognose) | `spec-flower-experience.md` | `confidence: none` variant — backfill prompt, **no fabricated window**, CTA |
+| Flower · Home (niedrige Sicherheit) | `spec-flower-experience.md` | `confidence: low` variant — prediction (`~`) + a **low-confidence caveat** distinct from the disclaimer |
+| Flower · Kalender | `spec-flower-experience.md` | Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** affordance |
+| Flower · Periode eintragen | `spec-cycle-logging.md` | Log/edit sheet: start-date picker (**past-date backfill**), optional end-date, **delete** |
+| Flower · Zyklus-Historie | `spec-cycle-logging.md` | Chronological period list (descending) + stats; row → edit/delete |
+| Flower · Mood-Logging | `spec-flower-experience.md` | 6-mood set, past-date backfill chip — **mood-only, no free-text note** |
+| Flower · Invite-Code | `spec-pairing.md` | Single-use code, 24h; **"Neuen Code generieren"**; "nie deine Einträge" |
+| Flower · Invite-Code (abgelaufen) | `spec-pairing.md` | Expired/used state — greyed code, "Code abgelaufen", regenerate as primary |
+| Flower · Pairing-Management | `spec-pairing.md` | Connected status + **"Mate entfernen"/revoke** + re-invite + "Was Tom sieht" (from Flower · Profil "Mein Mate ›") |
+| Flower · Profil | `spec-foundation-auth.md` | Identity + setting rows + sign out; "Mein Mate ›" row opens Flower · Pairing-Management |
+| Mate · Code eingeben | `spec-pairing.md` | Mate accept screen — enter code → `accept_invite` |
+| Mate · Eingestimmt | `spec-mate-push.md` | Phase + heads-up + attunement hint, **no raw data, no calendar** |
+| Mate · Eingestimmt (beendet) | `spec-mate-push.md` | Revoked/empty state — "Verbindung beendet", no phase data |
+| Mate · Profil | `spec-mate-push.md` | Follower identity, Abmelden, **push on/off toggle**; Eingestimmt/Profil nav |
 
 ## Design rules (from the foundation docs)
 
