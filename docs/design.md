@@ -92,7 +92,7 @@ prefix; listed state variants are separate artboards.
 | Surface | Spec | Notes |
 |---|---|---|
 | Shared · Auth | `spec-foundation-auth.md` | Wordmark, email+password, trust note; "Registrieren" link |
-| Shared · Onboarding | `spec-pairing.md` | First-run fork after sign-up: "Eigenen Zyklus tracken" → Flower shell; "Partner:in folgen" → Mate · Code eingeben. **Navigation-only, never a stored role.** |
+| Shared · Onboarding | `spec-pairing.md` | First-run fork after sign-up: "Eigenen Zyklus tracken" → Flower shell; "Partner:in folgen" → Mate · Code eingeben. **Navigation-only, never a stored role.** Artboard: `docs/design-assets/shared-onboarding.png` |
 | Flower · Home | `spec-flower-experience.md` | Phase card + **fertile window** + week glance + mood row + **"Periode eintragen" CTA** |
 | Flower · Home (keine Prognose) | `spec-flower-experience.md` | `confidence: none` variant — backfill prompt, **no fabricated window**, CTA |
 | Flower · Home (niedrige Sicherheit) | `spec-flower-experience.md` | `confidence: low` variant — prediction (`~`) + a **low-confidence caveat** distinct from the disclaimer |
