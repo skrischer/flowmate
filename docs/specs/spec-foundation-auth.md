@@ -58,6 +58,11 @@ moved to `docs/specs/archive/`.
 - The `pairing` edge table and data sovereignty (Phase 5), and the Mate shell +
   push (Phase 6) — Phase 1 establishes `profiles` with no role column; the role
   substrate's pairing edges land in Phase 5.
+- The **first-run onboarding fork** (the Mate entry point: "Eigenen Zyklus tracken"
+  vs "Partner:in folgen" → `Code eingeben`) — Phase 5 (pairing) owns it, since it
+  routes into `accept_invite`. Phase 1's default-shell boot is **unchanged**: a
+  fresh account still lands on the owner/Flower shell; the fork is layered in front
+  of it in Phase 5 (navigation-only, never a persisted role).
 - Prediction, push, and Edge Functions (Phases 3/6).
 - A profile **edit** form — Phase 1 displays the row read-only only.
 - **Live operation** — a hosted Supabase project, production env, EAS builds, and
@@ -171,3 +176,6 @@ behavioral items below are the script for the human milestone-QA gate.
   (no hosted project / `blocked:human` for v1), added the `npm run android` WSLg
   run command, moved hosted Supabase + EAS/store to Phase 7; resolved auth method
   = email + password at the acceptance gate.
+- 2026-06-21: Design-coherence pass #2 — added an Out-of-scope forward-ref to the
+  first-run onboarding fork (Phase 5 owns it; Phase 1's default-shell boot is
+  unchanged).

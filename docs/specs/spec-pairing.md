@@ -39,6 +39,19 @@ GitHub issues and milestone. A completed spec is moved to `docs/specs/archive/`.
 - The owner-side write path that updates `shared_state` from `lib/prediction`.
 - Revoke.
 - Typed CRUD / RPC wrappers in `lib/data/`.
+- The **first-run onboarding fork** — the Mate entry point. After sign-up a
+  stateless account chooses "Eigenen Zyklus tracken" (→ Flower shell) or
+  "Partner:in folgen" (→ `Code eingeben` → `accept_invite`). Navigation-only: the
+  choice is **never persisted as a role** (no `profiles.role`) and adds no sovereign
+  data. Completion is a device-local boolean in **SecureStore** (the adapter Phase 1
+  chose for the session token — not AsyncStorage, not synced, no health data). The
+  fork is skipped once the account has state, with a fixed precedence: **own logs →
+  Flower shell; else an active follower edge → Mate shell** (a user who is both sees
+  the Flower shell, matching the Phase 6 activation rule). The fork is a **gate, not
+  a wizard**: a user who picks "Partner:in folgen" but kills the app before entering
+  a code (flag unset, no own logs, no edge) simply sees the fork again on relaunch —
+  no partial-state recovery. This makes the Mate path reachable — without it
+  `accept_invite` has no UI entry from the default Flower shell.
 
 ### Out of scope
 
@@ -129,6 +142,7 @@ References `docs/constitution.md` rather than restating it.
 | Invite UX = short **code** (hashed, single-use, 24h expiry) the owner shares out-of-band; the Mate types it | Local-friendly; no deep-link config or QR dependency (minimal-deps) | 2026-06-19 |
 | `shared_state` = `current_phase` + `next_period_date` heads-up + a phase-derived attunement hint (not her raw mood) | Vision-aligned attunement; her actual mood stays in `daily_logs`, follower-inaccessible | 2026-06-19 |
 | Revoke is **Flower-only** in v1; the Mate has no self-exit path (sovereignty deliberately one-directional) | Vision: the Mate is an invited companion, never a co-manager; follower-initiated leave is a Phase 8 concern | 2026-06-19 |
+| Mate entry = a **first-run onboarding fork** ("tracken" vs "Partner:in folgen" → `Code eingeben`); navigation-only, never a stored role; completion flag in SecureStore; reuses the code-only accept (no deep-link/QR) | The default shell boots Flower (Phase 1), so the follow path needs an explicit entry; Flo for Partners' companion-mode entry flow (ADOPT); the role stays edge-derived (constitution) | 2026-06-21 |
 
 ## Tracking
 
@@ -137,10 +151,11 @@ issue per step, grouped under the milestone.
 
 - Milestone: Pairing & data sovereignty (created on merge; `Depends on milestone: #1, #4`)
 - Issues: created from this spec once it is merged (one per implementable step)
-- Design: `docs/design.md` (Heather · Dark) — surfaces: Invite-Code (incl.
-  expired/used + "neuen Code generieren" states), Code-eingeben (Mate accept
-  screen → `accept_invite`), Pairing-Management (on the Profil "Mein Mate" row —
-  connected status, "Mate entfernen"/revoke, re-invite)
+- Design: `docs/design.md` (Heather · Dark) — surfaces: Onboarding (first-run fork
+  → Code-eingeben; navigation-only), Invite-Code (incl. expired/used + "neuen Code
+  generieren" states), Code-eingeben (Mate accept screen → `accept_invite`),
+  Pairing-Management (on the Profil "Mein Mate" row — connected status, "Mate
+  entfernen"/revoke, re-invite)
 
 ## Verification
 
@@ -158,6 +173,13 @@ Uses the workflow contract's Verify + Test commands.
       `daily_logs` for an owner (RLS smoke — fail).
 - [ ] Revoke → the follower's `shared_state` SELECT fails immediately.
 - [ ] No `profiles.role` column exists (schema check).
+- [ ] A brand-new account reaches `Code eingeben` via the first-run fork
+      ("Partner:in folgen"); choosing "Eigenen Zyklus tracken" lands on the Flower
+      shell. The fork persists no role (the no-`profiles.role` check above covers it).
+- [ ] The choice sticks across a kill-and-relaunch (SecureStore flag); a user who
+      picked "Partner:in folgen" but never entered a code sees the fork again (gate,
+      not wizard); a user with own logs always lands on the Flower shell, even with
+      an active follower edge.
 
 ## Risks and mitigations
 
@@ -185,3 +207,9 @@ Uses the workflow contract's Verify + Test commands.
   (Code-eingeben, Pairing-Management with revoke/re-invite, Invite regenerate +
   expired/used states); recorded follower-initiated leave as out of scope for v1
   (Flower-only revoke; Phase 8 concern).
+- 2026-06-21: Design-coherence pass #2 — closed the missing Default-account → Mate
+  entry. Added the **first-run onboarding fork** (navigation-only, never a persisted
+  role; "Partner:in folgen" → `Code eingeben`) to In scope, a prior decision, and a
+  verification item; added the `Shared · Onboarding` surface to `docs/design.md`.
+  Phase 1 (`spec-foundation-auth.md`) carries a forward-ref: default-shell boot
+  unchanged, the fork is layered in front of it here.
