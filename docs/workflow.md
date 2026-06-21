@@ -55,7 +55,7 @@ truth, milestones and issues are created on GitHub from them.
 - Bootstrap: `npm ci && cp .env.example .env && supabase start` (brings up the
   local Supabase stack)
 - Verify: `npm run verify` (= `eslint . && tsc --noEmit`)
-  (measured duration: `to be measured after Phase 1; target < 30s`)
+  (measured duration: ~3s on Node 24, well under the < 30s target)
 - Run (local): `npm run android` — launches an Android emulator on the Windows
   host via WSLg and runs the app in it (requires KVM + an Android SDK/AVD in WSL;
   fall back to Expo Go on a device or `expo start --web` for smoke)
