@@ -92,6 +92,7 @@ prefix; listed state variants are separate artboards.
 | Surface | Spec | Notes |
 |---|---|---|
 | Shared · Auth | `spec-foundation-auth.md` | Wordmark, email+password, trust note; "Registrieren" link |
+| Shared · Onboarding | `spec-pairing.md` | First-run fork after sign-up: "Eigenen Zyklus tracken" → Flower shell; "Partner:in folgen" → Mate · Code eingeben. **Navigation-only, never a stored role.** |
 | Flower · Home | `spec-flower-experience.md` | Phase card + **fertile window** + week glance + mood row + **"Periode eintragen" CTA** |
 | Flower · Home (keine Prognose) | `spec-flower-experience.md` | `confidence: none` variant — backfill prompt, **no fabricated window**, CTA |
 | Flower · Home (niedrige Sicherheit) | `spec-flower-experience.md` | `confidence: low` variant — prediction (`~`) + a **low-confidence caveat** distinct from the disclaimer |
@@ -129,5 +130,11 @@ prefix; listed state variants are separate artboards.
   revokes ("Mate entfernen"); the Mate only enters a code and toggles push. v1 has
   **no follower-initiated leave** (Flower-only sovereignty; Phase 8). The revoked
   state is designed on both sides (Pairing-Management + the empty Mate-View).
+- **The Mate path is reachable** — a first-run onboarding fork (after sign-up)
+  routes "Partner:in folgen" to Mate · Code eingeben; without it the Mate role is
+  designed but unreachable from the default Flower shell. The fork sets **initial
+  navigation only — never a persisted role** (no `profiles.role`; constitution). A
+  user who already tracks (own logs) or follows (an active pairing edge) skips it;
+  the shell otherwise stays derived from the pairing edge.
 - **Mood logging is mood-only** — the curated set of 6, no free-text note and no
   symptoms (data minimization + the vision's no-quantified-self non-goal).
