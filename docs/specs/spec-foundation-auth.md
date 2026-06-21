@@ -176,3 +176,6 @@ behavioral items below are the script for the human milestone-QA gate.
   (no hosted project / `blocked:human` for v1), added the `npm run android` WSLg
   run command, moved hosted Supabase + EAS/store to Phase 7; resolved auth method
   = email + password at the acceptance gate.
+- 2026-06-21: Design-coherence pass #2 — added an Out-of-scope forward-ref to the
+  first-run onboarding fork (Phase 5 owns it; Phase 1's default-shell boot is
+  unchanged).
