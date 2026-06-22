@@ -59,13 +59,15 @@ truth, milestones and issues are created on GitHub from them.
 - Run (local): `npm run android` — launches an Android emulator on the Windows
   host via WSLg and runs the app in it (requires KVM + an Android SDK/AVD in WSL;
   fall back to Expo Go on a device or `expo start --web` for smoke)
-- Test: `none yet` (target: Jest + React Native Testing Library)
+- Test: `npm test` (= `jest`, jest-expo preset + React Native Testing Library)
+  (measured duration: ~3s cold, < 1s warm on Node 24)
 - Build: `npx expo prebuild && npm run build` (EAS — live/Phase 7, not v1)
 
 Verify is the per-iteration gate: run it after every change set and fix until
 green. Run is the local-test loop for app-affecting changes (Build/EAS is a
-live-operation concern, Phase 7). While Test is `none yet`, every acceptance item
-no machine check covers is verified at the human milestone-QA gate instead.
+live-operation concern, Phase 7). Test (`npm test`) covers machine-checkable
+behavior; every acceptance item no machine check covers is verified at the human
+milestone-QA gate instead.
 
 ## Branch and spec naming
 
