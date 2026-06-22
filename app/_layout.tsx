@@ -42,6 +42,7 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
       <Stack.Screen name="mood-log" options={{ title: 'Stimmung eintragen' }} />
       <Stack.Screen name="invite" options={{ title: 'Mate einladen' }} />
       <Stack.Screen name="accept-invite" options={{ title: 'Code eingeben' }} />
+      <Stack.Screen name="pairing" options={{ title: 'Mein Mate' }} />
     </Stack>
   );
 }

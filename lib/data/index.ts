@@ -27,7 +27,12 @@ export {
   setPushEnabled,
 } from './push-tokens';
 export type { NewPushToken, PushPlatform, PushToken } from './push-tokens';
-export { acceptInvite, createInvite } from './pairing';
+export {
+  acceptInvite,
+  createInvite,
+  listActivePairings,
+  revokePairing,
+} from './pairing';
 export type { Invite, Pairing } from './pairing';
 export { getFollowedSharedState, refreshSharedState } from './shared-state';
 export type { SharedState } from './shared-state';

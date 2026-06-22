@@ -14,6 +14,18 @@ import type { Tables } from './database.types';
 /** A pairing edge row as stored (owner <-> follower, with status). */
 export type Pairing = Tables<'pairing'>;
 
+/** Resolves the authenticated user's id, throwing when no session exists. */
+async function requireUserId(): Promise<string> {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    throw error;
+  }
+  if (!data.user) {
+    throw new Error('No authenticated user: cannot resolve pairings.');
+  }
+  return data.user.id;
+}
+
 /**
  * A freshly minted invite. `token` is the plaintext code the owner shares with
  * the Mate out-of-band; it exists only in this response and is never persisted
@@ -57,4 +69,46 @@ export async function acceptInvite(token: string): Promise<string> {
     throw error;
   }
   return data;
+}
+
+/**
+ * Lists the current owner's ACTIVE pairing edges (the Mates following them). The
+ * `pairing_select_own_edge` RLS policy returns the caller's edges in BOTH
+ * directions (owner and follower), so this scopes explicitly to `owner_id` -- in
+ * the n:m-capable substrate a person may also be a follower elsewhere, and this
+ * management view is owner-only. Narrowed to `status = 'active'`; revoked history
+ * stays out. v1 is single-follower, but the query stays n:m-capable (returns a
+ * list). Ordered newest-first. Returns `[]` when nothing is active.
+ */
+export async function listActivePairings(): Promise<Pairing[]> {
+  const ownerId = await requireUserId();
+  const { data, error } = await supabase
+    .from('pairing')
+    .select()
+    .eq('owner_id', ownerId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  if (error) {
+    throw error;
+  }
+  return data;
+}
+
+/**
+ * Revokes a pairing edge: flips its `status` to `revoked`, keeping the row as
+ * history (no hard delete). The owner-only `pairing_update_owner` RLS policy is
+ * the enforcing boundary -- a follower cannot revoke. Because the follower's
+ * `shared_state` SELECT policy matches only `active` edges, this cuts the Mate's
+ * derived read immediately. Re-pairing later mints a fresh `active` row. No raw
+ * health data is touched.
+ */
+export async function revokePairing(pairingId: string): Promise<void> {
+  const { error } = await supabase
+    .from('pairing')
+    .update({ status: 'revoked' })
+    .eq('id', pairingId)
+    .eq('status', 'active');
+  if (error) {
+    throw error;
+  }
 }
