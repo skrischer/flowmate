@@ -111,6 +111,15 @@ export function predictNextPeriodDate(
   };
 }
 
+/**
+ * The most recent valid period start (the current cycle's anchor), or `null`
+ * when the history holds no valid start. Input order is irrelevant.
+ */
+export function latestPeriodStart(periods: readonly PeriodStart[]): string | null {
+  const starts = sortedUniqueStarts(periods);
+  return starts[starts.length - 1] ?? null;
+}
+
 /** Valid, de-duplicated period starts, sorted ascending by date. */
 function sortedUniqueStarts(periods: readonly PeriodStart[]): string[] {
   const valid = periods
