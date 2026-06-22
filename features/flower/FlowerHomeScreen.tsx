@@ -52,6 +52,7 @@ export function FlowerHomeScreen() {
           <NavRow label="Kalender" onPress={() => router.push('/calendar')} />
           <NavRow label="Zyklus-Historie" onPress={() => router.push('/periods')} />
           <NavRow label="Stimmung eintragen" onPress={() => router.push('/mood-log')} />
+          <NavRow label="Mate einladen" onPress={() => router.push('/invite')} />
           <NavRow label="Profil" onPress={() => router.push('/profile')} />
         </View>
       </ScrollView>
