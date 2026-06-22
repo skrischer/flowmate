@@ -1,0 +1,39 @@
+# Flowmate local Supabase stack.
+#
+# Custom 563xx ports let this stack coexist with other local Supabase projects
+# on the same host (which already occupy the 543xx and 553xx ranges). Only the
+# values that differ from the CLI defaults are set here; every other setting
+# falls back to the CLI default.
+# Config reference: https://supabase.com/docs/guides/local-development/cli/config
+project_id = "flowmate"
+
+[api]
+enabled = true
+# Port to use for the API URL.
+port = 56321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+# Port to use for the local database URL.
+port = 56322
+# Port used by `db diff` to initialize the shadow database.
+shadow_port = 56320
+# Must match the remote database major version.
+major_version = 17
+
+[studio]
+enabled = true
+# Port to use for Supabase Studio.
+port = 56323
+
+# Email testing server. Emails sent locally are captured here, not delivered.
+[inbucket]
+enabled = true
+# Port to use for the email testing server web interface.
+port = 56324
+
+[analytics]
+enabled = true
+port = 56327
