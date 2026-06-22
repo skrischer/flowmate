@@ -34,6 +34,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      periods: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          owner_id: string
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          owner_id: string
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          owner_id?: string
+          start_date?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
