@@ -27,3 +27,5 @@ export {
   setPushEnabled,
 } from './push-tokens';
 export type { NewPushToken, PushPlatform, PushToken } from './push-tokens';
+export { refreshSharedState } from './shared-state';
+export type { SharedState } from './shared-state';
