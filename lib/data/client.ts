@@ -3,6 +3,7 @@ import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 
 import type { Database } from './database.types';
+import { secureStoreAdapter } from './secure-store-adapter';
 
 // EXPO_PUBLIC_* vars are inlined at build time; the anon/publishable key is
 // safe to ship in the client (RLS is the security boundary, not key secrecy).
@@ -16,6 +17,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// The single Supabase access path for the whole app. No auth storage adapter
-// yet — session persistence is wired in issue #6.
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// The single Supabase access path for the whole app. The SecureStore adapter
+// persists the session in the platform keystore so it survives app restarts;
+// detectSessionInUrl is off because there is no browser redirect flow.
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: secureStoreAdapter,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
