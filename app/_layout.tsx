@@ -37,6 +37,7 @@ function RootNavigator() {
       <Stack.Screen name="profile" options={{ title: 'Profil' }} />
       <Stack.Screen name="periods" options={{ title: 'Zyklus-Historie' }} />
       <Stack.Screen name="period-form" options={{ title: 'Periode eintragen' }} />
+      <Stack.Screen name="mood-log" options={{ title: 'Stimmung eintragen' }} />
     </Stack>
   );
 }

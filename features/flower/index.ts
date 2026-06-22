@@ -3,6 +3,7 @@
 // and the pure engine stay behind this glue.
 
 export { todayIso } from './today';
+export { MOOD_OPTIONS, moodLabel, parseMood } from './mood';
 export { loadFlowerPrediction, periodsToStarts, toFlowerPrediction } from './prediction';
 export type { FlowerPrediction } from './prediction';
 export { useFlowerPrediction } from './useFlowerPrediction';
