@@ -29,3 +29,5 @@ export {
 export type { NewPushToken, PushPlatform, PushToken } from './push-tokens';
 export { acceptInvite, createInvite } from './pairing';
 export type { Invite, Pairing } from './pairing';
+export { refreshSharedState } from './shared-state';
+export type { SharedState } from './shared-state';
