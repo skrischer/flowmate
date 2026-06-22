@@ -37,3 +37,12 @@ port = 56324
 [analytics]
 enabled = true
 port = 56327
+
+# Phase-change push dispatcher (Deno Edge Function). Invoked by a DB webhook on
+# shared_state UPDATE. verify_jwt is OFF because the webhook authenticates with a
+# shared secret (Authorization: Bearer PUSH_WEBHOOK_SECRET), not a Supabase JWT;
+# the function rejects any request lacking that secret. Spec:
+# docs/specs/spec-mate-push.md.
+[functions.push-dispatcher]
+enabled = true
+verify_jwt = false
