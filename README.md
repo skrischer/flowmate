@@ -18,22 +18,49 @@ v1 runs entirely locally — no hosted service required.
 - Node 24 and npm 11.
 - Docker plus the Supabase CLI (for `supabase start`).
 - For `npm run android`: an Android SDK + AVD reachable from WSL and KVM /
-  nested virtualization enabled so the emulator can run and display via WSLg.
-  Without it, fall back to Expo Go on a physical device or `npm run web` for a
-  quick smoke test.
+  nested virtualization enabled so the emulator can run and display via WSLg
+  (see [Android emulator via WSLg](#android-emulator-via-wslg)).
 
 ## Bootstrap and run locally
 
 ```sh
 npm ci                     # install pinned dependencies
-cp .env.example .env       # local Supabase env (filled by the supabase wiring step)
+cp .env.example .env       # local Supabase env (Android URL preset to 10.0.2.2)
 supabase start             # bring up the local Supabase stack (Docker)
 npm run android            # launch the app in an Android emulator via WSLg
 ```
 
-> Note: `.env.example` is a stub at this phase; the local Supabase client and the
-> concrete variable set land with the data-layer wiring step. `supabase start`
-> and the auth/profiles schema arrive in the same phase.
+`npm run android` runs `expo run:android`: it generates the native `android/`
+project on first run (via `expo prebuild` — the directory is gitignored, not
+checked in), builds it, and installs it on the running emulator. The generated
+project is disposable; delete `android/` and re-run to regenerate it.
+
+## Android emulator via WSLg
+
+The v1 local-test loop targets an Android emulator displayed on the Windows host
+through WSLg. One-time host/WSL setup:
+
+- Enable nested virtualization so the emulator gets KVM. In an elevated
+  PowerShell on the host: `Set-VMProcessor -VMName WSL -ExposeVirtualizationExtensions $true`
+  (WSL 2). Inside WSL, confirm `/dev/kvm` exists and is accessible
+  (`ls -l /dev/kvm`); add your user to the `kvm` group if needed.
+- Install the Android SDK in WSL (command-line tools, `platform-tools`, a system
+  image, and `emulator`). Point `ANDROID_HOME` / `ANDROID_SDK_ROOT` at it and put
+  `platform-tools` and `emulator` on `PATH`.
+- Create at least one AVD (`sdkmanager` + `avdmanager create avd ...`). Start it
+  with `emulator -avd <name>` — WSLg renders its window on the Windows desktop.
+  Leave it running, then `npm run android` builds and installs onto it.
+- The emulator reaches the host loopback (where the local Supabase stack listens)
+  at `10.0.2.2`. `.env.example` already presets
+  `EXPO_PUBLIC_SUPABASE_URL=http://10.0.2.2:56321` for this reason.
+
+### Fallbacks (no KVM / no emulator)
+
+- Physical device: install **Expo Go**, run `npm start`, and scan the QR code.
+  Set `EXPO_PUBLIC_SUPABASE_URL` to your machine's LAN IP so the phone can reach
+  the local stack (`10.0.2.2` is emulator-only).
+- Browser smoke test: `npm run web` (`expo start --web`) with
+  `EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:56321`.
 
 ## Scripts
 
