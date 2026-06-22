@@ -8,3 +8,11 @@ export { loadFlowerPrediction, periodsToStarts, toFlowerPrediction } from './pre
 export type { FlowerPrediction } from './prediction';
 export { useFlowerPrediction } from './useFlowerPrediction';
 export type { FlowerPredictionState } from './useFlowerPrediction';
+export { FlowerHomeScreen } from './FlowerHomeScreen';
+export {
+  confidenceCaveat,
+  daysToNextPeriod,
+  isInsufficient,
+  nextPeriodLabel,
+  phaseLabel,
+} from './home-view';
