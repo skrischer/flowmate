@@ -58,6 +58,57 @@ export type Database = {
         }
         Relationships: []
       }
+      invites: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          owner_id: string
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          owner_id: string
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          owner_id?: string
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      pairing: {
+        Row: {
+          created_at: string
+          follower_id: string
+          id: string
+          owner_id: string
+          status: Database["public"]["Enums"]["pairing_status"]
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          id?: string
+          owner_id: string
+          status?: Database["public"]["Enums"]["pairing_status"]
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          id?: string
+          owner_id?: string
+          status?: Database["public"]["Enums"]["pairing_status"]
+        }
+        Relationships: []
+      }
       periods: {
         Row: {
           created_at: string
@@ -100,6 +151,27 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_state: {
+        Row: {
+          current_phase: string | null
+          next_period_date: string | null
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          current_phase?: string | null
+          next_period_date?: string | null
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          current_phase?: string | null
+          next_period_date?: string | null
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -108,7 +180,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      pairing_status: "active" | "revoked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -238,7 +310,9 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      pairing_status: ["active", "revoked"],
+    },
   },
 } as const
 
