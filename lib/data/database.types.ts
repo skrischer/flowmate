@@ -34,6 +34,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_logs: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          mood: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          mood: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          mood?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
       periods: {
         Row: {
           created_at: string
