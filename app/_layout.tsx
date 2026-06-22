@@ -38,6 +38,8 @@ function RootNavigator() {
       <Stack.Screen name="periods" options={{ title: 'Zyklus-Historie' }} />
       <Stack.Screen name="period-form" options={{ title: 'Periode eintragen' }} />
       <Stack.Screen name="mood-log" options={{ title: 'Stimmung eintragen' }} />
+      <Stack.Screen name="invite" options={{ title: 'Mate einladen' }} />
+      <Stack.Screen name="accept-invite" options={{ title: 'Code eingeben' }} />
     </Stack>
   );
 }
