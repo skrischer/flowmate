@@ -16,3 +16,15 @@ export {
   nextPeriodLabel,
   phaseLabel,
 } from './home-view';
+export { CalendarScreen } from './CalendarScreen';
+export { useFlowerCalendar } from './useFlowerCalendar';
+export type { FlowerCalendarState } from './useFlowerCalendar';
+export {
+  WEEKDAY_LABELS,
+  buildMonthGrid,
+  loggedDays,
+  monthStartOf,
+  monthTitle,
+  shiftMonth,
+} from './calendar';
+export type { DayCell, DayMarker, MonthGrid } from './calendar';
