@@ -9,6 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import {
   getOnboardingComplete,
   resolveOnboardingNeeded,
+  resolveShell,
   setOnboardingComplete,
 } from '../onboarding';
 
@@ -98,5 +99,28 @@ describe('resolveOnboardingNeeded precedence', () => {
   it('skips the fork when an active follower edge exists', async () => {
     mockPairingHead.mockResolvedValue({ count: 1, error: null });
     await expect(resolveOnboardingNeeded()).resolves.toBe(false);
+  });
+});
+
+describe('resolveShell (owner-vs-follower routing)', () => {
+  it('routes to the Flower shell when the account has own logs', async () => {
+    mockPeriodsHead.mockResolvedValue({ count: 2, error: null });
+    await expect(resolveShell()).resolves.toBe('flower');
+  });
+
+  it('routes to the Mate shell for an active follower with no own logs', async () => {
+    mockPeriodsHead.mockResolvedValue({ count: 0, error: null });
+    mockPairingHead.mockResolvedValue({ count: 1, error: null });
+    await expect(resolveShell()).resolves.toBe('mate');
+  });
+
+  it('routes a both-owner-and-follower account to the Flower shell (own logs win)', async () => {
+    mockPeriodsHead.mockResolvedValue({ count: 1, error: null });
+    mockPairingHead.mockResolvedValue({ count: 1, error: null });
+    await expect(resolveShell()).resolves.toBe('flower');
+  });
+
+  it('defaults to the Flower shell for a stateless account', async () => {
+    await expect(resolveShell()).resolves.toBe('flower');
   });
 });

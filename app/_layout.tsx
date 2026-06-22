@@ -6,7 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from '../features/auth/AuthProvider';
 import { SignInScreen } from '../features/auth/SignInScreen';
-import { resolveOnboardingNeeded } from '../lib/data';
+import { resolveOnboardingNeeded, resolveShell } from '../lib/data';
 import { colors } from '../lib/theme';
 
 function Spinner() {
@@ -17,14 +17,15 @@ function Spinner() {
   );
 }
 
-// Authenticated app stack. The first-run fork is layered in front of it via
-// initialRouteName (spec-pairing.md): a stateless, unflagged account starts on
-// the onboarding gate; everyone else starts on the Flower home. This is
-// navigation-only — no role is persisted (the shell stays edge-derived).
-function AppStack({ needsOnboarding }: { needsOnboarding: boolean }) {
+// Authenticated app stack. The first-run fork and the owner-vs-follower shell are
+// layered in front of it via initialRouteName (spec-pairing.md / spec-mate-push.md):
+// a stateless, unflagged account starts on the onboarding gate; otherwise the
+// shell is edge-derived — an active follower lands on the read-only Mate view,
+// everyone else on the Flower home. Navigation-only: no role is persisted.
+function AppStack({ initialRoute }: { initialRoute: string }) {
   return (
     <Stack
-      initialRouteName={needsOnboarding ? 'onboarding' : 'index'}
+      initialRouteName={initialRoute}
       screenOptions={{
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
@@ -33,6 +34,7 @@ function AppStack({ needsOnboarding }: { needsOnboarding: boolean }) {
     >
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="mate" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ title: 'Profil' }} />
       <Stack.Screen name="calendar" options={{ title: 'Kalender' }} />
       <Stack.Screen name="periods" options={{ title: 'Zyklus-Historie' }} />
@@ -44,31 +46,36 @@ function AppStack({ needsOnboarding }: { needsOnboarding: boolean }) {
   );
 }
 
-// Onboarding gate: resolves the first-run destination once a session exists,
-// applying the spec precedence (own logs / active follower edge / completion
-// flag all skip the fork). While resolving we hold the spinner so the stack
-// never mounts at the wrong initial route.
+// Onboarding + shell gate: resolves the first-run destination once a session
+// exists. The fork wins when needed (spec precedence: own logs / active follower
+// edge / completion flag all skip it); otherwise the shell is edge-derived — an
+// active follower opens the Mate view, everyone else the Flower home. We hold the
+// spinner while resolving so the stack never mounts at the wrong initial route.
 function OnboardingGate() {
-  const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     resolveOnboardingNeeded()
-      .then((needed) => {
-        if (active) setNeedsOnboarding(needed);
+      .then(async (needed) => {
+        if (needed) return 'onboarding';
+        return (await resolveShell()) === 'mate' ? 'mate' : 'index';
+      })
+      .then((route) => {
+        if (active) setInitialRoute(route);
       })
       .catch(() => {
-        if (active) setNeedsOnboarding(false);
+        if (active) setInitialRoute('index');
       });
     return () => {
       active = false;
     };
   }, []);
 
-  if (needsOnboarding === null) {
+  if (initialRoute === null) {
     return <Spinner />;
   }
-  return <AppStack needsOnboarding={needsOnboarding} />;
+  return <AppStack initialRoute={initialRoute} />;
 }
 
 // Auth gate: while the persisted session loads we show a spinner, then route

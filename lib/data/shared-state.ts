@@ -37,6 +37,49 @@ async function requireOwnerId(): Promise<string> {
 }
 
 /**
+ * READ-ONLY follower path for the Mate attunement view (spec-mate-push.md):
+ * reads the `shared_state` of the owner the current user follows on an ACTIVE
+ * pairing edge. Resolves the active edge (`follower_id = auth.uid() AND status =
+ * 'active'`) to find the owner, then SELECTs that owner's derived row.
+ *
+ * The follower never touches raw logs -- this reads ONLY `shared_state`, whose
+ * follower-SELECT RLS policy (Phase 5) is keyed on the active edge. After revoke
+ * the edge is no longer `active`, so no owner resolves and this returns `null`,
+ * driving the Mate view's ended/empty state. Returns `null` when there is no
+ * active following edge or no shared row exists yet. There is no write path here.
+ */
+export async function getFollowedSharedState(): Promise<SharedState | null> {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    throw userError;
+  }
+  if (!userData.user) {
+    return null;
+  }
+  const { data: edge, error: edgeError } = await supabase
+    .from('pairing')
+    .select('owner_id')
+    .eq('follower_id', userData.user.id)
+    .eq('status', 'active')
+    .maybeSingle();
+  if (edgeError) {
+    throw edgeError;
+  }
+  if (!edge) {
+    return null;
+  }
+  const { data, error } = await supabase
+    .from('shared_state')
+    .select()
+    .eq('owner_id', edge.owner_id)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  return data;
+}
+
+/**
  * Recomputes and writes the current owner's `shared_state` from their logged
  * periods, anchoring the prediction on `today` (injected by the caller -- the
  * data layer reads no clock). Called on app open and after a log so the

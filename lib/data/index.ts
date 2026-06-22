@@ -29,10 +29,12 @@ export {
 export type { NewPushToken, PushPlatform, PushToken } from './push-tokens';
 export { acceptInvite, createInvite } from './pairing';
 export type { Invite, Pairing } from './pairing';
-export { refreshSharedState } from './shared-state';
+export { getFollowedSharedState, refreshSharedState } from './shared-state';
 export type { SharedState } from './shared-state';
 export {
   getOnboardingComplete,
   resolveOnboardingNeeded,
+  resolveShell,
   setOnboardingComplete,
 } from './onboarding';
+export type { Shell } from './onboarding';

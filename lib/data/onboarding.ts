@@ -98,3 +98,25 @@ export async function resolveOnboardingNeeded(): Promise<boolean> {
   }
   return !(await getOnboardingComplete());
 }
+
+/** Which shell an account sees once the first-run fork is skipped. */
+export type Shell = 'flower' | 'mate';
+
+/**
+ * Resolves the owner-vs-follower shell once onboarding is past, applying the
+ * Phase 6 activation rule (spec-mate-push.md): own logs win and route to the
+ * Flower shell; otherwise an active follower edge routes to the read-only Mate
+ * attunement view; a stateless account (post-fork "tracken" choice) defaults to
+ * the Flower shell. A user who is both owner and follower sees the Flower shell
+ * (own logs win), matching the onboarding precedence. This is edge-derived only
+ * -- no `profiles.role` is read or stored.
+ */
+export async function resolveShell(): Promise<Shell> {
+  if (await hasOwnLogs()) {
+    return 'flower';
+  }
+  if (await hasActiveFollowerEdge()) {
+    return 'mate';
+  }
+  return 'flower';
+}
