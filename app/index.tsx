@@ -29,6 +29,13 @@ export default function Index() {
       </Pressable>
       <Pressable
         style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+        onPress={() => router.push('/mood-log')}
+      >
+        <Text style={styles.rowText}>Stimmung eintragen</Text>
+        <Text style={styles.chevron}>{'>'}</Text>
+      </Pressable>
+      <Pressable
+        style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
         onPress={() => router.push('/profile')}
       >
         <Text style={styles.rowText}>Profil</Text>
