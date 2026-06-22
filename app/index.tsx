@@ -22,6 +22,13 @@ export default function Index() {
       <Text style={styles.subtitle}>{greeting}</Text>
       <Pressable
         style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+        onPress={() => router.push('/periods')}
+      >
+        <Text style={styles.rowText}>Zyklus-Historie</Text>
+        <Text style={styles.chevron}>{'>'}</Text>
+      </Pressable>
+      <Pressable
+        style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
         onPress={() => router.push('/profile')}
       >
         <Text style={styles.rowText}>Profil</Text>
