@@ -36,6 +36,13 @@ export default function Index() {
       </Pressable>
       <Pressable
         style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+        onPress={() => router.push('/invite')}
+      >
+        <Text style={styles.rowText}>Mate einladen</Text>
+        <Text style={styles.chevron}>{'>'}</Text>
+      </Pressable>
+      <Pressable
+        style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
         onPress={() => router.push('/profile')}
       >
         <Text style={styles.rowText}>Profil</Text>
