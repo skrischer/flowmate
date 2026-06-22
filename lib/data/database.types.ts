@@ -204,7 +204,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_invite: { Args: { token: string }; Returns: string }
+      create_invite: {
+        Args: { expires_in_hours?: number }
+        Returns: {
+          expires_at: string
+          token: string
+        }[]
+      }
     }
     Enums: {
       pairing_status: "active" | "revoked"
