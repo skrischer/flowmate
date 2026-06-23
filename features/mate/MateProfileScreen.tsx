@@ -3,15 +3,15 @@
 // Erscheinungsbild row, a Benachrichtigungen toggle (wired to the existing
 // push-tokens layer), and an Abmelden affordance.
 //
-// Data accessed:
-//   getOwnProfile(userId)  — Mate's own display_name (no raw health data)
-//   getPartnerProfile()    — Flower's display_name only (PartnerProfile: id + displayName)
-//   getOwnPushToken()      — reads enabled state
-//   setPushEnabled(bool)   — toggles push delivery
+// Data accessed (via useMateProfile hook — no raw health data):
+//   getOwnProfile(userId)  — Mate's own display_name
+//   getPartnerProfile()    — Flower's display_name only (PartnerProfile)
+//   getOwnPushToken()      — reads enabled state; null = no registered device
+//   setPushEnabled(bool)   — toggles push delivery (push-token row must exist)
 //   signOut()              — ends the session
 //
-// The Mate sees no raw cycle data here — identity + settings only.
-import { useEffect, useState } from 'react';
+// Benachrichtigungen toggle is disabled when no push-token row is registered
+// (getOwnPushToken returns null). This prevents a silent no-op UPDATE.
 import {
   ActivityIndicator,
   Alert,
@@ -27,67 +27,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../auth/AuthProvider';
 import { Avatar } from '../../components/Avatar';
 import { Icon } from '../../components/Icon';
-import {
-  getOwnProfile,
-  getPartnerProfile,
-  getOwnPushToken,
-  setPushEnabled,
-  signOut,
-} from '../../lib/data';
-import type { PartnerProfile, Profile } from '../../lib/data';
+import { signOut } from '../../lib/data';
 import { colors, radii, spacing, typography } from '../../lib/theme';
+import { useMateProfile } from './useMateProfile';
 
 export function MateProfileScreen() {
   const { session } = useAuth();
-  const userId = session?.user.id ?? null;
-
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [partner, setPartner] = useState<PartnerProfile | null>(null);
-  const [pushEnabled, setPushEnabledState] = useState<boolean>(true);
-  const [pushLoading, setPushLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!userId) return;
-    let active = true;
-
-    Promise.all([
-      getOwnProfile(userId).then((r) => r.profile),
-      getPartnerProfile(),
-      getOwnPushToken(),
-    ])
-      .then(([ownProfile, partnerProfile, pushToken]) => {
-        if (!active) return;
-        setProfile(ownProfile);
-        setPartner(partnerProfile);
-        if (pushToken !== null) {
-          setPushEnabledState(pushToken.enabled);
-        }
-      })
-      .catch(() => {
-        // Non-fatal — render what we have.
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [userId]);
-
-  async function handleTogglePush(value: boolean) {
-    setPushLoading(true);
-    try {
-      await setPushEnabled(value);
-      setPushEnabledState(value);
-    } catch {
-      // Revert optimistic update on error.
-      setPushEnabledState(!value);
-    } finally {
-      setPushLoading(false);
-    }
-  }
+  const { profile, partner, pushEnabled, pushLoading, isLoading, togglePush } =
+    useMateProfile();
 
   function handleSignOut() {
     Alert.alert('Abmelden', 'Wirklich abmelden?', [
@@ -133,27 +80,33 @@ export function MateProfileScreen() {
 
         {/* Settings rows */}
         <View style={styles.card}>
-          {/* Erscheinungsbild */}
+          {/* Erscheinungsbild — no chevron until destination exists */}
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <Icon name="appearance" size={20} color={colors.textMuted} />
               <Text style={styles.settingLabel}>Erscheinungsbild</Text>
             </View>
-            <Icon name="chevron" size={18} color={colors.textSubtle} />
           </View>
 
           <View style={styles.divider} />
 
-          {/* Benachrichtigungen */}
+          {/* Benachrichtigungen — disabled when no push-token row is registered */}
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <Icon name="bell" size={20} color={colors.textMuted} />
-              <Text style={styles.settingLabel}>Benachrichtigungen</Text>
+              <View style={styles.notifTextCol}>
+                <Text style={styles.settingLabel}>Benachrichtigungen</Text>
+                {pushEnabled === null ? (
+                  <Text style={styles.notifCaption}>
+                    Kein Gerät registriert
+                  </Text>
+                ) : null}
+              </View>
             </View>
             <Switch
-              value={pushEnabled}
-              onValueChange={handleTogglePush}
-              disabled={pushLoading}
+              value={pushEnabled ?? false}
+              onValueChange={togglePush}
+              disabled={pushLoading || pushEnabled === null}
               trackColor={{ false: colors.hairline, true: colors.primary }}
               thumbColor={colors.onPrimary}
             />
@@ -161,7 +114,11 @@ export function MateProfileScreen() {
         </View>
 
         {/* Sign out */}
-        <TouchableOpacity style={styles.signOutRow} onPress={handleSignOut} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.signOutRow}
+          onPress={handleSignOut}
+          activeOpacity={0.7}
+        >
           <Icon name="logout" size={20} color={colors.danger} />
           <Text style={styles.signOutLabel}>Abmelden</Text>
         </TouchableOpacity>
@@ -187,11 +144,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     padding: spacing.field,
   },
-  identityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
+  identityRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   identityText: { flex: 1, gap: 3 },
   displayName: { ...typography.title, color: colors.text },
   attunedLine: { ...typography.bodySm, color: colors.textMuted },
@@ -201,17 +154,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
+  settingLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  notifTextCol: { gap: 2 },
   settingLabel: { ...typography.body, color: colors.text },
-  divider: {
-    height: 1,
-    backgroundColor: colors.hairline,
-    marginHorizontal: 0,
-  },
+  notifCaption: { ...typography.caption, color: colors.textSubtle },
+  divider: { height: 1, backgroundColor: colors.hairline },
   signOutRow: {
     flexDirection: 'row',
     alignItems: 'center',
