@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { DISCLAIMER_TEXT } from '../../components/PredictionDisclaimer';
 import { getPartnerProfile } from '../../lib/data';
 import type { PartnerProfile } from '../../lib/data';
 import { colors, radii, spacing, typography } from '../../lib/theme';
@@ -73,10 +74,12 @@ function Header({ flowerName, isEnded }: { flowerName: string | null; isEnded: b
   );
 }
 
-// Pill badge: sage "Verbunden" when connected, muted "Getrennt" when ended.
+// Pill badge: sage "Verbunden" (with a green status dot) when connected, muted
+// "Getrennt" when ended.
 function ConnectionBadge({ isEnded }: { isEnded: boolean }) {
   return (
     <View style={[styles.badge, isEnded ? styles.badgeEnded : styles.badgeConnected]}>
+      {isEnded ? null : <View style={styles.badgeDot} />}
       <Text style={[styles.badgeText, isEnded ? styles.badgeTextEnded : styles.badgeTextConnected]}>
         {isEnded ? 'Getrennt' : 'Verbunden'}
       </Text>
@@ -116,11 +119,30 @@ function AttunementSection({ data, connected, isLoading, error, flowerName }: Se
     return <WaitingCard flowerName={flowerName} />;
   }
   return (
-    <View style={styles.cards}>
-      <AttunementCard data={data} flowerName={flowerName} />
-      {data.phase !== null ? (
-        <PhaseTrackSection phase={data.phase} flowerName={flowerName} />
-      ) : null}
+    <>
+      <View style={styles.cards}>
+        <AttunementCard data={data} flowerName={flowerName} />
+        {data.phase !== null ? (
+          <PhaseTrackSection phase={data.phase} flowerName={flowerName} />
+        ) : null}
+      </View>
+      <BottomDisclaimer flowerName={flowerName} />
+    </>
+  );
+}
+
+// Mandatory "Prognose, keine Garantie" disclaimer (constitution) — relocated to
+// the very bottom of the screen with the Paper artboard's longer copy (#135).
+function BottomDisclaimer({ flowerName }: { flowerName: string | null }) {
+  const name = flowerName ?? 'Deine Flower';
+  return (
+    <View style={styles.disclaimer}>
+      <View style={styles.disclaimerMark}>
+        <Text style={styles.disclaimerMarkText}>i</Text>
+      </View>
+      <Text style={styles.disclaimerText}>
+        {`${DISCLAIMER_TEXT} ${name} teilt nur, was sie möchte.`}
+      </Text>
     </View>
   );
 }
@@ -130,7 +152,7 @@ function AttunementSection({ data, connected, isLoading, error, flowerName }: Se
 function WaitingCard({ flowerName }: { flowerName: string | null }) {
   return (
     <View style={styles.waitingCard}>
-      <Text style={styles.waitingTitle}>Verbunden</Text>
+      <Text style={styles.waitingTitle}>Noch keine Daten</Text>
       <Text style={styles.bodyMuted}>
         {`${flowerName ?? 'Deine Flower'} hat noch nichts geteilt. Sobald etwas da ist, erscheint es hier.`}
       </Text>
@@ -151,11 +173,20 @@ const styles = StyleSheet.create({
   eyebrow: { ...typography.bodySm, color: colors.textMuted },
   title: { ...typography.h1, color: colors.text },
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     alignSelf: 'flex-start',
     marginTop: 6,
     borderRadius: radii.pill,
     paddingVertical: 4,
     paddingHorizontal: 10,
+  },
+  badgeDot: {
+    width: 7,
+    height: 7,
+    borderRadius: radii.pill,
+    backgroundColor: colors.success,
   },
   badgeConnected: { backgroundColor: colors.successTint },
   badgeEnded: { backgroundColor: colors.surfaceRaised },
@@ -190,4 +221,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   waitingTitle: { ...typography.title, color: colors.text },
+  disclaimer: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  disclaimerMark: {
+    width: 18,
+    height: 18,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disclaimerMarkText: { color: colors.textSubtle, fontSize: 11, fontWeight: '600' },
+  disclaimerText: { color: colors.textSubtle, fontSize: 12, lineHeight: 16, flex: 1 },
 });

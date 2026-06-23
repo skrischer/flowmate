@@ -1,11 +1,11 @@
 // Attunement card for the Mate view: PhaseChip + warm headline + optional
-// heads-up chip with clock icon + mandatory prediction disclaimer (spec-mate-push.md).
+// heads-up chip with clock icon (spec-mate-push.md). The mandatory prediction
+// disclaimer lives at the bottom of MateAttunementScreen (#135), not in here.
 // Phase-level only -- no raw data.
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '../../components/Icon';
 import { PhaseChip } from '../../components/PhaseChip';
-import { PredictionDisclaimer } from '../../components/PredictionDisclaimer';
 import type { Phase } from '../../lib/prediction';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 import type { MateAttunement } from './attunement-view';
@@ -49,8 +49,6 @@ export function AttunementCard({ data, flowerName }: AttunementCardProps) {
           <Text style={styles.headsUpText}>{data.headsUp}</Text>
         </View>
       ) : null}
-
-      <PredictionDisclaimer />
     </View>
   );
 }

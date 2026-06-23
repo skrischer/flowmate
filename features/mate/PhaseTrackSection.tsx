@@ -1,11 +1,30 @@
 // "WO [Flower] GERADE IST" section for the Mate attunement view (issue #109).
-// Renders a PhaseTrack for the owner's current phase + a reassurance card below.
-// Shown only when a known phase is available (phase !== null).
+// Renders a 4-segment phase track for the owner's current phase + a reassurance
+// card below. Shown only when a known phase is available (phase !== null).
+//
+// The track is rendered inline here (not via the shared components/PhaseTrack,
+// which the Flower home screen owns) so the Mate surface can match the Paper
+// "Mate · Eingestimmt" artboard (#135): individually pill-rounded segments with
+// the design's balanced weights, and the current phase surfaced as a highlighted
+// label per the settled decision (keep the labels, highlight the current phase).
 import { StyleSheet, Text, View } from 'react-native';
 
-import { PhaseTrack } from '../../components/PhaseTrack';
-import { colors, radii, spacing, typography } from '../../lib/theme';
+import { Icon } from '../../components/Icon';
+import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
 import type { Phase } from '../../lib/prediction';
+
+// Inactive segment fill (docs/design.md Phase track) — a one-off dark token not
+// in the shared palette, matching the Paper artboard's #352C42.
+const PHASE_INACTIVE = '#352C42';
+
+// Segment weights from the Paper artboard (1 / 1.4 / 0.7 / 1.2): more balanced
+// than a true cycle would be, so the German labels stay readable under each.
+const SEGMENTS: readonly { key: Phase; label: string; weight: number }[] = [
+  { key: 'menstrual', label: 'Menstruation', weight: 1 },
+  { key: 'follicular', label: 'Follikel', weight: 1.4 },
+  { key: 'ovulation', label: 'Eisprung', weight: 0.7 },
+  { key: 'luteal', label: 'Luteal', weight: 1.2 },
+] as const;
 
 interface PhaseTrackSectionProps {
   phase: Phase;
@@ -20,9 +39,44 @@ export function PhaseTrackSection({ phase, flowerName }: PhaseTrackSectionProps)
     <View style={styles.section}>
       <Text style={styles.sectionLabel}>{sectionLabel}</Text>
       <View style={styles.trackCard}>
-        <PhaseTrack currentPhase={phase} />
+        <MatePhaseTrack phase={phase} />
       </View>
       <ReassuranceCard />
+    </View>
+  );
+}
+
+// 4-segment pill track + per-phase labels, with the current phase highlighted.
+// Named distinctly from the shared components/PhaseTrack to avoid shadowing it.
+function MatePhaseTrack({ phase }: { phase: Phase }) {
+  return (
+    <View>
+      <View style={styles.track}>
+        {SEGMENTS.map((seg) => (
+          <View
+            key={seg.key}
+            style={[
+              styles.segment,
+              {
+                flex: seg.weight,
+                backgroundColor: seg.key === phase ? colors.primary : PHASE_INACTIVE,
+              },
+            ]}
+          />
+        ))}
+      </View>
+      <View style={styles.labels}>
+        {SEGMENTS.map((seg) => (
+          <View key={seg.key} style={{ flex: seg.weight }}>
+            <Text
+              style={seg.key === phase ? styles.labelActive : styles.label}
+              numberOfLines={1}
+            >
+              {seg.label}
+            </Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -30,6 +84,7 @@ export function PhaseTrackSection({ phase, flowerName }: PhaseTrackSectionProps)
 function ReassuranceCard() {
   return (
     <View style={styles.reassuranceCard}>
+      <Icon name="attunement" size={22} color={colors.primary} />
       <Text style={styles.reassuranceText}>
         Du musst nichts verwalten. Einfach da sein und mitschwingen.
       </Text>
@@ -54,7 +109,15 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     padding: spacing.screen,
   },
+  track: { flexDirection: 'row', gap: 5, height: 7 },
+  segment: { height: 7, borderRadius: radii.pill },
+  labels: { flexDirection: 'row', gap: 5, marginTop: 8 },
+  label: { ...typography.caption, color: colors.textSubtle },
+  labelActive: { ...typography.caption, fontFamily: fonts.bodySemiBold, color: colors.primary },
   reassuranceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
@@ -65,7 +128,7 @@ const styles = StyleSheet.create({
   reassuranceText: {
     ...typography.bodySm,
     color: colors.textMuted,
-    textAlign: 'center',
+    flex: 1,
     lineHeight: 20,
   },
 });
