@@ -4,12 +4,11 @@
 // average cycle: menstrual ~5d, follicular ~9d, ovulation ~2d, luteal ~14d
 // (total 30). The active segment is filled with the primary lavender accent;
 // inactive segments use the inactive token. Labels sit below each segment.
-// Reusable: Mate surface can pass the same phase/cycleDay props.
+// Reusable by the Mate surface — pass the same currentPhase prop.
 import { StyleSheet, Text, View } from 'react-native';
 
+import type { Phase } from '../lib/prediction';
 import { colors, typography } from '../lib/theme';
-
-type Phase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal';
 
 const PHASE_INACTIVE = '#352C42';
 
@@ -28,11 +27,6 @@ export interface PhaseTrackProps {
    * lavender color; all others are inactive.
    */
   currentPhase: Phase;
-  /**
-   * Optional current cycle day (1-based). Not rendered by this component but
-   * accepted so callers don't need to spread partial props when passing through.
-   */
-  cycleDay?: number;
 }
 
 /** 4-segment weighted phase bar with German labels. */

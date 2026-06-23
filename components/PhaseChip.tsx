@@ -4,10 +4,11 @@
 // current phase label (Phase C).
 import { StyleSheet, Text, View } from 'react-native';
 
+import type { Phase } from '../lib/prediction';
 import { colors, radii, typography } from '../lib/theme';
 
 /** Phase color dot token — each cycle phase has a distinct accent. */
-const PHASE_COLORS: Record<string, string> = {
+const PHASE_COLORS: Record<Phase, string> = {
   menstrual: colors.period,    // soft rose
   follicular: colors.success,  // sage
   ovulation: colors.secondary, // caramel (fertile peak)
@@ -15,8 +16,8 @@ const PHASE_COLORS: Record<string, string> = {
 };
 
 export interface PhaseChipProps {
-  /** The current cycle phase key (menstrual/follicular/ovulation/luteal). */
-  phase: string;
+  /** The current cycle phase. */
+  phase: Phase;
   /** German display label for the phase. */
   label: string;
 }

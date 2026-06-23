@@ -53,7 +53,11 @@ export function greeting(hour: number): string {
   return 'Guten Abend';
 }
 
-/** Display headline for the phase card: 'Periode in X Tagen' / 'Periode heute erwartet'. */
+/**
+ * Display headline for the phase card: 'Periode in X Tagen' / 'Periode heute
+ * erwartet'. Distinct from nextPeriodLabel which produces the shorter stat-row
+ * form ('In X Tagen'). Both cover the same three-branch structure intentionally.
+ */
 export function periodHeadline(days: number): string {
   if (days <= 0) return 'Periode heute erwartet';
   if (days === 1) return 'Periode in 1 Tag';

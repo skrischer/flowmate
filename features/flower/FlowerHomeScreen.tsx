@@ -20,10 +20,12 @@ import { colors, radii, spacing, typography } from '../../lib/theme';
 import { getOwnProfile } from '../../lib/data/profiles';
 import { getDailyLog, listDailyLogs, listPeriods, upsertDailyLog, type Mood } from '../../lib/data';
 import type { DateRange, Prediction } from '../../lib/prediction';
+import { daysBetween } from '../../lib/prediction/dates';
 import { formatIso } from '../cycle-logging/date';
 import { useFlowerPrediction } from './useFlowerPrediction';
 import type { FlowerPrediction } from './prediction';
 import { loggedDays } from './calendar';
+import { parseMood } from './mood';
 import {
   buildWeekDays,
   confidenceCaveat,
@@ -86,8 +88,9 @@ function PhaseCard({
   const caveat = confidenceCaveat(prediction.confidence);
   const approx = prediction.confidence === 'low' ? '~ ' : '';
   // Cycle day: days elapsed since the last logged period start + 1 (1-based).
+  // Uses daysBetween directly (semantically clear: "days from start to today").
   // Falls back to 1 when cycleStart is unknown.
-  const cycleDay = cycleStart ? Math.max(1, daysToNextPeriod(cycleStart, today) + 1) : 1;
+  const cycleDay = cycleStart ? Math.max(1, daysBetween(cycleStart, today) + 1) : 1;
   return (
     <View style={styles.card}>
       <View style={styles.chipRow}>
@@ -96,7 +99,7 @@ function PhaseCard({
       </View>
       <Text style={styles.displayHeadline}>{`${approx}${periodHeadline(days)}`}</Text>
       <Text style={styles.reassurance}>{reassuranceLine(prediction.confidence)}</Text>
-      <PhaseTrack currentPhase={prediction.currentPhase} cycleDay={cycleDay} />
+      <PhaseTrack currentPhase={prediction.currentPhase} />
       <FertileWindow window={prediction.fertileWindow} approx={approx} />
       {caveat ? <Text style={styles.caveat}>{caveat}</Text> : null}
       <PredictionDisclaimer />
@@ -158,8 +161,9 @@ export function FlowerHomeScreen() {
       void getOwnProfile(userId).then(({ profile }) =>
         setDisplayName(profile?.display_name ?? null),
       );
+      // parseMood narrows the DB string to the curated Mood union safely.
       void getDailyLog(today).then((log) =>
-        setSelectedMood((log?.mood as Mood | undefined) ?? null),
+        setSelectedMood(log?.mood != null ? parseMood(log.mood) : null),
       );
       void listDailyLogs().then((logs) => setMoodDates(new Set(logs.map((l) => l.date))));
       void listPeriods().then((periods) => {
@@ -173,9 +177,16 @@ export function FlowerHomeScreen() {
 
   const weekDays = buildWeekDays(today, periodDates, moodDates);
 
-  async function handleMoodSelect(mood: Mood) {
+  // Optimistic update: set immediately, then persist. The .catch surfaces the
+  // rejection to the global unhandled-promise boundary (LogBox in dev). A full
+  // error UI path is deferred until error-state spec work in a future phase.
+  function handleMoodSelect(mood: Mood) {
     setSelectedMood(mood);
-    await upsertDailyLog({ date: today, mood });
+    upsertDailyLog({ date: today, mood }).catch((cause: unknown) => {
+      // Revert optimistic selection so the UI is not stuck in the wrong state.
+      setSelectedMood(null);
+      throw cause;
+    });
   }
 
   return (
