@@ -30,7 +30,19 @@ function Spinner() {
 // layered in front of it via initialRouteName (spec-pairing.md / spec-mate-push.md):
 // a stateless, unflagged account starts on the onboarding gate; otherwise the
 // shell is edge-derived — an active follower lands on the read-only Mate view,
-// everyone else on the Flower home. Navigation-only: no role is persisted.
+// everyone else on the Flower tab shell. Navigation-only: no role is persisted.
+//
+// Route structure:
+//   (tabs)          — Flower tab bar (Heute / Kalender / Profil); headerShown: false
+//                     because the Tabs navigator manages its own headers per tab.
+//   onboarding      — first-run fork (no header)
+//   mate            — follower read-only shell (no header)
+//   periods         — Zyklus-Historie (stack-presented from Profil tab)
+//   period-form     — Periode eintragen (stack-presented from Heute / Kalender)
+//   mood-log        — Stimmung eintragen (stack-presented from Heute)
+//   invite          — Mate einladen (stack-presented from Profil tab)
+//   accept-invite   — Code eingeben (reached via onboarding fork)
+//   pairing         — Mein Mate management (stack-presented from Profil tab)
 function AppStack({ initialRoute }: { initialRoute: string }) {
   return (
     <Stack
@@ -41,11 +53,9 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
         contentStyle: { backgroundColor: colors.bg },
       }}
     >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="mate" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ title: 'Profil' }} />
-      <Stack.Screen name="calendar" options={{ title: 'Kalender' }} />
       <Stack.Screen name="periods" options={{ title: 'Zyklus-Historie' }} />
       <Stack.Screen name="period-form" options={{ title: 'Periode eintragen' }} />
       <Stack.Screen name="mood-log" options={{ title: 'Stimmung eintragen' }} />
@@ -69,13 +79,13 @@ function OnboardingGate() {
     resolveOnboardingNeeded()
       .then(async (needed) => {
         if (needed) return 'onboarding';
-        return (await resolveShell()) === 'mate' ? 'mate' : 'index';
+        return (await resolveShell()) === 'mate' ? 'mate' : '(tabs)';
       })
       .then((route) => {
         if (active) setInitialRoute(route);
       })
       .catch(() => {
-        if (active) setInitialRoute('index');
+        if (active) setInitialRoute('(tabs)');
       });
     return () => {
       active = false;

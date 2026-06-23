@@ -5,6 +5,11 @@
 // and shows a backfill prompt; `low` adds a visible low-confidence caveat;
 // `medium`/`high` render normally. Prediction is consumed via useFlowerPrediction
 // (lib/prediction behind lib/data) and never reimplemented here.
+//
+// The vertical nav-row list was removed in favour of the bottom-tab bar
+// (Heute / Kalender / Profil). Secondary destinations (Zyklus-Historie,
+// Stimmung eintragen, Mate einladen, Mein Mate) are reached from the Profil
+// tab or via CTA buttons on this screen.
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -48,14 +53,12 @@ export function FlowerHomeScreen() {
           <Text style={styles.ctaText}>Periode eintragen</Text>
         </Pressable>
 
-        <View style={styles.navGroup}>
-          <NavRow label="Kalender" onPress={() => router.push('/calendar')} />
-          <NavRow label="Zyklus-Historie" onPress={() => router.push('/periods')} />
-          <NavRow label="Stimmung eintragen" onPress={() => router.push('/mood-log')} />
-          <NavRow label="Mate einladen" onPress={() => router.push('/invite')} />
-          <NavRow label="Mein Mate" onPress={() => router.push('/pairing')} />
-          <NavRow label="Profil" onPress={() => router.push('/profile')} />
-        </View>
+        <Pressable
+          style={({ pressed }) => [styles.secondaryCta, pressed && styles.secondaryCtaPressed]}
+          onPress={() => router.push('/mood-log')}
+        >
+          <Text style={styles.secondaryCtaText}>Stimmung eintragen</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -161,18 +164,6 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function NavRow({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-      onPress={onPress}
-    >
-      <Text style={styles.rowText}>{label}</Text>
-      <Text style={styles.chevron}>{'>'}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: spacing.screen, paddingBottom: 32, gap: 18 },
@@ -222,18 +213,14 @@ const styles = StyleSheet.create({
   },
   ctaPressed: { backgroundColor: colors.primaryPress },
   ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
-  navGroup: { gap: 12 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  secondaryCta: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
     borderRadius: radii.md,
-    padding: 18,
+    padding: 17,
+    alignItems: 'center',
   },
-  rowPressed: { opacity: 0.7 },
-  rowText: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  chevron: { color: colors.textSubtle, fontSize: 16 },
+  secondaryCtaPressed: { opacity: 0.7 },
+  secondaryCtaText: { color: colors.primary, fontSize: 16, fontWeight: '600' },
 });
