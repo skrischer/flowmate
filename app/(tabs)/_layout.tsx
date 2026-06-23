@@ -31,7 +31,7 @@ export default function TabsLayout() {
           title: 'Heute',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="today" color={String(color)} size={size} />
+            <Icon name="today" color={color} size={size} />
           ),
         }}
       />
@@ -39,8 +39,9 @@ export default function TabsLayout() {
         name="calendar"
         options={{
           title: 'Kalender',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="calendar" color={String(color)} size={size} />
+            <Icon name="calendar" color={color} size={size} />
           ),
         }}
       />
@@ -48,8 +49,9 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profil',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="person" color={String(color)} size={size} />
+            <Icon name="person" color={color} size={size} />
           ),
         }}
       />

@@ -16,6 +16,7 @@
 //   Navigation arrows:  chevron, back
 //   Profile rows:       appearance, pairing
 import { Ionicons } from '@expo/vector-icons';
+import type { ColorValue } from 'react-native';
 
 import { colors } from '../lib/theme';
 
@@ -83,7 +84,9 @@ export const ICON_SIZE_DEFAULT = 20;
 export interface IconProps {
   name: IconName;
   size?: number;
-  color?: string;
+  // ColorValue accepts string hex tokens and opaque platform colors (e.g. system
+  // dynamic colors on iOS) — required so tabBarIcon callbacks can pass color directly.
+  color?: ColorValue;
 }
 
 /** Token-driven icon atom. Wraps Ionicons with semantic names and theme defaults. */
