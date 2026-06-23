@@ -26,7 +26,7 @@ export type CycleLengthStats = {
   count: number;
   /** Median cycle length in whole days — the value used for prediction. */
   median: number;
-  /** Arithmetic mean cycle length in whole days (not rounded). */
+  /** Arithmetic mean cycle length in days (not rounded; may be fractional). */
   mean: number;
   /** Shortest cycle length in the sample, in whole days. */
   min: number;
@@ -76,7 +76,9 @@ export function cycleLengthStats(periods: readonly PeriodStart[]): CycleLengthSt
   const sum = sample.reduce((total, length) => total + length, 0);
   return {
     count: sample.length,
-    median: median(sample),
+    // Whole days (the field's contract): an even sample can yield a .5 raw
+    // median, which would make addDays() produce a malformed (fractional) date.
+    median: Math.round(median(sample)),
     mean: sum / sample.length,
     min: Math.min(...sample),
     max: Math.max(...sample),
