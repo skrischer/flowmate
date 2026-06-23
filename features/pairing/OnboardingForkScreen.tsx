@@ -12,9 +12,12 @@ import { useRouter } from 'expo-router';
 
 import { setOnboardingComplete } from '../../lib/data';
 import { colors, radii, spacing } from '../../lib/theme';
+import { BrandMark } from '../../components/BrandMark';
+import { Icon, type IconName } from '../../components/Icon';
 
 type Choice = {
   key: 'track' | 'follow';
+  icon: IconName;
   title: string;
   body: string;
 };
@@ -22,11 +25,13 @@ type Choice = {
 const CHOICES: readonly Choice[] = [
   {
     key: 'track',
+    icon: 'calendar',
     title: 'Eigenen Zyklus tracken',
     body: 'Du loggst deinen Zyklus und behaeltst die volle Hoheit ueber deine Daten.',
   },
   {
     key: 'follow',
+    icon: 'pairing',
     title: 'Partner:in folgen',
     body: 'Du gibst einen Einladungs-Code ein und bleibst eingestimmt.',
   },
@@ -50,9 +55,7 @@ export function OnboardingForkScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <View style={styles.logo}>
-          <View style={styles.logoMark} />
-        </View>
+        <BrandMark size={88} />
         <Text style={styles.wordmark}>Flowmate</Text>
         <Text style={styles.heading}>Wie nutzt du die App?</Text>
       </View>
@@ -64,12 +67,14 @@ export function OnboardingForkScreen() {
             onPress={() => choose(choice.key)}
             disabled={isBusy}
           >
-            <View style={styles.cardIcon} />
+            <View style={styles.cardIcon}>
+              <Icon name={choice.icon} size={26} color={colors.primary} />
+            </View>
             <View style={styles.cardText}>
               <Text style={styles.cardTitle}>{choice.title}</Text>
               <Text style={styles.cardBody}>{choice.body}</Text>
             </View>
-            <Text style={styles.chevron}>{'>'}</Text>
+            <Icon name="chevron" size={20} color={colors.textSubtle} />
           </Pressable>
         ))}
       </View>
@@ -86,22 +91,6 @@ const styles = StyleSheet.create({
     gap: 40,
   },
   header: { alignItems: 'center', gap: 16 },
-  logo: {
-    width: 88,
-    height: 88,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surfaceRaised,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoMark: {
-    width: 34,
-    height: 18,
-    borderColor: colors.primary,
-    borderTopWidth: 2.5,
-    borderBottomWidth: 2.5,
-    borderRadius: radii.pill,
-  },
   wordmark: {
     color: colors.text,
     fontSize: 40,
@@ -132,9 +121,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     backgroundColor: colors.surfaceRaised,
     flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardText: { flex: 1, gap: 6 },
   cardTitle: { color: colors.text, fontSize: 18, fontWeight: '600' },
   cardBody: { color: colors.textMuted, fontSize: 15, lineHeight: 21 },
-  chevron: { color: colors.textSubtle, fontSize: 20, flexShrink: 0 },
 });
