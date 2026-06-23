@@ -38,8 +38,11 @@ describe('toMateAttunement', () => {
   });
 
   it('treats a due-or-past next-period date as "etwa jetzt"', () => {
-    const view = toMateAttunement(state('menstrual', '2026-03-01'), '2026-03-01');
-    expect(view.headsUp).toBe('Periode etwa jetzt erwartet');
+    const due = toMateAttunement(state('menstrual', '2026-03-01'), '2026-03-01');
+    expect(due.headsUp).toBe('Periode etwa jetzt erwartet');
+
+    const past = toMateAttunement(state('menstrual', '2026-02-28'), '2026-03-01');
+    expect(past.headsUp).toBe('Periode etwa jetzt erwartet');
   });
 
   it('degrades an unknown or null phase to no label and no hint', () => {

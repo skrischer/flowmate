@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
   },
-  badgeConnected: { backgroundColor: `${colors.success}26` },
+  badgeConnected: { backgroundColor: colors.successTint },
   badgeEnded: { backgroundColor: colors.surfaceRaised },
   badgeText: { ...typography.caption },
   badgeTextConnected: { color: colors.success },

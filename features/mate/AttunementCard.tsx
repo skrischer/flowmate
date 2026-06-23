@@ -6,11 +6,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../../components/Icon';
 import { PhaseChip } from '../../components/PhaseChip';
 import { PredictionDisclaimer } from '../../components/PredictionDisclaimer';
+import type { Phase } from '../../lib/prediction';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 import type { MateAttunement } from './attunement-view';
 
 // Warm headline per phase -- "informed, not instructed" (design.md).
-const WARM_HEADLINES: Record<string, string> = {
+const WARM_HEADLINES: Record<Phase, string> = {
   menstrual: 'Gerade braucht sie Ruhe und Naehe.',
   follicular: 'Sie sammelt neue Energie.',
   ovulation: 'Sie ist besonders lebendig gerade.',
