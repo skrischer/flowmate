@@ -138,6 +138,21 @@ describe('buildPrediction', () => {
     expect(result?.fertileWindow).not.toBeNull();
   });
 
+  it('builds a valid prediction when the median cycle length is fractional', () => {
+    // Regression: three starts => lengths [27, 28] => raw median 27.5, which once
+    // made the next-period date "2026-06-29.5" and threw RangeError downstream.
+    const threeStarts = periods('2026-04-08', '2026-05-05', '2026-06-02');
+    expect(() => buildPrediction(threeStarts, '2026-06-22')).not.toThrow();
+    const result = buildPrediction(threeStarts, '2026-06-22');
+    expect(result).toEqual({
+      currentPhase: 'luteal',
+      nextPeriodDate: '2026-06-30',
+      ovulationDate: '2026-06-16',
+      fertileWindow: { start: '2026-06-11', end: '2026-06-17' },
+      confidence: 'medium',
+    });
+  });
+
   it('rejects an invalid reference date', () => {
     expect(() => buildPrediction(regular, '2026-13-40')).toThrow(RangeError);
   });

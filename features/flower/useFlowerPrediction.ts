@@ -3,7 +3,8 @@
 // once at the wiring boundary, and runs the pure engine — components consume the
 // result, never the data layer or the engine directly.
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 
 import { loadFlowerPrediction, type FlowerPrediction } from './prediction';
 import { todayIso } from './today';
@@ -19,9 +20,11 @@ export type FlowerPredictionState = {
 };
 
 /**
- * Loads the Flower prediction view-model on mount. `today` is read once here and
- * passed into the pure pipeline; pass an explicit value to pin the reference day
- * (e.g. in a screenshot or test). The clock is not re-read after mount — a date
+ * Loads the Flower prediction view-model whenever the screen gains focus, so a
+ * period logged on another screen is reflected on return (the home and calendar
+ * stay mounted under the stack, so a mount-only load would go stale). `today` is
+ * read at the wiring boundary; pass an explicit value to pin the reference day
+ * (e.g. in a screenshot or test). The clock is not re-read mid-focus — a date
  * rollover while the screen is open is out of scope for v1.
  */
 export function useFlowerPrediction(today: string = todayIso()): FlowerPredictionState {
@@ -29,25 +32,28 @@ export function useFlowerPrediction(today: string = todayIso()): FlowerPredictio
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      setError(null);
 
-    loadFlowerPrediction(today)
-      .then((result) => {
-        if (!active) return;
-        setData(result);
-        setIsLoading(false);
-      })
-      .catch((cause: unknown) => {
-        if (!active) return;
-        setError(cause instanceof Error ? cause : new Error(String(cause)));
-        setIsLoading(false);
-      });
+      loadFlowerPrediction(today)
+        .then((result) => {
+          if (!active) return;
+          setData(result);
+          setIsLoading(false);
+        })
+        .catch((cause: unknown) => {
+          if (!active) return;
+          setError(cause instanceof Error ? cause : new Error(String(cause)));
+          setIsLoading(false);
+        });
 
-    return () => {
-      active = false;
-    };
-  }, [today]);
+      return () => {
+        active = false;
+      };
+    }, [today]),
+  );
 
   return { data, isLoading, error };
 }

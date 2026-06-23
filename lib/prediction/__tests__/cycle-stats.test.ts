@@ -62,6 +62,12 @@ describe('cycleLengthStats', () => {
     expect(stats).toEqual({ count: 2, median: 29, mean: 29, min: 28, max: 30 });
   });
 
+  it('rounds an even sample with a .5 raw median to whole days', () => {
+    const stats = cycleLengthStats(periods('2026-04-08', '2026-05-05', '2026-06-02'));
+    // lengths [27, 28] => raw median 27.5 => rounded to 28 whole days (mean stays exact)
+    expect(stats).toEqual({ count: 2, median: 28, mean: 27.5, min: 27, max: 28 });
+  });
+
   it('uses the median to resist a one-off irregular outlier', () => {
     // lengths [28, 28, 60, 28] => median 28 despite the 60-day outlier
     const stats = cycleLengthStats(periods('2026-01-01', '2026-01-29', '2026-02-26', '2026-04-27', '2026-05-25'));
@@ -80,6 +86,13 @@ describe('predictNextPeriodDate', () => {
   it('anchors on the most recent start regardless of input order', () => {
     const result = predictNextPeriodDate(periods('2026-02-26', '2026-01-01', '2026-01-29'), '2026-03-01');
     expect(result?.nextPeriodDate).toBe('2026-03-26');
+  });
+
+  it('yields a valid whole-day date when the median is fractional', () => {
+    // Regression: lengths [27, 28] => raw median 27.5 once made addDays emit a
+    // malformed "2026-06-29.5" that failed ISO validation downstream.
+    const result = predictNextPeriodDate(periods('2026-04-08', '2026-05-05', '2026-06-02'), '2026-06-22');
+    expect(result?.nextPeriodDate).toBe('2026-06-30');
   });
 
   it('returns null when history is insufficient', () => {
