@@ -65,7 +65,7 @@ export function AcceptInviteScreen() {
         <TrustRow caption="Dein Flower kann die Verbindung jederzeit beenden." />
         <Pressable
           style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-          onPress={() => router.replace('/')}
+          onPress={() => router.replace('/mate')}
         >
           <Text style={styles.ctaText}>Fertig</Text>
         </Pressable>
