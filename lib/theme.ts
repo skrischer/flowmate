@@ -42,62 +42,57 @@ export const fonts = {
 } as const;
 
 // Type-scale tokens per docs/design.md. fontFamily values reference the names
-// above; all sizes in px, lineHeight in px, letterSpacing in em.
+// above; fontSize and lineHeight in dp; letterSpacing in dp (em × fontSize).
+// fontWeight is intentionally omitted — each loaded font file encodes its own
+// weight; specifying fontWeight on native selects a different file and is ignored.
 export const typography = {
   display: {
     fontFamily: fonts.display,
     fontSize: 40,
     lineHeight: 44,
     letterSpacing: -0.025 * 40,
-    fontWeight: '600' as const,
   },
   h1: {
     fontFamily: fonts.display,
     fontSize: 32,
     lineHeight: 36,
     letterSpacing: -0.02 * 32,
-    fontWeight: '600' as const,
   },
   h2: {
     fontFamily: fonts.display,
     fontSize: 22,
     lineHeight: 28,
     letterSpacing: -0.02 * 22,
-    fontWeight: '600' as const,
   },
   title: {
     fontFamily: fonts.display,
     fontSize: 16,
     lineHeight: 22,
     letterSpacing: -0.02 * 16,
-    fontWeight: '600' as const,
   },
   body: {
     fontFamily: fonts.body,
     fontSize: 16,
     lineHeight: 24,
     letterSpacing: 0,
-    fontWeight: '400' as const,
   },
   bodySm: {
     fontFamily: fonts.body,
     fontSize: 14,
     lineHeight: 20,
     letterSpacing: 0,
-    fontWeight: '400' as const,
   },
   label: {
     fontFamily: fonts.bodySemiBold,
     fontSize: 13,
     lineHeight: 18,
     letterSpacing: 0.01 * 13,
-    fontWeight: '600' as const,
   },
   caption: {
     fontFamily: fonts.bodyMedium,
     fontSize: 11,
     lineHeight: 15,
+    // 0.04em at the low end of the 0.04–0.16em spec range (design.md)
     letterSpacing: 0.04 * 11,
-    fontWeight: '500' as const,
   },
 } as const;

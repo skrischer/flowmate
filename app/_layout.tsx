@@ -106,14 +106,15 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     DMSans_600SemiBold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
   });
 
-  if (!fontsLoaded) {
+  // On font-load error fall through with system fonts rather than blocking forever.
+  if (!fontsLoaded && !fontError) {
     return <Spinner />;
   }
 
