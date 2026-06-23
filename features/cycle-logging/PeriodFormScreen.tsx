@@ -23,6 +23,7 @@ import {
   createPeriod,
   deletePeriod,
   listPeriods,
+  refreshSharedState,
   updatePeriod,
 } from '../../lib/data';
 import { Icon } from '../../components/Icon';
@@ -85,6 +86,12 @@ export function PeriodFormScreen() {
     return null;
   };
 
+  // Republish the owner's phase snapshot so the paired Mate stays attuned. The
+  // period is already saved, so a publish failure is swallowed -- it must not
+  // surface as a save error (next app open / log re-derives the snapshot).
+  const publishSharedState = () =>
+    refreshSharedState(todayIso()).catch(() => undefined);
+
   const submit = async () => {
     const message = validate();
     if (message) {
@@ -100,6 +107,7 @@ export function PeriodFormScreen() {
       } else {
         await createPeriod({ start_date: startDate, end_date: end });
       }
+      await publishSharedState();
       router.back();
     } catch (cause: unknown) {
       setError(cause instanceof Error ? cause.message : 'Speichern fehlgeschlagen.');
@@ -113,6 +121,7 @@ export function PeriodFormScreen() {
     setIsBusy(true);
     try {
       await deletePeriod(id);
+      await publishSharedState();
       router.back();
     } catch (cause: unknown) {
       setError(cause instanceof Error ? cause.message : 'Loeschen fehlgeschlagen.');
