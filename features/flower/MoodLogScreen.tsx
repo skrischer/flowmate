@@ -33,6 +33,8 @@ export function MoodLogScreen() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Prefill today's stored mood so re-logging shows the current value.
+  // todayIso() is called inside the callback so the load always targets the
+  // current calendar day, even if focus fires after midnight.
   useFocusEffect(
     useCallback(() => {
       let active = true;
