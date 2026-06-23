@@ -7,26 +7,34 @@
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 
 import { getDailyLog, upsertDailyLog, type Mood } from '../../lib/data';
-import { colors, radii, spacing } from '../../lib/theme';
-import { formatIso, isValidIso } from '../cycle-logging/date';
+import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
+import { Icon } from '../../components/Icon';
+import { isValidIso } from '../cycle-logging/date';
 import { todayIso } from './today';
 import { MOOD_OPTIONS, parseMood } from './mood';
 
+// Per-mood dot colors derived from the Heather Dark palette (design.md / Paper
+// artboard "Flower · Mood-Logging"). Keeps color decisions out of render logic.
+const MOOD_DOT_COLORS: Record<Mood, string> = {
+  content: colors.success,       // sage — positive
+  calm: colors.success,          // sage — positive
+  sensitive: colors.secondary,   // caramel — warm/neutral
+  irritable: colors.danger,      // soft rose — tense
+  low: '#8E8AA8',                 // muted lavender-grey
+  anxious: '#A88FB8',             // soft violet
+};
+
 export function MoodLogScreen() {
   const router = useRouter();
-  const [date, setDate] = useState(todayIso());
+  const [date] = useState(todayIso());
   const [mood, setMood] = useState<Mood | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -54,25 +62,7 @@ export function MoodLogScreen() {
     }, []),
   );
 
-  // Reload the stored mood whenever the user edits the date to a valid day, so
-  // backfilling a past date reflects what is already saved for it.
-  const onDateChange = (next: string) => {
-    setDate(next);
-    setError(null);
-    if (!isValidIso(next)) {
-      setMood(null);
-      return;
-    }
-    loadMoodForDate(next)
-      .then(setMood)
-      .catch((cause: unknown) => setError(messageOf(cause, 'Laden fehlgeschlagen.')));
-  };
-
   const submit = async () => {
-    if (!isValidIso(date)) {
-      setError('Bitte ein gueltiges Datum eingeben (JJJJ-MM-TT).');
-      return;
-    }
     if (!mood) {
       setError('Bitte eine Stimmung auswaehlen.');
       return;
@@ -96,62 +86,74 @@ export function MoodLogScreen() {
     );
   }
 
+  // Pair up mood options into rows of two for the 2-column grid.
+  const rows = pairOptions(MOOD_OPTIONS);
+
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Tag</Text>
-          <TextInput
-            style={styles.input}
-            value={date}
-            onChangeText={onDateChange}
-            placeholder="JJJJ-MM-TT"
-            placeholderTextColor={colors.textSubtle}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="numbers-and-punctuation"
-            editable={!isBusy}
-          />
-          <Text style={styles.hint}>
-            {isValidIso(date)
-              ? `Stimmung fuer ${formatIso(date)}. Auch vergangene Tage moeglich.`
-              : 'Auch vergangene Tage moeglich (nachtragen).'}
-          </Text>
+    <View style={styles.flex}>
+      {/* Sheet header: close-X left, title centre, spacer right (#95) */}
+      <View style={styles.header}>
+        <Pressable
+          style={({ pressed }) => [styles.closeBtn, pressed && styles.closeBtnPressed]}
+          onPress={() => router.back()}
+          hitSlop={8}
+        >
+          <Icon name="close" size={16} color={colors.label} />
+        </Pressable>
+        <Text style={styles.title}>Stimmung</Text>
+        {/* Spacer mirrors the close button to keep the title centred */}
+        <View style={styles.headerSpacer} />
+      </View>
+
+      {/* Scrollable body */}
+      <View style={styles.body}>
+        {/* Date chip — read-only display of the day being logged (#96) */}
+        <View style={styles.dateChip}>
+          <Icon name="calendar" size={15} color={colors.primary} />
+          <Text style={styles.dateChipText}>{formatDateChip(date)}</Text>
         </View>
 
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Stimmung</Text>
-          <View style={styles.chips}>
-            {MOOD_OPTIONS.map((option) => {
-              const selected = option.value === mood;
-              return (
-                <Pressable
-                  key={option.value}
-                  style={({ pressed }) => [
-                    styles.chip,
-                    selected && styles.chipSelected,
-                    pressed && styles.chipPressed,
-                  ]}
-                  onPress={() => setMood(option.value)}
-                  disabled={isBusy}
-                >
-                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+        {/* Section heading */}
+        <Text style={styles.heading}>Wie fühlst du dich?</Text>
+
+        {/* 2-column mood grid with colored dots + filled selected state (#97) */}
+        <View style={styles.grid}>
+          {rows.map((row, rowIndex) => (
+            <View key={rowIndex} style={styles.gridRow}>
+              {row.map((option) => {
+                const selected = option.value === mood;
+                return (
+                  <Pressable
+                    key={option.value}
+                    style={({ pressed }) => [
+                      styles.gridCell,
+                      selected && styles.gridCellSelected,
+                      pressed && styles.gridCellPressed,
+                    ]}
+                    onPress={() => setMood(option.value)}
+                    disabled={isBusy}
+                  >
+                    <View
+                      style={[
+                        styles.dot,
+                        { backgroundColor: selected ? colors.onPrimary : MOOD_DOT_COLORS[option.value] },
+                      ]}
+                    />
+                    <Text style={[styles.cellText, selected && styles.cellTextSelected]}>
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+      </View>
 
+      {/* Pinned CTA at the bottom (#95) */}
+      <View style={styles.ctaContainer}>
         <Pressable
           style={({ pressed }) => [
             styles.cta,
@@ -167,8 +169,8 @@ export function MoodLogScreen() {
             <Text style={styles.ctaText}>Speichern</Text>
           )}
         </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </View>
   );
 }
 
@@ -182,6 +184,38 @@ function messageOf(cause: unknown, fallback: string): string {
   return cause instanceof Error ? cause.message : fallback;
 }
 
+/** Splits a flat options array into rows of two for the 2-column grid. */
+function pairOptions<T>(options: readonly T[]): T[][] {
+  const rows: T[][] = [];
+  for (let i = 0; i < options.length; i += 2) {
+    rows.push(options.slice(i, i + 2));
+  }
+  return rows;
+}
+
+/**
+ * Formats an ISO date as a German date chip label, e.g. "Heute, 19. Juni".
+ * Falls back to the raw string when the date is not valid.
+ */
+function formatDateChip(isoDate: string): string {
+  if (!isValidIso(isoDate)) return isoDate;
+  const today = todayIso();
+  const parts = isoDate.split('-');
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  const DE_MONTHS = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+  ];
+  const monthName = DE_MONTHS[month - 1] ?? '';
+  const dayLabel = isoDate === today ? 'Heute' : `${day}. ${monthName} ${year}`;
+  return isoDate === today ? `Heute, ${day}. ${monthName}` : dayLabel;
+}
+
+const CHIP_BG = '#241F2E';
+const CHIP_BORDER = '#322B3D';
+
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
   center: {
@@ -190,44 +224,126 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.bg,
   },
-  content: { padding: spacing.screen, gap: 20 },
-  fieldGroup: { gap: 8 },
-  label: { color: colors.label, fontSize: 13, fontWeight: '600' },
-  input: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
+
+  // Header (#95)
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.screen,
+    paddingTop: 8,
+    paddingBottom: 19,
+  },
+  closeBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: radii.sm + 2, // 12px as per design
+    backgroundColor: CHIP_BG,
     borderWidth: 1,
-    borderRadius: radii.md,
-    padding: 16,
+    borderColor: CHIP_BORDER,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeBtnPressed: { opacity: 0.7 },
+  title: {
+    ...typography.title,
+    fontSize: 18,
+    lineHeight: 22,
     color: colors.text,
-    fontSize: 15,
   },
-  hint: { color: colors.textSubtle, fontSize: 12 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  chip: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
+  headerSpacer: { width: 38, height: 38 },
+
+  // Scrollable body
+  body: {
+    flex: 1,
+    paddingHorizontal: spacing.screen,
+    gap: 18,
+  },
+
+  // Date chip (#96)
+  dateChip: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: CHIP_BG,
     borderWidth: 1,
+    borderColor: CHIP_BORDER,
     borderRadius: radii.pill,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
   },
-  chipSelected: {
-    backgroundColor: colors.surfaceRaised,
-    borderColor: colors.primary,
+  dateChipText: {
+    ...typography.label,
+    color: colors.label,
   },
-  chipPressed: { opacity: 0.7 },
-  chipText: { color: colors.label, fontSize: 14, fontWeight: '600' },
-  chipTextSelected: { color: colors.text },
+
+  // Heading
+  heading: {
+    fontFamily: fonts.display,
+    fontSize: 24,
+    lineHeight: 30,
+    letterSpacing: -0.02 * 24,
+    color: colors.text,
+  },
+
+  // Mood grid (#97)
+  grid: {
+    gap: 12,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  gridCell: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    borderRadius: 16,
+    padding: 17,
+  },
+  gridCellSelected: {
+    backgroundColor: colors.primary,
+    borderWidth: 0,
+  },
+  gridCellPressed: { opacity: 0.7 },
+  dot: {
+    width: 11,
+    height: 11,
+    borderRadius: radii.pill,
+    flexShrink: 0,
+  },
+  cellText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 15,
+    lineHeight: 18,
+    color: '#D7D1DC',
+    flexShrink: 1,
+  },
+  cellTextSelected: {
+    fontFamily: fonts.bodySemiBold,
+    color: colors.onPrimary,
+  },
+
   error: { color: colors.danger, fontSize: 14 },
+
+  // Pinned CTA (#95)
+  ctaContainer: {
+    paddingHorizontal: spacing.screen,
+    paddingBottom: 30,
+    paddingTop: 16,
+  },
   cta: {
     backgroundColor: colors.primary,
     borderRadius: 15,
     padding: 17,
     alignItems: 'center',
-    marginTop: 4,
   },
   ctaPressed: { backgroundColor: colors.primaryPress },
   ctaDisabled: { opacity: 0.6 },
-  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontFamily: fonts.bodySemiBold },
 });
