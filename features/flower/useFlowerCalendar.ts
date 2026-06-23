@@ -1,10 +1,11 @@
 // React hook feeding the Flower month calendar (#26). The calendar needs both the
 // logged periods (to mark logged days) and the prediction view-model (predicted
 // start day + fertile window), built against a single `today`. It loads periods
-// once through lib/data and runs the same pure mapping the home uses — prediction
-// is never reimplemented here.
+// on focus through lib/data and runs the same pure mapping the home uses —
+// prediction is never reimplemented here.
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 
 import { listPeriods, type Period } from '../../lib/data';
 import { toFlowerPrediction, type FlowerPrediction } from './prediction';
@@ -23,8 +24,10 @@ export type FlowerCalendarState = {
 };
 
 /**
- * Loads the owner's periods and builds the prediction view-model on mount.
- * `today` is read once here at the wiring boundary and passed into the pure
+ * Loads the owner's periods and builds the prediction view-model whenever the
+ * screen gains focus, so a period logged on another screen is reflected on
+ * return (the calendar stays mounted under the stack, so a mount-only load would
+ * go stale). `today` is read at the wiring boundary and passed into the pure
  * pipeline; pass an explicit value to pin the reference day in tests.
  */
 export function useFlowerCalendar(today: string = todayIso()): FlowerCalendarState {
@@ -33,26 +36,29 @@ export function useFlowerCalendar(today: string = todayIso()): FlowerCalendarSta
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      setError(null);
 
-    listPeriods()
-      .then((loaded) => {
-        if (!active) return;
-        setPeriods(loaded);
-        setPrediction(toFlowerPrediction(loaded, today));
-        setIsLoading(false);
-      })
-      .catch((cause: unknown) => {
-        if (!active) return;
-        setError(cause instanceof Error ? cause : new Error(String(cause)));
-        setIsLoading(false);
-      });
+      listPeriods()
+        .then((loaded) => {
+          if (!active) return;
+          setPeriods(loaded);
+          setPrediction(toFlowerPrediction(loaded, today));
+          setIsLoading(false);
+        })
+        .catch((cause: unknown) => {
+          if (!active) return;
+          setError(cause instanceof Error ? cause : new Error(String(cause)));
+          setIsLoading(false);
+        });
 
-    return () => {
-      active = false;
-    };
-  }, [today]);
+      return () => {
+        active = false;
+      };
+    }, [today]),
+  );
 
   return { periods, prediction, isLoading, error };
 }
