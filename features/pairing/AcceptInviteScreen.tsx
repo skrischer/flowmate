@@ -40,6 +40,7 @@ export function AcceptInviteScreen() {
     setIsBusy(true);
     try {
       await acceptInvite(token);
+      setIsBusy(false);
       setIsPaired(true);
     } catch (cause: unknown) {
       setError(
@@ -61,9 +62,10 @@ export function AcceptInviteScreen() {
         <Text style={styles.successBody}>
           Du folgst jetzt dem Zyklus deines Flowers und bleibst eingestimmt.
         </Text>
+        <TrustRow caption="Dein Flower kann die Verbindung jederzeit beenden." />
         <Pressable
           style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-          onPress={() => router.back()}
+          onPress={() => router.replace('/')}
         >
           <Text style={styles.ctaText}>Fertig</Text>
         </Pressable>
