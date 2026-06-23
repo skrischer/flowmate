@@ -3,6 +3,15 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
+import {
+  DMSans_600SemiBold,
+} from '@expo-google-fonts/dm-sans';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+} from '@expo-google-fonts/inter';
 
 import { AuthProvider, useAuth } from '../features/auth/AuthProvider';
 import { SignInScreen } from '../features/auth/SignInScreen';
@@ -97,6 +106,17 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    DMSans_600SemiBold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+  });
+
+  if (!fontsLoaded) {
+    return <Spinner />;
+  }
+
   return (
     <SafeAreaProvider>
       <AuthProvider>
