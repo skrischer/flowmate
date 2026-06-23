@@ -261,10 +261,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
-  disclaimerMarkText: { color: colors.textSubtle, fontSize: 9 },
-  disclaimerText: { color: colors.textSubtle, fontSize: 12 },
+  disclaimerMarkText: { color: colors.textSubtle, fontFamily: typography.caption.fontFamily, fontSize: 9 },
+  disclaimerText: { color: colors.textSubtle, fontFamily: typography.bodySm.fontFamily, fontSize: 12 },
   ctaBlock: { alignItems: 'center', gap: 14, paddingTop: 4 },
-  tapHint: { color: colors.textSubtle, fontSize: 13, textAlign: 'center' },
+  tapHint: { color: colors.textSubtle, fontFamily: typography.bodySm.fontFamily, fontSize: 13, textAlign: 'center' },
   ctaButton: {
     flexDirection: 'row',
     alignItems: 'center',
