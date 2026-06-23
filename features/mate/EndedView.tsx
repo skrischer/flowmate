@@ -1,8 +1,10 @@
 // Ended / disconnected state for the Mate attunement view (issue #110).
 // Shown when the pairing is revoked or there is no active edge.
-// Centered hero layout: icon + headline + body + data-sovereignty note.
+// Centered hero layout: icon + headline + body + "Code eingeben" CTA back to
+// Mate · Code eingeben (issue #134) + data-sovereignty note.
 // No prediction disclaimer here (no prediction data shown).
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { Icon } from '../../components/Icon';
 import { colors, radii, spacing, typography } from '../../lib/theme';
@@ -12,6 +14,7 @@ interface EndedViewProps {
 }
 
 export function EndedView({ flowerName }: EndedViewProps) {
+  const router = useRouter();
   const bodyText =
     flowerName !== null
       ? `${flowerName} teilt aktuell keine Einstimmung mehr mit dir. Du erhaeltst keine Hinweise, bis sie dich erneut einlaedt.`
@@ -26,6 +29,12 @@ export function EndedView({ flowerName }: EndedViewProps) {
       </View>
       <Text style={styles.headline}>Verbindung beendet</Text>
       <Text style={styles.body}>{bodyText}</Text>
+      <Pressable
+        style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+        onPress={() => router.push('/accept-invite')}
+      >
+        <Text style={styles.ctaText}>Code eingeben</Text>
+      </Pressable>
       {sovereigntyNote !== null ? (
         <View style={styles.noteCard}>
           <Text style={styles.noteText}>{sovereigntyNote}</Text>
@@ -64,6 +73,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
+  cta: {
+    alignSelf: 'stretch',
+    backgroundColor: colors.primary,
+    borderRadius: radii.md,
+    paddingVertical: 17,
+    alignItems: 'center',
+  },
+  ctaPressed: { backgroundColor: colors.primaryPress },
+  ctaText: { ...typography.title, color: colors.onPrimary },
   noteCard: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,

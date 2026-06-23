@@ -14,6 +14,12 @@ import { toMateAttunement, type MateAttunement } from './attunement-view';
 export type MateAttunementState = {
   /** The phase-level model once loaded, or `null` while loading or after an error. */
   data: MateAttunement | null;
+  /**
+   * True when the follower is on an active pairing edge (connected), even if the
+   * owner has not published a snapshot yet. False means disconnected/ended.
+   * Distinguishes connected-but-waiting from ended; only meaningful once loaded.
+   */
+  connected: boolean;
   /** True until the first load settles. */
   isLoading: boolean;
   /** The load error, or `null` when none occurred. */
@@ -31,6 +37,7 @@ export type MateAttunementState = {
  */
 export function useMateAttunement(today: string = todayIso()): MateAttunementState {
   const [data, setData] = useState<MateAttunement | null>(null);
+  const [connected, setConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -40,9 +47,10 @@ export function useMateAttunement(today: string = todayIso()): MateAttunementSta
       setError(null);
 
       getFollowedSharedState()
-        .then((state) => {
+        .then((result) => {
           if (!active) return;
-          setData(toMateAttunement(state, today));
+          setConnected(result.connected);
+          setData(result.connected ? toMateAttunement(result.state, today) : null);
           setIsLoading(false);
         })
         .catch((cause: unknown) => {
@@ -57,5 +65,5 @@ export function useMateAttunement(today: string = todayIso()): MateAttunementSta
     }, [today]),
   );
 
-  return { data, isLoading, error };
+  return { data, connected, isLoading, error };
 }
