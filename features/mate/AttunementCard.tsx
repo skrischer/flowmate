@@ -10,12 +10,14 @@ import type { Phase } from '../../lib/prediction';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 import type { MateAttunement } from './attunement-view';
 
-// Warm headline per phase -- "informed, not instructed" (design.md).
-const WARM_HEADLINES: Record<Phase, string> = {
-  menstrual: 'Gerade braucht sie Ruhe und Naehe.',
-  follicular: 'Sie sammelt neue Energie.',
-  ovulation: 'Sie ist besonders lebendig gerade.',
-  luteal: 'Sie ist in einer ruhigeren Phase.',
+// Warm headline builders per phase -- "informed, not instructed" (design.md).
+// Each is a function accepting the Flower's name so the substitution is
+// explicit and case-safe (no brittle pronoun search-replace).
+const WARM_HEADLINES: Record<Phase, (name: string) => string> = {
+  menstrual: (name) => `Gerade braucht ${name} Ruhe und Naehe.`,
+  follicular: (name) => `${name} sammelt neue Energie.`,
+  ovulation: (name) => `${name} ist besonders lebendig gerade.`,
+  luteal: (name) => `${name} ist in einer ruhigeren Phase.`,
 };
 
 interface AttunementCardProps {
@@ -25,10 +27,7 @@ interface AttunementCardProps {
 
 export function AttunementCard({ data, flowerName }: AttunementCardProps) {
   const name = flowerName ?? 'Sie';
-  const warmHeadline =
-    data.phase !== null
-      ? (WARM_HEADLINES[data.phase] ?? null)
-      : null;
+  const warmHeadline = data.phase !== null ? WARM_HEADLINES[data.phase](name) : null;
 
   return (
     <View style={styles.card}>
@@ -37,7 +36,7 @@ export function AttunementCard({ data, flowerName }: AttunementCardProps) {
       ) : null}
 
       {warmHeadline !== null ? (
-        <Text style={styles.warmHeadline}>{name !== 'Sie' ? warmHeadline.replace('Sie', name) : warmHeadline}</Text>
+        <Text style={styles.warmHeadline}>{warmHeadline}</Text>
       ) : null}
 
       {data.hint !== null ? (

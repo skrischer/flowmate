@@ -42,6 +42,9 @@ const styles = StyleSheet.create({
   sectionLabel: {
     ...typography.caption,
     color: colors.textSubtle,
+    // All-caps section labels use wider tracking than body captions.
+    // 0.08em × 11px = 0.88dp (twice the caption token's 0.04em base).
+    // design.md caption spec range: 0.04–0.16em; 0.08em is mid-range for labels.
     letterSpacing: 0.08 * 11,
   },
   trackCard: {

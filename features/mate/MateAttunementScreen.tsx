@@ -33,7 +33,9 @@ export function MateAttunementScreen() {
   }, []);
 
   const flowerName = partnerProfile?.displayName ?? null;
-  const isEnded = !isLoading && (error !== null || data === null || isAttunementEmpty(data));
+  // "Getrennt" means the pairing was revoked -- not a transient load error.
+  // Only show the ended badge when the load settled cleanly with no active edge.
+  const isEnded = !isLoading && error === null && (data === null || isAttunementEmpty(data));
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
