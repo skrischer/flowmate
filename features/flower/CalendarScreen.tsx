@@ -6,12 +6,22 @@
 // the pure engine behind it); the grid model is the pure features/flower/calendar
 // helper. This surface never reimplements prediction and makes no Supabase calls.
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { PredictionDisclaimer } from '../../components/PredictionDisclaimer';
-import { colors, radii, spacing } from '../../lib/theme';
+import { Icon } from '../../components/Icon';
+import { colors, radii, spacing, typography } from '../../lib/theme';
 import {
   WEEKDAY_LABELS,
   buildMonthGrid,
@@ -56,16 +66,34 @@ export function CalendarScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
+        {/* #87: title left, both nav arrows grouped on the right */}
         <View style={styles.monthNav}>
-          <NavButton label="<" onPress={() => setMonthStart(shiftMonth(visibleMonth, -1))} />
           <Text style={styles.monthTitle}>{monthTitle(grid)}</Text>
-          <NavButton label=">" onPress={() => setMonthStart(shiftMonth(visibleMonth, 1))} />
+          <View style={styles.navGroup}>
+            <NavButton direction="back" onPress={() => setMonthStart(shiftMonth(visibleMonth, -1))} />
+            <NavButton direction="forward" onPress={() => setMonthStart(shiftMonth(visibleMonth, 1))} />
+          </View>
         </View>
+
+        {/* #85: 4 dot-chip legend directly under the header, before the grid */}
+        <Legend />
 
         <MonthGridView grid={grid} onDayPress={() => router.push('/period-form')} />
 
-        <Legend />
-        <PredictionDisclaimer />
+        {/* #87: calendar-specific disclaimer (outlined = predicted) */}
+        <CalendarDisclaimer />
+
+        {/* #86: tap-a-day hint + primary CTA */}
+        <View style={styles.ctaBlock}>
+          <Text style={styles.tapHint}>Tippe einen Tag an, um eine Periode einzutragen.</Text>
+          <Pressable
+            style={({ pressed }) => [styles.ctaButton, pressed && styles.ctaButtonPressed]}
+            onPress={() => router.push('/period-form')}
+          >
+            <Icon name="plus" size={18} color={colors.primary} />
+            <Text style={styles.ctaLabel}>Periode eintragen</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -117,33 +145,49 @@ function DayView({ cell, onPress }: { cell: DayCell; onPress: () => void }) {
   );
 }
 
-function NavButton({ label, onPress }: { label: string; onPress: () => void }) {
+// #87: both arrows grouped right; direction prop drives which icon to render.
+function NavButton({ direction, onPress }: { direction: 'back' | 'forward'; onPress: () => void }) {
   return (
     <Pressable
       style={({ pressed }) => [styles.navButton, pressed && styles.navButtonPressed]}
       onPress={onPress}
     >
-      <Text style={styles.navButtonText}>{label}</Text>
+      <Icon name={direction === 'back' ? 'back' : 'chevron'} size={18} color={colors.label} />
     </Pressable>
   );
 }
 
-// Reads the day highlights so logged vs predicted vs fertile are distinguishable.
+// #85: 4 dot-chips — Periode (solid), prognostiziert (outline), fruchtbar (solid),
+// heute (primary outline). Circular dots, wrapping row, sits above the grid.
 function Legend() {
   return (
     <View style={styles.legend}>
-      <LegendItem swatchStyle={styles.swatchLogged} label="Periode (eingetragen)" />
-      <LegendItem swatchStyle={styles.swatchPredicted} label="Periode (Prognose)" />
-      <LegendItem swatchStyle={styles.swatchFertile} label="Fruchtbares Fenster" />
+      <LegendDot dotStyle={styles.dotLogged} label="Periode" />
+      <LegendDot dotStyle={styles.dotPredicted} label="prognostiziert" />
+      <LegendDot dotStyle={styles.dotFertile} label="fruchtbar" />
+      <LegendDot dotStyle={styles.dotToday} label="heute" />
     </View>
   );
 }
 
-function LegendItem({ swatchStyle, label }: { swatchStyle: object; label: string }) {
+function LegendDot({ dotStyle, label }: { dotStyle: StyleProp<ViewStyle>; label: string }) {
   return (
     <View style={styles.legendItem}>
-      <View style={[styles.swatch, swatchStyle]} />
+      <View style={[styles.dot, dotStyle]} />
       <Text style={styles.legendLabel}>{label}</Text>
+    </View>
+  );
+}
+
+// #87: calendar-specific disclaimer — explains that outlined days are predicted.
+// Replaces the generic PredictionDisclaimer on this surface.
+function CalendarDisclaimer() {
+  return (
+    <View style={styles.disclaimerRow}>
+      <View style={styles.disclaimerMark}>
+        <Text style={styles.disclaimerMarkText}>i</Text>
+      </View>
+      <Text style={styles.disclaimerText}>Umrandete Tage sind prognostiziert — keine Garantie.</Text>
     </View>
   );
 }
@@ -157,34 +201,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   errorText: { color: colors.danger, fontSize: 14 },
-  content: { padding: spacing.screen, gap: 20 },
-  monthNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  monthTitle: { color: colors.text, fontSize: 20, fontWeight: '600' },
+  content: { padding: spacing.screen, gap: 18 },
+  monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  // DM Sans SemiBold; fontSize 24 matches the artboard (h2 spec: 22–24).
+  monthTitle: { ...typography.h2, fontSize: 24, color: colors.text },
+  navGroup: { flexDirection: 'row', gap: 8 },
   navButton: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: radii.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.inputDisabled,
     borderColor: colors.hairline,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   navButtonPressed: { opacity: 0.7 },
-  navButtonText: { color: colors.text, fontSize: 18, fontWeight: '600' },
   gridBlock: { gap: 6 },
   weekdays: { flexDirection: 'row' },
-  weekday: {
-    flex: 1,
-    textAlign: 'center',
-    color: colors.textSubtle,
-    fontSize: 12,
-    fontWeight: '600',
-  },
+  weekday: { ...typography.caption, flex: 1, textAlign: 'center', color: colors.textSubtle },
   grid: { gap: 6 },
   week: { flexDirection: 'row', gap: 6 },
   cell: {
@@ -193,39 +228,69 @@ const styles = StyleSheet.create({
     borderRadius: radii.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: 'transparent',
   },
   cellPressed: { opacity: 0.6 },
-  cellText: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  cellTextOut: { color: colors.textSubtle, fontWeight: '400' },
-  loggedCell: { backgroundColor: colors.period },
-  loggedText: { color: colors.onPrimary },
-  predictedCell: { borderColor: colors.period, borderStyle: 'dashed' },
+  cellText: { color: colors.label, fontFamily: typography.h2.fontFamily, fontSize: 15 },
+  cellTextOut: { color: colors.hairline },
+  loggedCell: { backgroundColor: colors.period, borderColor: 'transparent' },
+  loggedText: { color: '#2A1E22' },
+  predictedCell: { borderColor: colors.period },
   predictedText: { color: colors.period },
-  fertileCell: { backgroundColor: colors.surfaceRaised, borderColor: colors.secondary },
+  fertileCell: { backgroundColor: colors.surfaceRaised, borderColor: 'transparent' },
   fertileText: { color: colors.secondary },
   today: { borderColor: colors.primary },
-  legend: { gap: 10 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  swatch: { width: 18, height: 18, borderRadius: radii.sm, borderWidth: 1 },
-  swatchLogged: { backgroundColor: colors.period, borderColor: colors.period },
-  swatchPredicted: { borderColor: colors.period, borderStyle: 'dashed' },
-  swatchFertile: { backgroundColor: colors.surfaceRaised, borderColor: colors.secondary },
-  legendLabel: { color: colors.textMuted, fontSize: 13 },
+  // #85: legend row — wrapping chips above the grid
+  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  dot: { width: 12, height: 12, borderRadius: radii.pill, borderWidth: 1.5, borderColor: 'transparent' },
+  dotLogged: { backgroundColor: colors.period, borderColor: 'transparent' },
+  dotPredicted: { backgroundColor: 'transparent', borderColor: colors.period },
+  dotFertile: { backgroundColor: colors.secondary, borderColor: 'transparent' },
+  dotToday: { backgroundColor: 'transparent', borderColor: colors.primary },
+  legendLabel: { color: colors.textMuted, fontFamily: typography.caption.fontFamily, fontSize: 12 },
+  disclaimerRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  disclaimerMark: {
+    width: 14,
+    height: 14,
+    borderRadius: radii.pill,
+    borderWidth: 1.4,
+    borderColor: colors.hairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  disclaimerMarkText: { color: colors.textSubtle, fontFamily: typography.caption.fontFamily, fontSize: 9 },
+  disclaimerText: { color: colors.textSubtle, fontFamily: typography.bodySm.fontFamily, fontSize: 12 },
+  ctaBlock: { alignItems: 'center', gap: 14, paddingTop: 4 },
+  tapHint: { color: colors.textSubtle, fontFamily: typography.bodySm.fontFamily, fontSize: 13, textAlign: 'center' },
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    backgroundColor: colors.surfaceRaised,
+    borderColor: colors.hairline,
+    borderWidth: 1,
+    borderRadius: radii.pill,
+    height: 50,
+    paddingHorizontal: 22,
+  },
+  ctaButtonPressed: { opacity: 0.7 },
+  ctaLabel: { color: colors.primary, fontFamily: typography.label.fontFamily, fontSize: 15 },
 });
 
 // Marker-driven cell and text styles, keyed off the pure grid model's DayMarker.
-const markerStyles: Record<DayMarker, object> = {
+const markerStyles: Record<DayMarker, StyleProp<ViewStyle>> = {
   logged: styles.loggedCell,
   predicted: styles.predictedCell,
   fertile: styles.fertileCell,
-  none: {},
+  none: null,
 };
 
-const textStyles: Record<DayMarker, object> = {
+const textStyles: Record<DayMarker, StyleProp<TextStyle>> = {
   logged: styles.loggedText,
   predicted: styles.predictedText,
   fertile: styles.fertileText,
-  none: {},
+  none: null,
 };
