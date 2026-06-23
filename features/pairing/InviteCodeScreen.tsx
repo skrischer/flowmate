@@ -61,15 +61,15 @@ export function InviteCodeScreen() {
   const handleShare = async () => {
     if (!invite) return;
     try {
+      // Dismissed and shared are both fine; genuine errors (permissions) propagate.
       await Share.share({ message: invite.token });
-    } catch {
-      // User dismissed the share sheet — no error state needed.
+    } catch (cause: unknown) {
+      setError(cause instanceof Error ? cause.message : 'Teilen fehlgeschlagen.');
     }
   };
 
   const expired = invite !== null && isExpired(invite);
-  // Show primary generate button when no code yet or code is expired;
-  // show secondary when an active code exists.
+  // Primary generate: no code yet or expired; secondary: active code present.
   const generateIsPrimary = !invite || expired;
 
   return (
@@ -144,7 +144,7 @@ export function InviteCodeScreen() {
           pressed && (generateIsPrimary ? styles.primaryBtnPressed : styles.secondaryBtnPressed),
           isBusy && styles.btnDisabled,
         ]}
-        onPress={generate}
+        onPress={() => void generate()}
         disabled={isBusy}
       >
         {isBusy ? (
@@ -198,8 +198,9 @@ const styles = StyleSheet.create({
   codeLabel: {
     ...typography.caption,
     color: colors.textSubtle,
-    letterSpacing: 0.08 * 11,
+    letterSpacing: 0.08 * 11, // wider than base caption — matches all-caps artboard label
   },
+  // No token for large code display; DM Sans between h2 (22) and h1 (32).
   code: {
     fontFamily: typography.h1.fontFamily,
     fontSize: 28,
