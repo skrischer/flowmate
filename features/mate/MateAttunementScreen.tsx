@@ -23,7 +23,7 @@ import { PhaseTrackSection } from './PhaseTrackSection';
 import { useMateAttunement } from './useMateAttunement';
 
 export function MateAttunementScreen() {
-  const { data, isLoading, error } = useMateAttunement();
+  const { data, connected, isLoading, error } = useMateAttunement();
   const [partnerProfile, setPartnerProfile] = useState<PartnerProfile | null>(null);
 
   useEffect(() => {
@@ -33,15 +33,22 @@ export function MateAttunementScreen() {
   }, []);
 
   const flowerName = partnerProfile?.displayName ?? null;
-  // "Getrennt" means the pairing was revoked -- not a transient load error.
-  // Only show the ended badge when the load settled cleanly with no active edge.
-  const isEnded = !isLoading && error === null && (data === null || isAttunementEmpty(data));
+  // "Getrennt" means the pairing was revoked -- not a transient load error and
+  // not a connected edge still waiting for the first snapshot. Only show the
+  // ended badge when the load settled cleanly with no active edge.
+  const isEnded = !isLoading && error === null && !connected;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <Header flowerName={flowerName} isEnded={isEnded} />
-        <AttunementSection data={data} isLoading={isLoading} error={error} flowerName={flowerName} />
+        <AttunementSection
+          data={data}
+          connected={connected}
+          isLoading={isLoading}
+          error={error}
+          flowerName={flowerName}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -79,13 +86,14 @@ function ConnectionBadge({ isEnded }: { isEnded: boolean }) {
 
 type SectionProps = {
   data: MateAttunement | null;
+  connected: boolean;
   isLoading: boolean;
   error: Error | null;
   flowerName: string | null;
 };
 
 // Picks the right surface for the current load / connection state.
-function AttunementSection({ data, isLoading, error, flowerName }: SectionProps) {
+function AttunementSection({ data, connected, isLoading, error, flowerName }: SectionProps) {
   if (isLoading) {
     return (
       <View style={styles.loadingCard}>
@@ -101,8 +109,11 @@ function AttunementSection({ data, isLoading, error, flowerName }: SectionProps)
       </View>
     );
   }
-  if (data === null || isAttunementEmpty(data)) {
+  if (!connected) {
     return <EndedView flowerName={flowerName} />;
+  }
+  if (data === null || isAttunementEmpty(data)) {
+    return <WaitingCard flowerName={flowerName} />;
   }
   return (
     <View style={styles.cards}>
@@ -110,6 +121,19 @@ function AttunementSection({ data, isLoading, error, flowerName }: SectionProps)
       {data.phase !== null ? (
         <PhaseTrackSection phase={data.phase} flowerName={flowerName} />
       ) : null}
+    </View>
+  );
+}
+
+// Connected but the owner has not shared anything yet: a calm waiting state.
+// Stays under the "Verbunden" badge -- this is not the ended view.
+function WaitingCard({ flowerName }: { flowerName: string | null }) {
+  return (
+    <View style={styles.waitingCard}>
+      <Text style={styles.waitingTitle}>Verbunden</Text>
+      <Text style={styles.bodyMuted}>
+        {`${flowerName ?? 'Deine Flower'} hat noch nichts geteilt. Sobald etwas da ist, erscheint es hier.`}
+      </Text>
     </View>
   );
 }
@@ -157,4 +181,13 @@ const styles = StyleSheet.create({
   },
   errorTitle: { ...typography.title, color: colors.text },
   bodyMuted: { ...typography.bodySm, color: colors.textMuted },
+  waitingCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.hairline,
+    borderWidth: 1,
+    borderRadius: radii.lg,
+    padding: 22,
+    gap: 8,
+  },
+  waitingTitle: { ...typography.title, color: colors.text },
 });

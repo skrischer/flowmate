@@ -1,8 +1,10 @@
 /// <reference types="jest" />
 // Verifies the READ-ONLY follower path getFollowedSharedState: it resolves the
-// active pairing edge to the owner and reads ONLY that owner's shared_state row;
-// it returns null when there is no session, no active edge (revoked), or no
-// shared row yet -- never touching periods or daily_logs.
+// active pairing edge to the owner and reads ONLY that owner's shared_state row.
+// It returns { connected: false } when there is no session or no active edge
+// (revoked), and { connected: true, state } on an active edge -- with state null
+// when the owner has not published a snapshot yet (connected but waiting), never
+// conflating that with ended. It never touches periods or daily_logs.
 
 import { getFollowedSharedState } from '../shared-state';
 import type { Tables } from '../database.types';
@@ -55,8 +57,11 @@ beforeEach(() => {
 });
 
 describe('getFollowedSharedState', () => {
-  it('resolves the active edge and returns only that owner shared_state', async () => {
-    await expect(getFollowedSharedState()).resolves.toEqual(sharedRow);
+  it('resolves the active edge and returns connected with that owner shared_state', async () => {
+    await expect(getFollowedSharedState()).resolves.toEqual({
+      connected: true,
+      state: sharedRow,
+    });
     expect(tablesQueried).toEqual(['pairing', 'shared_state']);
   });
 
@@ -66,20 +71,24 @@ describe('getFollowedSharedState', () => {
     expect(tablesQueried).not.toContain('daily_logs');
   });
 
-  it('returns null when there is no active edge (revoked)', async () => {
+  it('returns { connected: false } when there is no active edge (revoked)', async () => {
     mockPairingMaybeSingle.mockResolvedValue({ data: null, error: null });
-    await expect(getFollowedSharedState()).resolves.toBeNull();
+    await expect(getFollowedSharedState()).resolves.toEqual({ connected: false });
     expect(tablesQueried).toEqual(['pairing']);
   });
 
-  it('returns null when there is no session', async () => {
+  it('returns { connected: false } when there is no session', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
-    await expect(getFollowedSharedState()).resolves.toBeNull();
+    await expect(getFollowedSharedState()).resolves.toEqual({ connected: false });
     expect(tablesQueried).toEqual([]);
   });
 
-  it('returns null when the owner has no shared row yet', async () => {
+  it('returns connected with null state when the owner has no shared row yet', async () => {
     mockSharedMaybeSingle.mockResolvedValue({ data: null, error: null });
-    await expect(getFollowedSharedState()).resolves.toBeNull();
+    await expect(getFollowedSharedState()).resolves.toEqual({
+      connected: true,
+      state: null,
+    });
+    expect(tablesQueried).toEqual(['pairing', 'shared_state']);
   });
 });

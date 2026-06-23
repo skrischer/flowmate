@@ -24,6 +24,18 @@ import type { Tables } from './database.types';
 /** The owner's derived shared row as stored: phase-level fields only. */
 export type SharedState = Tables<'shared_state'>;
 
+/**
+ * Result of the follower read path, distinguishing the connection from the
+ * snapshot: `connected: false` is a disconnected/ended edge (no active follow),
+ * while `connected: true` is an active edge whose `state` may still be `null`
+ * when the owner has not published a snapshot yet (freshly paired, nothing
+ * logged). The screen must not conflate these -- a fresh Mate is connected and
+ * waiting, not ended.
+ */
+export type FollowedSharedState =
+  | { connected: false }
+  | { connected: true; state: SharedState | null };
+
 /** Resolves the authenticated user's id, throwing when no session exists. */
 async function requireOwnerId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -44,17 +56,20 @@ async function requireOwnerId(): Promise<string> {
  *
  * The follower never touches raw logs -- this reads ONLY `shared_state`, whose
  * follower-SELECT RLS policy (Phase 5) is keyed on the active edge. After revoke
- * the edge is no longer `active`, so no owner resolves and this returns `null`,
- * driving the Mate view's ended/empty state. Returns `null` when there is no
- * active following edge or no shared row exists yet. There is no write path here.
+ * the edge is no longer `active`, so no owner resolves and this returns
+ * `{ connected: false }`, driving the Mate view's ended state. With an active
+ * edge it returns `{ connected: true, state }`, where `state` is the owner's
+ * derived row or `null` when none has been published yet -- a connected-but-
+ * waiting Mate, kept distinct from ended so the screen never shows the latter
+ * for the former. There is no write path here.
  */
-export async function getFollowedSharedState(): Promise<SharedState | null> {
+export async function getFollowedSharedState(): Promise<FollowedSharedState> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) {
     throw userError;
   }
   if (!userData.user) {
-    return null;
+    return { connected: false };
   }
   const { data: edge, error: edgeError } = await supabase
     .from('pairing')
@@ -66,7 +81,7 @@ export async function getFollowedSharedState(): Promise<SharedState | null> {
     throw edgeError;
   }
   if (!edge) {
-    return null;
+    return { connected: false };
   }
   const { data, error } = await supabase
     .from('shared_state')
@@ -76,7 +91,7 @@ export async function getFollowedSharedState(): Promise<SharedState | null> {
   if (error) {
     throw error;
   }
-  return data;
+  return { connected: true, state: data };
 }
 
 /**

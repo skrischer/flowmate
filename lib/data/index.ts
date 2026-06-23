@@ -35,7 +35,7 @@ export {
 } from './pairing';
 export type { Invite, Pairing } from './pairing';
 export { getFollowedSharedState, refreshSharedState } from './shared-state';
-export type { SharedState } from './shared-state';
+export type { FollowedSharedState, SharedState } from './shared-state';
 export {
   getOnboardingComplete,
   resolveOnboardingNeeded,
