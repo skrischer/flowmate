@@ -38,7 +38,7 @@ function Spinner() {
 //   onboarding      — first-run fork (no header)
 //   mate            — follower read-only shell (no header)
 //   periods         — Verlauf / Zyklus-Historie (stack-presented from Profil tab)
-//   period-form     — Periode eintragen (stack-presented from Heute / Kalender)
+//   period-form     — Periode eintragen (modal sheet; self-managed header)
 //   mood-log        — Stimmung eintragen (stack-presented from Heute)
 //   invite          — Mate einladen (stack-presented from Profil tab)
 //   accept-invite   — Code eingeben (reached via onboarding fork)
@@ -57,7 +57,10 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="mate" options={{ headerShown: false }} />
       <Stack.Screen name="periods" options={{ title: 'Verlauf' }} />
-      <Stack.Screen name="period-form" options={{ title: 'Periode eintragen' }} />
+      <Stack.Screen
+        name="period-form"
+        options={{ presentation: 'modal', headerShown: false }}
+      />
       <Stack.Screen name="mood-log" options={{ headerShown: false }} />
       <Stack.Screen name="invite" options={{ title: 'Mate einladen' }} />
       <Stack.Screen name="accept-invite" options={{ title: 'Code eingeben' }} />
