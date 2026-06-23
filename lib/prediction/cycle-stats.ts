@@ -26,7 +26,7 @@ export type CycleLengthStats = {
   count: number;
   /** Median cycle length in whole days — the value used for prediction. */
   median: number;
-  /** Arithmetic mean cycle length in whole days (not rounded). */
+  /** Arithmetic mean cycle length in days (not rounded; may be fractional). */
   mean: number;
   /** Shortest cycle length in the sample, in whole days. */
   min: number;
