@@ -12,7 +12,7 @@ const MOOD_LABELS: Record<Mood, string> = {
   sensitive: 'Sensibel',
   irritable: 'Gereizt',
   low: 'Niedergeschlagen',
-  anxious: 'Aengstlich',
+  anxious: 'Ängstlich',
 };
 
 /** The curated moods in display order, paired with their German label. */

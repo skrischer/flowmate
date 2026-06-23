@@ -18,6 +18,7 @@ export const colors = {
   textSubtle: '#857A8E',
   label: '#C9C2CF',
   inputDisabled: '#241F2E',
+  chipBorder: '#322B3D', // default chip border (design.md: Chip · default)
 } as const;
 
 export const radii = {
