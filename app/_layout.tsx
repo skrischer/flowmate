@@ -35,7 +35,9 @@ function Spinner() {
 // Route structure:
 //   (tabs)          — Flower tab bar (Heute / Kalender / Profil); headerShown: false
 //                     because the Tabs navigator manages its own headers per tab.
-//   (mate)          — Mate tab bar (Eingestimmt / Profil); headerShown: false
+//   mate            — Mate tab bar (Eingestimmt / Profil) at /mate; a real path
+//                     segment, not a route group, so it never collides with the
+//                     (tabs) shell at /; headerShown: false
 //   onboarding      — first-run fork (no header)
 //   periods         — Verlauf / Zyklus-Historie (stack-presented from Profil tab)
 //   period-form     — Periode eintragen (modal sheet; self-managed header)
@@ -54,7 +56,7 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(mate)" options={{ headerShown: false }} />
+      <Stack.Screen name="mate" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="periods" options={{ title: 'Verlauf' }} />
       <Stack.Screen
@@ -82,7 +84,7 @@ function OnboardingGate() {
     resolveOnboardingNeeded()
       .then(async (needed) => {
         if (needed) return 'onboarding';
-        return (await resolveShell()) === 'mate' ? '(mate)' : '(tabs)';
+        return (await resolveShell()) === 'mate' ? 'mate' : '(tabs)';
       })
       .then((route) => {
         if (active) setInitialRoute(route);
