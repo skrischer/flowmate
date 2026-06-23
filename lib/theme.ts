@@ -32,7 +32,67 @@ export const spacing = {
   field: 16,
 } as const;
 
+// Loaded font family names — must match the keys passed to useFonts() in
+// app/_layout.tsx. Headings use DM Sans 600; body uses Inter 400/500/600.
 export const fonts = {
-  display: 'System',
-  body: 'System',
+  display: 'DMSans_600SemiBold',
+  body: 'Inter_400Regular',
+  bodyMedium: 'Inter_500Medium',
+  bodySemiBold: 'Inter_600SemiBold',
+} as const;
+
+// Type-scale tokens per docs/design.md. fontFamily values reference the names
+// above; fontSize and lineHeight in dp; letterSpacing in dp (em × fontSize).
+// fontWeight is intentionally omitted — each loaded font file encodes its own
+// weight; specifying fontWeight on native selects a different file and is ignored.
+export const typography = {
+  display: {
+    fontFamily: fonts.display,
+    fontSize: 40,
+    lineHeight: 44,
+    letterSpacing: -0.025 * 40,
+  },
+  h1: {
+    fontFamily: fonts.display,
+    fontSize: 32, // mid-range pick from the 30–34 spec range (design.md)
+    lineHeight: 36, // spec: 34–36; high end for the chosen 32px size
+    letterSpacing: -0.02 * 32,
+  },
+  h2: {
+    fontFamily: fonts.display,
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: -0.02 * 22,
+  },
+  title: {
+    fontFamily: fonts.display,
+    fontSize: 16,
+    lineHeight: 22, // spec does not specify; ~1.375× convention
+    letterSpacing: -0.02 * 16,
+  },
+  body: {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: 0,
+  },
+  bodySm: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 20, // low end of the 20–21 spec range (design.md)
+    letterSpacing: 0,
+  },
+  label: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13,
+    lineHeight: 18, // spec does not specify; ~1.38× convention
+    letterSpacing: 0.01 * 13,
+  },
+  caption: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 11,
+    lineHeight: 15, // spec does not specify; ~1.36× convention
+    // 0.04em at the low end of the 0.04–0.16em spec range (design.md)
+    letterSpacing: 0.04 * 11,
+  },
 } as const;
