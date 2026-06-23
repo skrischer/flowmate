@@ -37,7 +37,7 @@ function Spinner() {
 //                     because the Tabs navigator manages its own headers per tab.
 //   onboarding      — first-run fork (no header)
 //   mate            — follower read-only shell (no header)
-//   periods         — Zyklus-Historie (stack-presented from Profil tab)
+//   periods         — Verlauf / Zyklus-Historie (stack-presented from Profil tab)
 //   period-form     — Periode eintragen (stack-presented from Heute / Kalender)
 //   mood-log        — Stimmung eintragen (stack-presented from Heute)
 //   invite          — Mate einladen (stack-presented from Profil tab)
@@ -56,7 +56,7 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="mate" options={{ headerShown: false }} />
-      <Stack.Screen name="periods" options={{ title: 'Zyklus-Historie' }} />
+      <Stack.Screen name="periods" options={{ title: 'Verlauf' }} />
       <Stack.Screen name="period-form" options={{ title: 'Periode eintragen' }} />
       <Stack.Screen name="mood-log" options={{ title: 'Stimmung eintragen' }} />
       <Stack.Screen name="invite" options={{ title: 'Mate einladen' }} />

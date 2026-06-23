@@ -1,9 +1,8 @@
 // Flower · Zyklus-Historie (docs/design.md, spec-cycle-logging.md): the
 // chronological list of logged periods, descending by start date, each row
-// showing the cycle length to the next-newer period, with a "Periode eintragen"
-// CTA. Tapping a row opens the log/edit form. All data flows through lib/data —
-// this component makes no direct Supabase calls. Cycle length is a fact derived
-// from two logged starts, not a prediction, so no disclaimer applies.
+// showing a colored dot, compact date range, and period-length meta. A
+// stats card at the top shows Ø cycle length, Ø period length, and entry
+// count. All data flows through lib/data — no direct Supabase calls.
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -18,22 +17,43 @@ import { useFocusEffect, useRouter } from 'expo-router';
 
 import { listPeriods, type Period } from '../../lib/data';
 import { daysBetween } from '../../lib/prediction/dates';
-import { colors, radii, spacing } from '../../lib/theme';
+import { cycleLengthStats } from '../../lib/prediction/cycle-stats';
+import { colors, radii, spacing, typography } from '../../lib/theme';
+import { Icon } from '../../components/Icon';
 import { formatIso } from './date';
 
+// ---------------------------------------------------------------------------
+// Derived stats helpers
+// ---------------------------------------------------------------------------
+
 /**
- * Cycle length in whole days for the period at `index` in a descending (newest
- * first) list: the span from this period's start to the next-newer start. The
- * newest period (index 0) has no completed cycle yet, so returns null.
+ * Cycle length in whole days for the period at `index` in a descending
+ * (newest first) list. The newest entry (index 0) has no completed cycle
+ * yet, so returns null.
  */
 function cycleLengthAt(periods: Period[], index: number): number | null {
   const current = periods[index];
   const newer = periods[index - 1];
-  if (current === undefined || newer === undefined) {
-    return null;
-  }
+  if (current === undefined || newer === undefined) return null;
   return daysBetween(current.start_date, newer.start_date);
 }
+
+/** Period length in whole days (end - start + 1). Null when end_date absent. */
+function periodLengthDays(period: Period): number | null {
+  if (!period.end_date) return null;
+  return daysBetween(period.start_date, period.end_date) + 1;
+}
+
+/** Mean period length in whole days across all entries that have an end_date. */
+function avgPeriodLength(periods: Period[]): number | null {
+  const lengths = periods.map(periodLengthDays).filter((v): v is number => v !== null);
+  if (lengths.length === 0) return null;
+  return Math.round(lengths.reduce((sum, n) => sum + n, 0) / lengths.length);
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
 
 export function PeriodHistoryScreen() {
   const router = useRouter();
@@ -58,19 +78,17 @@ export function PeriodHistoryScreen() {
     };
   }, []);
 
-  // Reload on focus so an entry logged or edited on the form screen shows up
-  // immediately when the user returns here.
+  // Reload on focus so an entry logged or edited on the form screen appears
+  // immediately when the user navigates back here.
   useFocusEffect(reload);
+
+  // Map periods to PeriodStart shape required by cycle-stats.
+  const periodStarts = (periods ?? []).map((p) => ({ startDate: p.start_date }));
+  const stats = cycleLengthStats(periodStarts);
+  const avgPeriod = periods ? avgPeriodLength(periods) : null;
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <Pressable
-        style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-        onPress={() => router.push('/period-form')}
-      >
-        <Text style={styles.ctaText}>Periode eintragen</Text>
-      </Pressable>
-
       {periods === null ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -80,11 +98,25 @@ export function PeriodHistoryScreen() {
           data={periods}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <>
+              {/* #92 Stats summary card */}
+              <StatsCard
+                avgCycle={stats?.median ?? null}
+                avgPeriod={avgPeriod}
+                entryCount={periods.length}
+              />
+              {/* #94 Section label */}
+              <Text style={styles.sectionLabel}>ALLE PERIODEN</Text>
+            </>
+          }
           renderItem={({ item, index }) => (
             <PeriodRow
               period={item}
               cycleLength={cycleLengthAt(periods, index)}
-              onPress={() => router.push({ pathname: '/period-form', params: { id: item.id } })}
+              onPress={() =>
+                router.push({ pathname: '/period-form', params: { id: item.id } })
+              }
             />
           )}
           ListEmptyComponent={
@@ -92,11 +124,59 @@ export function PeriodHistoryScreen() {
               {error ?? 'Noch keine Periode eingetragen.'}
             </Text>
           }
+          ListFooterComponent={<View style={styles.listFooter} />}
         />
       )}
+
+      {/* #94 CTA at bottom per design */}
+      <View style={styles.ctaWrap}>
+        <Pressable
+          style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+          onPress={() => router.push('/period-form')}
+        >
+          <Text style={styles.ctaText}>Periode eintragen</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Stats card (#92)
+// ---------------------------------------------------------------------------
+
+function StatsCard({
+  avgCycle,
+  avgPeriod,
+  entryCount,
+}: {
+  avgCycle: number | null;
+  avgPeriod: number | null;
+  entryCount: number;
+}) {
+  return (
+    <View style={styles.card}>
+      <StatItem label="Ø Zyklus" value={avgCycle !== null ? `${avgCycle} T` : '—'} />
+      <View style={styles.cardDivider} />
+      <StatItem label="Ø Periode" value={avgPeriod !== null ? `${avgPeriod} T` : '—'} />
+      <View style={styles.cardDivider} />
+      <StatItem label="Einträge" value={String(entryCount)} />
+    </View>
+  );
+}
+
+function StatItem({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.statItem}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Period row (#93)
+// ---------------------------------------------------------------------------
 
 function PeriodRow({
   period,
@@ -107,55 +187,147 @@ function PeriodRow({
   cycleLength: number | null;
   onPress: () => void;
 }) {
-  const range = period.end_date
-    ? `${formatIso(period.start_date)} - ${formatIso(period.end_date)}`
-    : formatIso(period.start_date);
+  // Compact date: "22.06." for start; "22.06. - 26.06." when end_date present.
+  const startShort = compactDate(period.start_date);
+  const dateLabel = period.end_date
+    ? `${startShort} - ${compactDate(period.end_date)}`
+    : startShort;
+
+  const pLen = periodLengthDays(period);
+  const periodMeta = pLen !== null ? `${pLen} ${pLen === 1 ? 'Tag' : 'Tage'}` : null;
   const cycleMeta =
-    cycleLength === null
-      ? 'Aktueller Zyklus'
-      : `Zykluslänge: ${cycleLength} ${cycleLength === 1 ? 'Tag' : 'Tage'}`;
+    cycleLength !== null
+      ? `Zyklus: ${cycleLength} T`
+      : 'Aktueller Zyklus';
+  const meta = periodMeta ? `${periodMeta}  ·  ${cycleMeta}` : cycleMeta;
+
   return (
     <Pressable
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
       onPress={onPress}
     >
-      <View style={styles.rowMain}>
-        <Text style={styles.rowDate}>{range}</Text>
-        <Text style={styles.rowMeta}>{cycleMeta}</Text>
+      {/* Colored dot per design (#93) */}
+      <View style={styles.dotWrap}>
+        <View style={styles.dot} />
       </View>
-      <Text style={styles.chevron}>{'>'}</Text>
+
+      <View style={styles.rowMain}>
+        <Text style={styles.rowDate}>{dateLabel}</Text>
+        <Text style={styles.rowMeta}>{meta}</Text>
+      </View>
+
+      <Icon name="chevron" size={18} color={colors.textSubtle} />
     </Pressable>
   );
 }
 
+/** Short date "DD.MM." — no year to save space in the row. */
+function compactDate(iso: string): string {
+  const formatted = formatIso(iso); // "DD.MM.YYYY"
+  const parts = formatted.split('.');
+  // parts = ["DD", "MM", "YYYY"]
+  return `${parts[0] ?? ''}.${parts[1] ?? ''}.`;
+}
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  cta: {
-    backgroundColor: colors.primary,
-    borderRadius: 15,
-    padding: 17,
-    alignItems: 'center',
-    marginHorizontal: spacing.screen,
-    marginTop: 16,
+
+  list: { paddingHorizontal: spacing.screen, paddingTop: 20, gap: 10 },
+  listFooter: { height: 24 },
+
+  // Stats card (#92)
+  card: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderColor: colors.hairline,
+    borderWidth: 1,
+    borderRadius: radii.md,
+    paddingVertical: 18,
+    marginBottom: 22,
   },
-  ctaPressed: { backgroundColor: colors.primaryPress },
-  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
-  list: { padding: spacing.screen, gap: 12 },
-  empty: { color: colors.textMuted, fontSize: 15, textAlign: 'center', marginTop: 32 },
+  statItem: { flex: 1, alignItems: 'center', gap: 4 },
+  statValue: {
+    ...typography.title,
+    color: colors.text,
+  },
+  statLabel: {
+    ...typography.caption,
+    color: colors.textMuted,
+    letterSpacing: 0.04 * 11,
+  },
+  cardDivider: {
+    width: 1,
+    backgroundColor: colors.hairline,
+    marginVertical: 4,
+  },
+
+  // Section label (#94)
+  sectionLabel: {
+    ...typography.caption,
+    color: colors.textSubtle,
+    letterSpacing: 0.08 * 11,
+    marginBottom: 10,
+  },
+
+  // Period row (#93)
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
     borderRadius: radii.md,
-    padding: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 12,
   },
   rowPressed: { opacity: 0.7 },
+  dotWrap: { justifyContent: 'center', alignItems: 'center', width: 10 },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.period,
+  },
   rowMain: { flex: 1 },
-  rowDate: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  rowMeta: { color: colors.textMuted, fontSize: 13, marginTop: 3 },
-  chevron: { color: colors.textSubtle, fontSize: 16 },
+  rowDate: {
+    ...typography.label,
+    color: colors.text,
+  },
+  rowMeta: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+
+  // CTA (#94 — bottom placement per design)
+  ctaWrap: {
+    paddingHorizontal: spacing.screen,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: colors.bg,
+  },
+  cta: {
+    backgroundColor: colors.primary,
+    borderRadius: radii.md,
+    padding: 17,
+    alignItems: 'center',
+  },
+  ctaPressed: { backgroundColor: colors.primaryPress },
+  ctaText: {
+    ...typography.title,
+    color: colors.onPrimary,
+  },
+
+  empty: {
+    ...typography.bodySm,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 32,
+  },
 });
