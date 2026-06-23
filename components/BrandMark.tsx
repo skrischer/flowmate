@@ -12,7 +12,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Icon } from './Icon';
-import { colors } from '../lib/theme';
+import { colors, radii } from '../lib/theme';
 
 export interface BrandMarkProps {
   /** Container size in dp (width = height). Defaults to 56. */
@@ -24,7 +24,7 @@ export function BrandMark({ size = 56 }: BrandMarkProps) {
   const iconSize = Math.round(size * 0.5);
   const containerStyle = [
     styles.container,
-    { width: size, height: size, borderRadius: Math.round(size * 0.285) },
+    { width: size, height: size },
   ];
 
   return (
@@ -38,7 +38,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.primary,
+    borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
