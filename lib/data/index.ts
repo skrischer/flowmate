@@ -8,8 +8,8 @@ export {
   onAuthStateChange,
 } from './auth';
 export type { AuthResult, Credentials } from './auth';
-export { getOwnProfile, ensureProfile } from './profiles';
-export type { Profile, ProfileResult } from './profiles';
+export { getOwnProfile, ensureProfile, getPartnerProfile } from './profiles';
+export type { Profile, ProfileResult, PartnerProfile } from './profiles';
 export { createPeriod, deletePeriod, listPeriods, updatePeriod } from './periods';
 export type { NewPeriod, Period, PeriodUpdate } from './periods';
 export {
