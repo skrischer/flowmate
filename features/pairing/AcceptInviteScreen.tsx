@@ -20,6 +20,8 @@ import { useRouter } from 'expo-router';
 
 import { acceptInvite } from '../../lib/data';
 import { colors, radii, spacing } from '../../lib/theme';
+import { BrandMark } from '../../components/BrandMark';
+import { TrustRow } from '../../components/TrustRow';
 
 export function AcceptInviteScreen() {
   const router = useRouter();
@@ -54,7 +56,7 @@ export function AcceptInviteScreen() {
       <View style={styles.successScreen}>
         <Text style={styles.successHeading}>Verbunden</Text>
         <Text style={styles.successBody}>
-          Du folgst jetzt dem Zyklus deines Mate und bleibst eingestimmt.
+          Du folgst jetzt dem Zyklus deines Flowers und bleibst eingestimmt.
         </Text>
         <Pressable
           style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
@@ -75,12 +77,17 @@ export function AcceptInviteScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
+        <View style={styles.brandRow}>
+          <BrandMark />
+        </View>
+
         <View style={styles.intro}>
           <Text style={styles.heading}>Code eingeben</Text>
           <Text style={styles.lede}>
-            Gib den Einladungscode ein, den dein Mate mit dir geteilt hat, um dich
-            zu verbinden.
+            Gib den Einladungscode ein, den dein Flower mit dir geteilt hat, um
+            dich zu verbinden.
           </Text>
+          <TrustRow caption="Dein Flower entscheidet, was du siehst — und kann die Verbindung jederzeit beenden." />
         </View>
 
         <View style={styles.fieldGroup}>
@@ -122,7 +129,13 @@ export function AcceptInviteScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.screen, gap: 24 },
+  content: {
+    flexGrow: 1,
+    padding: spacing.screen,
+    gap: 24,
+    justifyContent: 'center',
+  },
+  brandRow: { alignItems: 'center' },
   intro: { gap: 10 },
   heading: { color: colors.text, fontSize: 30, fontWeight: '600' },
   lede: { color: colors.textMuted, fontSize: 15, lineHeight: 22 },
