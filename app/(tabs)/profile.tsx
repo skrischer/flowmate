@@ -34,9 +34,13 @@ export default function ProfileTab() {
     getOwnProfile(userId).then(({ profile: row }) => {
       if (active) setProfile(row);
     });
-    getPartnerProfile().then((p) => {
-      if (active) setPartner(p);
-    });
+    getPartnerProfile()
+      .then((p) => {
+        if (active) setPartner(p);
+      })
+      .catch(() => {
+        // non-fatal: partner badge omitted on network/RLS errors
+      });
     return () => {
       active = false;
     };
@@ -87,7 +91,7 @@ export default function ProfileTab() {
         <SettingsRow
           iconName="bell"
           label="Benachrichtigungen"
-          showChevron
+          showChevron={false}
           isLast
         />
       </SettingsGroup>
