@@ -15,7 +15,9 @@ import {
 } from 'react-native';
 
 import { signIn, signUp } from '../../lib/data';
-import { colors, radii } from '../../lib/theme';
+import { colors, radii, typography } from '../../lib/theme';
+import { BrandMark } from '../../components/BrandMark';
+import { Icon } from '../../components/Icon';
 
 type Mode = 'signIn' | 'signUp';
 
@@ -23,6 +25,7 @@ export function SignInScreen() {
   const [mode, setMode] = useState<Mode>('signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
@@ -37,6 +40,7 @@ export function SignInScreen() {
 
   const toggleMode = () => {
     setError(null);
+    setShowPassword(false);
     setMode((current) => (current === 'signIn' ? 'signUp' : 'signIn'));
   };
 
@@ -54,6 +58,7 @@ export function SignInScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
+          <BrandMark size={72} />
           <Text style={styles.wordmark}>Flowmate</Text>
           <Text style={styles.tagline}>Mitschwingen, statt verwalten.</Text>
         </View>
@@ -77,18 +82,33 @@ export function SignInScreen() {
 
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Passwort</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="********"
-              placeholderTextColor={colors.textSubtle}
-              secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-              textContentType="password"
-              editable={!isBusy}
-            />
+            <View style={styles.passwordWrapper}>
+              <TextInput
+                style={styles.passwordInput}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="********"
+                placeholderTextColor={colors.textSubtle}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="password"
+                editable={!isBusy}
+              />
+              <Pressable
+                style={styles.eyeButton}
+                onPress={() => setShowPassword((v) => !v)}
+                accessibilityLabel={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                accessibilityRole="button"
+                hitSlop={8}
+              >
+                <Icon
+                  name={showPassword ? 'eyeOff' : 'eye'}
+                  size={20}
+                  color={colors.textSubtle}
+                />
+              </Pressable>
+            </View>
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -116,7 +136,7 @@ export function SignInScreen() {
             onPress={toggleMode}
             disabled={isBusy}
           >
-            <Text style={styles.prompt}>{prompt}</Text>
+            <Text style={styles.footerPrompt}>{prompt}</Text>
             <Text style={styles.switchLabel}>{switchLabel}</Text>
           </Pressable>
           <Text style={styles.trust}>Datenhoheit bleibt bei dir.</Text>
@@ -134,18 +154,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     gap: 36,
   },
-  header: { alignItems: 'center', gap: 7 },
+  header: { alignItems: 'center', gap: 8 },
   wordmark: {
+    ...typography.h2,
     color: colors.text,
-    fontFamily: 'System',
-    fontSize: 30,
-    fontWeight: '600',
-    letterSpacing: -0.75,
   },
-  tagline: { color: colors.textMuted, fontSize: 15 },
+  tagline: { ...typography.bodySm, color: colors.textMuted },
   form: { gap: 16 },
   fieldGroup: { gap: 8 },
-  label: { color: colors.label, fontSize: 13, fontWeight: '600' },
+  label: { ...typography.label, color: colors.label },
   input: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
@@ -155,7 +172,25 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
   },
-  error: { color: colors.danger, fontSize: 14 },
+  passwordWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.hairline,
+    borderWidth: 1,
+    borderRadius: radii.md,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 16,
+    color: colors.text,
+    fontSize: 15,
+  },
+  eyeButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+  },
+  error: { ...typography.bodySm, color: colors.danger },
   cta: {
     backgroundColor: colors.primary,
     borderRadius: 15,
@@ -165,10 +200,10 @@ const styles = StyleSheet.create({
   },
   ctaPressed: { backgroundColor: colors.primaryPress },
   ctaDisabled: { opacity: 0.6 },
-  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
+  ctaText: { ...typography.title, color: colors.onPrimary },
   footer: { alignItems: 'center', gap: 20 },
   switchRow: { flexDirection: 'row', gap: 6 },
-  prompt: { color: colors.textMuted, fontSize: 14 },
-  switchLabel: { color: colors.primary, fontSize: 14, fontWeight: '600' },
-  trust: { color: colors.textSubtle, fontSize: 12 },
+  footerPrompt: { ...typography.bodySm, color: colors.textMuted },
+  switchLabel: { ...typography.bodySm, color: colors.primary },
+  trust: { ...typography.caption, color: colors.textSubtle },
 });
