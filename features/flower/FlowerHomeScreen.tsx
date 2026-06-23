@@ -1,101 +1,43 @@
-// Flower · Home (docs/design.md, spec-flower-experience.md): the Flower's hub.
-// Renders the current phase, the next-period countdown, and the fertile window
-// from the prediction view-model, with the mandatory disclaimer on every
-// prediction surface. Handles all confidence states: `none` withholds the window
-// and shows a backfill prompt; `low` adds a visible low-confidence caveat;
-// `medium`/`high` render normally. Prediction is consumed via useFlowerPrediction
-// (lib/prediction behind lib/data) and never reimplemented here.
-//
-// The vertical nav-row list was removed in favour of the bottom-tab bar
-// (Heute / Kalender / Profil). Secondary destinations (Zyklus-Historie,
-// Stimmung eintragen, Mate einladen, Mein Mate) are reached from the Profil
-// tab or via CTA buttons on this screen.
+// Flower · Home (docs/design.md, spec-flower-experience.md) — rebuilt for
+// issues #76–#80. Renders the warm header (#80), phase card with chip +
+// display headline + reassurance + phase track (#79, #76), 'Diese Woche'
+// week glance (#77), 'Periode eintragen' CTA, and the inline mood row (#78).
+// Prediction is consumed via useFlowerPrediction; mood and period data are
+// loaded on focus to power week-glance dots and the mood chip selection.
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { PredictionDisclaimer } from '../../components/PredictionDisclaimer';
+import { Avatar } from '../../components/Avatar';
+import { PhaseChip } from '../../components/PhaseChip';
+import { PhaseTrack } from '../../components/PhaseTrack';
+import { WeekGlance } from '../../components/WeekGlance';
+import { MoodRow } from '../../components/MoodRow';
 import { useAuth } from '../auth/AuthProvider';
-import { colors, radii, spacing } from '../../lib/theme';
+import { colors, radii, spacing, typography } from '../../lib/theme';
+import { getOwnProfile } from '../../lib/data/profiles';
+import { getDailyLog, listDailyLogs, listPeriods, upsertDailyLog, type Mood } from '../../lib/data';
 import type { DateRange, Prediction } from '../../lib/prediction';
 import { formatIso } from '../cycle-logging/date';
 import { useFlowerPrediction } from './useFlowerPrediction';
 import type { FlowerPrediction } from './prediction';
+import { loggedDays } from './calendar';
 import {
+  buildWeekDays,
   confidenceCaveat,
   daysToNextPeriod,
+  greeting,
   isInsufficient,
-  nextPeriodLabel,
+  periodHeadline,
   phaseLabel,
+  reassuranceLine,
 } from './home-view';
+import { todayIso } from './today';
 
-export function FlowerHomeScreen() {
-  const router = useRouter();
-  const { session } = useAuth();
-  const { data, isLoading, error } = useFlowerPrediction();
-  const greeting = session?.user.email ?? '';
+// ── Sub-components ────────────────────────────────────────────────────────────
 
-  return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>Heute</Text>
-          <Text style={styles.title}>Flowmate</Text>
-          {greeting ? <Text style={styles.subtitle}>{greeting}</Text> : null}
-        </View>
-
-        <PredictionSection data={data} isLoading={isLoading} error={error} router={router} />
-
-        <Pressable
-          style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-          onPress={() => router.push('/period-form')}
-        >
-          <Text style={styles.ctaText}>Periode eintragen</Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [styles.secondaryCta, pressed && styles.secondaryCtaPressed]}
-          onPress={() => router.push('/mood-log')}
-        >
-          <Text style={styles.secondaryCtaText}>Stimmung eintragen</Text>
-        </Pressable>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-type SectionProps = {
-  data: FlowerPrediction | null;
-  isLoading: boolean;
-  error: Error | null;
-  router: ReturnType<typeof useRouter>;
-};
-
-// Picks the right prediction surface for the current load/confidence state.
-function PredictionSection({ data, isLoading, error, router }: SectionProps) {
-  if (isLoading) {
-    return (
-      <View style={styles.card}>
-        <ActivityIndicator color={colors.primary} />
-      </View>
-    );
-  }
-  if (error || !data) {
-    return (
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Prognose nicht verfuegbar</Text>
-        <Text style={styles.bodyMuted}>Bitte spaeter erneut versuchen.</Text>
-      </View>
-    );
-  }
-  if (isInsufficient(data) || data.prediction === null) {
-    return <BackfillCard onLog={() => router.push('/period-form')} />;
-  }
-  return <PhaseCard prediction={data.prediction} today={data.today} />;
-}
-
-// Insufficient-data state (`confidence: none`): no fabricated window, a prompt to
-// log more cycles, and the disclaimer (this is still a prediction surface).
 function BackfillCard({ onLog }: { onLog: () => void }) {
   return (
     <View style={styles.card}>
@@ -115,62 +57,175 @@ function BackfillCard({ onLog }: { onLog: () => void }) {
   );
 }
 
-// The full phase card for `low`/`medium`/`high`: phase, next-period countdown,
-// fertile window, the low-confidence caveat when present, and the disclaimer.
-function PhaseCard({ prediction, today }: { prediction: Prediction; today: string }) {
+function FertileWindow({ window, approx }: { window: DateRange | null; approx: string }) {
+  if (window === null) return null;
+  return (
+    <View style={styles.fertileBlock}>
+      <View style={styles.fertileRow}>
+        <View style={[styles.dot, { backgroundColor: colors.secondary }]} />
+        <Text style={styles.fertileLabel}>Fruchtbares Fenster</Text>
+      </View>
+      <Text style={styles.fertileValue}>
+        {approx}
+        {formatIso(window.start)} – {formatIso(window.end)}
+      </Text>
+    </View>
+  );
+}
+
+function PhaseCard({
+  prediction,
+  today,
+  cycleStart,
+}: {
+  prediction: Prediction;
+  today: string;
+  cycleStart: string | null;
+}) {
   const days = daysToNextPeriod(today, prediction.nextPeriodDate);
   const caveat = confidenceCaveat(prediction.confidence);
   const approx = prediction.confidence === 'low' ? '~ ' : '';
+  // Cycle day: days elapsed since the last logged period start + 1 (1-based).
+  // Falls back to 1 when cycleStart is unknown.
+  const cycleDay = cycleStart ? Math.max(1, daysToNextPeriod(cycleStart, today) + 1) : 1;
   return (
     <View style={styles.card}>
-      <Text style={styles.phaseLabel}>Aktuelle Phase</Text>
-      <Text style={styles.phaseName}>{phaseLabel(prediction.currentPhase)}</Text>
-
-      <View style={styles.statRow}>
-        <Stat label="Naechste Periode" value={`${approx}${nextPeriodLabel(days)}`} />
-        <Stat label="Am" value={formatIso(prediction.nextPeriodDate)} />
+      <View style={styles.chipRow}>
+        <PhaseChip phase={prediction.currentPhase} label={phaseLabel(prediction.currentPhase)} />
+        <Text style={styles.cycleDayLabel}>Zyklustag {cycleDay}</Text>
       </View>
-
+      <Text style={styles.displayHeadline}>{`${approx}${periodHeadline(days)}`}</Text>
+      <Text style={styles.reassurance}>{reassuranceLine(prediction.confidence)}</Text>
+      <PhaseTrack currentPhase={prediction.currentPhase} cycleDay={cycleDay} />
       <FertileWindow window={prediction.fertileWindow} approx={approx} />
-
       {caveat ? <Text style={styles.caveat}>{caveat}</Text> : null}
       <PredictionDisclaimer />
     </View>
   );
 }
 
-// The fertile window range, or a withheld note when the engine returns null.
-function FertileWindow({ window, approx }: { window: DateRange | null; approx: string }) {
-  if (window === null) {
-    return null;
+type SectionProps = {
+  data: FlowerPrediction | null;
+  isLoading: boolean;
+  error: Error | null;
+  cycleStart: string | null;
+  router: ReturnType<typeof useRouter>;
+};
+
+function PredictionSection({ data, isLoading, error, cycleStart, router }: SectionProps) {
+  if (isLoading) {
+    return (
+      <View style={styles.card}>
+        <ActivityIndicator color={colors.primary} />
+      </View>
+    );
   }
+  if (error || !data) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Prognose nicht verfuegbar</Text>
+        <Text style={styles.bodyMuted}>Bitte spaeter erneut versuchen.</Text>
+      </View>
+    );
+  }
+  if (isInsufficient(data) || data.prediction === null) {
+    return <BackfillCard onLog={() => router.push('/period-form')} />;
+  }
+  return <PhaseCard prediction={data.prediction} today={data.today} cycleStart={cycleStart} />;
+}
+
+// ── Main screen ───────────────────────────────────────────────────────────────
+
+export function FlowerHomeScreen() {
+  const router = useRouter();
+  const { session } = useAuth();
+  const { data, isLoading, error } = useFlowerPrediction();
+
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
+  const [periodDates, setPeriodDates] = useState<ReadonlySet<string>>(new Set());
+  const [moodDates, setMoodDates] = useState<ReadonlySet<string>>(new Set());
+  const [cycleStart, setCycleStart] = useState<string | null>(null);
+
+  const today = todayIso();
+  const hour = new Date().getHours();
+  const email = session?.user.email ?? null;
+
+  useFocusEffect(
+    useCallback(() => {
+      const userId = session?.user.id;
+      if (!userId) return;
+      void getOwnProfile(userId).then(({ profile }) =>
+        setDisplayName(profile?.display_name ?? null),
+      );
+      void getDailyLog(today).then((log) =>
+        setSelectedMood((log?.mood as Mood | undefined) ?? null),
+      );
+      void listDailyLogs().then((logs) => setMoodDates(new Set(logs.map((l) => l.date))));
+      void listPeriods().then((periods) => {
+        setPeriodDates(loggedDays(periods));
+        // Most recent period start for cycle-day calculation in the phase card.
+        const sorted = [...periods].sort((a, b) => b.start_date.localeCompare(a.start_date));
+        setCycleStart(sorted[0]?.start_date ?? null);
+      });
+    }, [session?.user.id, today]),
+  );
+
+  const weekDays = buildWeekDays(today, periodDates, moodDates);
+
+  async function handleMoodSelect(mood: Mood) {
+    setSelectedMood(mood);
+    await upsertDailyLog({ date: today, mood });
+  }
+
   return (
-    <View style={styles.fertile}>
-      <Text style={styles.fertileLabel}>Fruchtbares Fenster</Text>
-      <Text style={styles.fertileValue}>
-        {approx}
-        {formatIso(window.start)} bis {formatIso(window.end)}
-      </Text>
-    </View>
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.headerText}>
+            <Text style={styles.greetingLabel}>{greeting(hour)}</Text>
+            <Text style={styles.nameLabel}>{displayName ?? email ?? 'Flowmate'}</Text>
+          </View>
+          <Avatar displayName={displayName} fallback={email} size={44} />
+        </View>
+
+        <PredictionSection
+          data={data}
+          isLoading={isLoading}
+          error={error}
+          cycleStart={cycleStart}
+          router={router}
+        />
+
+        <WeekGlance days={weekDays} onCalendar={() => router.push('/calendar')} />
+
+        <Pressable
+          style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+          onPress={() => router.push('/period-form')}
+        >
+          <Text style={styles.ctaText}>Periode eintragen</Text>
+        </Pressable>
+
+        <MoodRow selectedMood={selectedMood} onSelect={handleMoodSelect} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-    </View>
-  );
-}
+// ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: spacing.screen, paddingBottom: 32, gap: 18 },
-  header: { paddingTop: 8, gap: 2 },
-  eyebrow: { color: colors.textMuted, fontSize: 14 },
-  title: { color: colors.text, fontSize: 30, fontWeight: '600' },
-  subtitle: { color: colors.textMuted, fontSize: 14 },
+  header: {
+    paddingTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerText: { gap: 2 },
+  greetingLabel: { ...typography.bodySm, color: colors.textMuted },
+  nameLabel: { ...typography.h2, color: colors.text },
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
@@ -179,31 +234,18 @@ const styles = StyleSheet.create({
     padding: 22,
     gap: 14,
   },
-  cardTitle: { color: colors.text, fontSize: 18, fontWeight: '600' },
-  bodyMuted: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
-  phaseLabel: { color: colors.textMuted, fontSize: 13, fontWeight: '600' },
-  phaseName: { color: colors.text, fontSize: 26, fontWeight: '600' },
-  statRow: { flexDirection: 'row', gap: 24 },
-  stat: { gap: 4 },
-  statLabel: { color: colors.textSubtle, fontSize: 12 },
-  statValue: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  fertile: {
-    backgroundColor: colors.surfaceRaised,
-    borderColor: colors.secondary,
-    borderWidth: 1,
-    borderRadius: radii.md,
-    padding: 14,
-    gap: 4,
-  },
-  fertileLabel: { color: colors.secondary, fontSize: 12, fontWeight: '600' },
-  fertileValue: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  caveat: { color: colors.secondary, fontSize: 13, lineHeight: 18 },
-  cta: {
-    backgroundColor: colors.primary,
-    borderRadius: 15,
-    padding: 17,
-    alignItems: 'center',
-  },
+  cardTitle: { ...typography.title, color: colors.text },
+  bodyMuted: { ...typography.bodySm, color: colors.textMuted },
+  chipRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cycleDayLabel: { ...typography.label, color: colors.textMuted },
+  displayHeadline: { ...typography.display, color: colors.text },
+  reassurance: { ...typography.bodySm, color: colors.textMuted },
+  caveat: { ...typography.bodySm, color: colors.secondary },
+  fertileBlock: { gap: 4 },
+  fertileRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  dot: { width: 8, height: 8, borderRadius: radii.pill },
+  fertileLabel: { ...typography.label, color: colors.secondary },
+  fertileValue: { ...typography.bodySm, color: colors.text },
   inlineCta: {
     backgroundColor: colors.primary,
     borderRadius: radii.md,
@@ -211,16 +253,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
   },
-  ctaPressed: { backgroundColor: colors.primaryPress },
-  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
-  secondaryCta: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
-    borderWidth: 1,
-    borderRadius: radii.md,
+  cta: {
+    backgroundColor: colors.primary,
+    borderRadius: 15,
     padding: 17,
     alignItems: 'center',
   },
-  secondaryCtaPressed: { opacity: 0.7 },
-  secondaryCtaText: { color: colors.primary, fontSize: 16, fontWeight: '600' },
+  ctaPressed: { backgroundColor: colors.primaryPress },
+  ctaText: { ...typography.title, color: colors.onPrimary },
 });
