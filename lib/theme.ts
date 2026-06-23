@@ -19,6 +19,7 @@ export const colors = {
   label: '#C9C2CF',
   inputDisabled: '#241F2E',
   chipBorder: '#322B3D', // default chip border (design.md: Chip · default)
+  successTint: '#9CB07E26', // success at ~15 % opacity (8-digit RGBA hex) — badge bg
 } as const;
 
 export const radii = {
