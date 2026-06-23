@@ -29,14 +29,14 @@ function Spinner() {
 // Authenticated app stack. The first-run fork and the owner-vs-follower shell are
 // layered in front of it via initialRouteName (spec-pairing.md / spec-mate-push.md):
 // a stateless, unflagged account starts on the onboarding gate; otherwise the
-// shell is edge-derived — an active follower lands on the read-only Mate view,
+// shell is edge-derived — an active follower lands on the Mate tab shell,
 // everyone else on the Flower tab shell. Navigation-only: no role is persisted.
 //
 // Route structure:
 //   (tabs)          — Flower tab bar (Heute / Kalender / Profil); headerShown: false
 //                     because the Tabs navigator manages its own headers per tab.
+//   (mate)          — Mate tab bar (Eingestimmt / Profil); headerShown: false
 //   onboarding      — first-run fork (no header)
-//   mate            — follower read-only shell (no header)
 //   periods         — Verlauf / Zyklus-Historie (stack-presented from Profil tab)
 //   period-form     — Periode eintragen (modal sheet; self-managed header)
 //   mood-log        — Stimmung eintragen (stack-presented from Heute)
@@ -54,8 +54,8 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(mate)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen name="mate" options={{ headerShown: false }} />
       <Stack.Screen name="periods" options={{ title: 'Verlauf' }} />
       <Stack.Screen
         name="period-form"
@@ -82,7 +82,7 @@ function OnboardingGate() {
     resolveOnboardingNeeded()
       .then(async (needed) => {
         if (needed) return 'onboarding';
-        return (await resolveShell()) === 'mate' ? 'mate' : '(tabs)';
+        return (await resolveShell()) === 'mate' ? '(mate)' : '(tabs)';
       })
       .then((route) => {
         if (active) setInitialRoute(route);

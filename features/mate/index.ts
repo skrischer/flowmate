@@ -3,6 +3,9 @@
 // pure mapping stay behind this glue.
 
 export { MateAttunementScreen } from './MateAttunementScreen';
+export { MateProfileScreen } from './MateProfileScreen';
+export { useMateProfile } from './useMateProfile';
+export type { MateProfileState } from './useMateProfile';
 export { useMateAttunement } from './useMateAttunement';
 export type { MateAttunementState } from './useMateAttunement';
 export { isAttunementEmpty, toMateAttunement } from './attunement-view';
