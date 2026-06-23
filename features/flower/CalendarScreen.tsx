@@ -6,12 +6,22 @@
 // the pure engine behind it); the grid model is the pure features/flower/calendar
 // helper. This surface never reimplements prediction and makes no Supabase calls.
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { Icon } from '../../components/Icon';
-import { colors, radii, spacing } from '../../lib/theme';
+import { colors, radii, spacing, typography } from '../../lib/theme';
 import {
   WEEKDAY_LABELS,
   buildMonthGrid,
@@ -160,7 +170,7 @@ function Legend() {
   );
 }
 
-function LegendDot({ dotStyle, label }: { dotStyle: object; label: string }) {
+function LegendDot({ dotStyle, label }: { dotStyle: StyleProp<ViewStyle>; label: string }) {
   return (
     <View style={styles.legendItem}>
       <View style={[styles.dot, dotStyle]} />
@@ -192,13 +202,9 @@ const styles = StyleSheet.create({
   },
   errorText: { color: colors.danger, fontSize: 14 },
   content: { padding: spacing.screen, gap: 18 },
-  // #87: title left, navGroup right
-  monthNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  monthTitle: { color: colors.text, fontSize: 24, fontWeight: '600', letterSpacing: -0.48 },
+  monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  // DM Sans SemiBold; fontSize 24 matches the artboard (h2 spec: 22–24).
+  monthTitle: { ...typography.h2, fontSize: 24, color: colors.text },
   navGroup: { flexDirection: 'row', gap: 8 },
   navButton: {
     width: 38,
@@ -213,13 +219,7 @@ const styles = StyleSheet.create({
   navButtonPressed: { opacity: 0.7 },
   gridBlock: { gap: 6 },
   weekdays: { flexDirection: 'row' },
-  weekday: {
-    flex: 1,
-    textAlign: 'center',
-    color: colors.textSubtle,
-    fontSize: 11,
-    fontWeight: '600',
-  },
+  weekday: { ...typography.caption, flex: 1, textAlign: 'center', color: colors.textSubtle },
   grid: { gap: 6 },
   week: { flexDirection: 'row', gap: 6 },
   cell: {
@@ -232,8 +232,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   cellPressed: { opacity: 0.6 },
-  cellText: { color: colors.label, fontSize: 15, fontWeight: '600' },
-  cellTextOut: { color: colors.hairline, fontWeight: '400' },
+  cellText: { color: colors.label, fontFamily: typography.h2.fontFamily, fontSize: 15 },
+  cellTextOut: { color: colors.hairline },
   loggedCell: { backgroundColor: colors.period, borderColor: 'transparent' },
   loggedText: { color: '#2A1E22' },
   predictedCell: { borderColor: colors.period },
@@ -249,8 +249,7 @@ const styles = StyleSheet.create({
   dotPredicted: { backgroundColor: 'transparent', borderColor: colors.period },
   dotFertile: { backgroundColor: colors.secondary, borderColor: 'transparent' },
   dotToday: { backgroundColor: 'transparent', borderColor: colors.primary },
-  legendLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '500' },
-  // #87: calendar-specific disclaimer
+  legendLabel: { color: colors.textMuted, fontFamily: typography.caption.fontFamily, fontSize: 12 },
   disclaimerRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   disclaimerMark: {
     width: 14,
@@ -262,9 +261,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
-  disclaimerMarkText: { color: colors.textSubtle, fontSize: 9, fontWeight: '700' },
+  disclaimerMarkText: { color: colors.textSubtle, fontSize: 9 },
   disclaimerText: { color: colors.textSubtle, fontSize: 12 },
-  // #86: tap hint + CTA button
   ctaBlock: { alignItems: 'center', gap: 14, paddingTop: 4 },
   tapHint: { color: colors.textSubtle, fontSize: 13, textAlign: 'center' },
   ctaButton: {
@@ -279,20 +277,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   ctaButtonPressed: { opacity: 0.7 },
-  ctaLabel: { color: colors.primary, fontSize: 15, fontWeight: '600' },
+  ctaLabel: { color: colors.primary, fontFamily: typography.label.fontFamily, fontSize: 15 },
 });
 
 // Marker-driven cell and text styles, keyed off the pure grid model's DayMarker.
-const markerStyles: Record<DayMarker, object> = {
+const markerStyles: Record<DayMarker, StyleProp<ViewStyle>> = {
   logged: styles.loggedCell,
   predicted: styles.predictedCell,
   fertile: styles.fertileCell,
-  none: {},
+  none: null,
 };
 
-const textStyles: Record<DayMarker, object> = {
+const textStyles: Record<DayMarker, StyleProp<TextStyle>> = {
   logged: styles.loggedText,
   predicted: styles.predictedText,
   fertile: styles.fertileText,
-  none: {},
+  none: null,
 };
