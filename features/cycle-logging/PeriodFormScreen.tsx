@@ -1,19 +1,18 @@
 // Flower · Periode eintragen (docs/design.md, spec-cycle-logging.md): the
-// log/edit sheet. Create a new period or edit an existing one (by `id` param),
+// log/edit sheet. Presented as a modal sheet (headerShown: false on the route).
+// Create a new period or edit an existing one (by `id` param),
 // with a past-date-capable start, an optional end, and delete when editing.
 // All persistence goes through lib/data; no direct Supabase calls here.
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   useFocusEffect,
   useLocalSearchParams,
@@ -26,7 +25,9 @@ import {
   listPeriods,
   updatePeriod,
 } from '../../lib/data';
-import { colors, radii, spacing } from '../../lib/theme';
+import { Icon } from '../../components/Icon';
+import { colors, radii, spacing, typography } from '../../lib/theme';
+import { DatePickerField } from './DatePickerField';
 import { isOnOrAfter, isValidIso, todayIso } from './date';
 
 export function PeriodFormScreen() {
@@ -72,11 +73,11 @@ export function PeriodFormScreen() {
 
   const validate = (): string | null => {
     if (!isValidIso(startDate)) {
-      return 'Bitte ein gueltiges Startdatum eingeben (JJJJ-MM-TT).';
+      return 'Bitte ein gueltiges Startdatum eingeben.';
     }
     const trimmedEnd = endDate.trim();
     if (trimmedEnd && !isValidIso(trimmedEnd)) {
-      return 'Bitte ein gueltiges Enddatum eingeben (JJJJ-MM-TT).';
+      return 'Bitte ein gueltiges Enddatum eingeben.';
     }
     if (trimmedEnd && !isOnOrAfter(startDate, trimmedEnd)) {
       return 'Das Enddatum darf nicht vor dem Startdatum liegen.';
@@ -121,56 +122,81 @@ export function PeriodFormScreen() {
 
   if (!isLoaded) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={colors.primary} />
-      </View>
+      // edges={['bottom']}: modal sheet — top inset already handled by the OS chrome.
+      <SafeAreaView style={styles.flex} edges={['bottom']}>
+        <View style={styles.center}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    // edges={['bottom']}: modal sheet — OS chrome covers the top; only footer needs inset.
+    <SafeAreaView style={styles.flex} edges={['bottom']}>
+      {/* Sheet header: close-X + centered title (no stack back arrow) */}
+      <View style={styles.sheetHeader}>
+        <Pressable
+          style={({ pressed }) => [styles.closeBtn, pressed && styles.closeBtnPressed]}
+          onPress={() => router.back()}
+          accessibilityLabel="Schliessen"
+          hitSlop={10}
+        >
+          <Icon name="close" size={22} color={colors.text} />
+        </Pressable>
+        <Text style={styles.sheetTitle}>
+          {isEdit ? 'Periode bearbeiten' : 'Periode eintragen'}
+        </Text>
+        {/* Spacer keeps title visually centered */}
+        <View style={styles.headerSpacer} />
+      </View>
+
+      {/* Intro line */}
+      <Text style={styles.intro}>
+        {isEdit
+          ? 'Passe den Zeitraum dieser Periode an oder loesche den Eintrag.'
+          : 'Trag den Beginn deiner Periode ein. Das Enddatum ist optional.'}
+      </Text>
+
       <ScrollView
-        contentContainerStyle={styles.content}
+        style={styles.scrollArea}
+        contentContainerStyle={styles.fields}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Startdatum</Text>
-          <TextInput
-            style={styles.input}
-            value={startDate}
-            onChangeText={setStartDate}
-            placeholder="JJJJ-MM-TT"
-            placeholderTextColor={colors.textSubtle}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="numbers-and-punctuation"
-            editable={!isBusy}
-          />
-          <Text style={styles.hint}>
-            Auch vergangene Tage moeglich (Historie nachtragen).
-          </Text>
-        </View>
+        <DatePickerField
+          label="Startdatum"
+          value={startDate}
+          onChange={setStartDate}
+          disabled={isBusy}
+          hint="Auch vergangene Tage moeglich (Historie nachtragen)."
+        />
 
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Enddatum (optional)</Text>
-          <TextInput
-            style={styles.input}
-            value={endDate}
-            onChangeText={setEndDate}
-            placeholder="JJJJ-MM-TT"
-            placeholderTextColor={colors.textSubtle}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="numbers-and-punctuation"
-            editable={!isBusy}
-          />
-        </View>
+        <DatePickerField
+          label="Enddatum (optional)"
+          value={endDate}
+          onChange={setEndDate}
+          optional
+          minDate={startDate || undefined}
+          disabled={isBusy}
+        />
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
+        {/* Delete button — edit case only */}
+        {isEdit ? (
+          <Pressable
+            style={({ pressed }) => [styles.deleteBtn, pressed && styles.deleteBtnPressed]}
+            onPress={remove}
+            disabled={isBusy}
+          >
+            <Icon name="trash" size={18} color={colors.danger} />
+            <Text style={styles.deleteBtnText}>Periode loeschen</Text>
+          </Pressable>
+        ) : null}
+      </ScrollView>
+
+      {/* Pinned save CTA */}
+      <View style={styles.footer}>
         <Pressable
           style={({ pressed }) => [
             styles.cta,
@@ -183,64 +209,91 @@ export function PeriodFormScreen() {
           {isBusy ? (
             <ActivityIndicator color={colors.onPrimary} />
           ) : (
-            <Text style={styles.ctaText}>{isEdit ? 'Aenderungen speichern' : 'Eintragen'}</Text>
+            <Text style={styles.ctaText}>Speichern</Text>
           )}
         </Pressable>
-
-        {isEdit ? (
-          <Pressable
-            style={({ pressed }) => [styles.delete, pressed && styles.deletePressed]}
-            onPress={remove}
-            disabled={isBusy}
-          >
-            <Text style={styles.deleteText}>Loeschen</Text>
-          </Pressable>
-        ) : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  center: {
-    flex: 1,
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+
+  // Sheet header
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.screen,
+    paddingVertical: 14,
+  },
+  closeBtn: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.bg,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surfaceRaised,
   },
-  content: { padding: spacing.screen, gap: 20 },
-  fieldGroup: { gap: 8 },
-  label: { color: colors.label, fontSize: 13, fontWeight: '600' },
-  input: {
+  closeBtnPressed: { opacity: 0.7 },
+  sheetTitle: {
+    ...typography.title,
+    color: colors.text,
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerSpacer: { width: 36 },
+
+  // Intro line
+  intro: {
+    ...typography.bodySm,
+    color: colors.textMuted,
+    paddingHorizontal: spacing.screen,
+    paddingBottom: 8,
+  },
+
+  // Scrollable field area
+  scrollArea: { flex: 1 },
+  fields: {
+    paddingHorizontal: spacing.screen,
+    paddingTop: 16,
+    paddingBottom: 24,
+    gap: 20,
+  },
+  error: { color: colors.danger, fontSize: 14 },
+
+  // Delete (edit-only)
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
     borderRadius: radii.md,
-    padding: 16,
-    color: colors.text,
-    fontSize: 15,
+    padding: 17,
+    marginTop: 8,
   },
-  hint: { color: colors.textSubtle, fontSize: 12 },
-  error: { color: colors.danger, fontSize: 14 },
+  deleteBtnPressed: { opacity: 0.7 },
+  deleteBtnText: { color: colors.danger, fontSize: 16, fontWeight: '600' },
+
+  // Pinned footer + CTA
+  footer: {
+    paddingHorizontal: spacing.screen,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.hairline,
+    backgroundColor: colors.bg,
+  },
   cta: {
     backgroundColor: colors.primary,
-    borderRadius: 15,
+    borderRadius: radii.md,
     padding: 17,
     alignItems: 'center',
-    marginTop: 4,
   },
   ctaPressed: { backgroundColor: colors.primaryPress },
   ctaDisabled: { opacity: 0.6 },
   ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
-  delete: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
-    borderWidth: 1,
-    borderRadius: radii.md,
-    padding: 17,
-    alignItems: 'center',
-  },
-  deletePressed: { opacity: 0.7 },
-  deleteText: { color: colors.danger, fontSize: 16, fontWeight: '600' },
 });
