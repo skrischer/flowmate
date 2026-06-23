@@ -3,7 +3,8 @@
 // follower path, injects `today` once at the wiring boundary, and runs the pure
 // mapping -- the component consumes the result, never the data layer directly.
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 
 import { getFollowedSharedState } from '../../lib/data';
 import { todayIso } from '../flower/today';
@@ -20,36 +21,41 @@ export type MateAttunementState = {
 };
 
 /**
- * Loads the Mate attunement model on mount. Reads ONLY `shared_state` via the
- * follower path; after a revoke that path returns no row and the model renders
- * the ended/empty state. `today` is read once here and passed into the pure
- * mapping; pass an explicit value to pin the reference day (e.g. in tests). The
- * clock is not re-read after mount (a date rollover while open is out of scope).
+ * Loads the Mate attunement model whenever the screen gains focus, so a pairing
+ * change made on another screen is reflected on return (the tab stays mounted
+ * under the stack, so a mount-only load would go stale). Reads ONLY
+ * `shared_state` via the follower path; after a revoke that path returns no row
+ * and the model renders the ended/empty state. `today` is read at the wiring
+ * boundary; pass an explicit value to pin the reference day (e.g. in tests). The
+ * clock is not re-read mid-focus (a date rollover while open is out of scope).
  */
 export function useMateAttunement(today: string = todayIso()): MateAttunementState {
   const [data, setData] = useState<MateAttunement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      setError(null);
 
-    getFollowedSharedState()
-      .then((state) => {
-        if (!active) return;
-        setData(toMateAttunement(state, today));
-        setIsLoading(false);
-      })
-      .catch((cause: unknown) => {
-        if (!active) return;
-        setError(cause instanceof Error ? cause : new Error(String(cause)));
-        setIsLoading(false);
-      });
+      getFollowedSharedState()
+        .then((state) => {
+          if (!active) return;
+          setData(toMateAttunement(state, today));
+          setIsLoading(false);
+        })
+        .catch((cause: unknown) => {
+          if (!active) return;
+          setError(cause instanceof Error ? cause : new Error(String(cause)));
+          setIsLoading(false);
+        });
 
-    return () => {
-      active = false;
-    };
-  }, [today]);
+      return () => {
+        active = false;
+      };
+    }, [today]),
+  );
 
   return { data, isLoading, error };
 }
