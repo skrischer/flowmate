@@ -54,6 +54,9 @@ export function AcceptInviteScreen() {
   if (isPaired) {
     return (
       <View style={styles.successScreen}>
+        <View style={styles.brandRow}>
+          <BrandMark />
+        </View>
         <Text style={styles.successHeading}>Verbunden</Text>
         <Text style={styles.successBody}>
           Du folgst jetzt dem Zyklus deines Flowers und bleibst eingestimmt.
