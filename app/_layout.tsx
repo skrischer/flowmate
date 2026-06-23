@@ -113,7 +113,8 @@ export default function RootLayout() {
     Inter_600SemiBold,
   });
 
-  // On font-load error fall through with system fonts rather than blocking forever.
+  // Hold splash until fonts are ready. On error (fontError non-null), fall through
+  // silently with system fonts rather than blocking the app forever.
   if (!fontsLoaded && !fontError) {
     return <Spinner />;
   }

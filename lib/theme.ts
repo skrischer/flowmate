@@ -54,8 +54,8 @@ export const typography = {
   },
   h1: {
     fontFamily: fonts.display,
-    fontSize: 32,
-    lineHeight: 36,
+    fontSize: 32, // mid-range pick from the 30–34 spec range (design.md)
+    lineHeight: 36, // spec: 34–36; high end for the chosen 32px size
     letterSpacing: -0.02 * 32,
   },
   h2: {
@@ -67,7 +67,7 @@ export const typography = {
   title: {
     fontFamily: fonts.display,
     fontSize: 16,
-    lineHeight: 22,
+    lineHeight: 22, // spec does not specify; ~1.375× convention
     letterSpacing: -0.02 * 16,
   },
   body: {
@@ -79,19 +79,19 @@ export const typography = {
   bodySm: {
     fontFamily: fonts.body,
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 20, // low end of the 20–21 spec range (design.md)
     letterSpacing: 0,
   },
   label: {
     fontFamily: fonts.bodySemiBold,
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 18, // spec does not specify; ~1.38× convention
     letterSpacing: 0.01 * 13,
   },
   caption: {
     fontFamily: fonts.bodyMedium,
     fontSize: 11,
-    lineHeight: 15,
+    lineHeight: 15, // spec does not specify; ~1.36× convention
     // 0.04em at the low end of the 0.04–0.16em spec range (design.md)
     letterSpacing: 0.04 * 11,
   },
