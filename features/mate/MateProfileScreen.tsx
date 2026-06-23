@@ -1,17 +1,9 @@
 // Mate · Profil (docs/design.md — Mate · Profil surface, spec-mate-push.md).
 // Shows the Mate's own identity, the Flower they are attuned to, an
-// Erscheinungsbild row, a Benachrichtigungen toggle (wired to the existing
-// push-tokens layer), and an Abmelden affordance.
-//
-// Data accessed (via useMateProfile hook — no raw health data):
-//   getOwnProfile(userId)  — Mate's own display_name
-//   getPartnerProfile()    — Flower's display_name only (PartnerProfile)
-//   getOwnPushToken()      — reads enabled state; null = no registered device
-//   setPushEnabled(bool)   — toggles push delivery (push-token row must exist)
-//   signOut()              — ends the session
+// Erscheinungsbild row, a Benachrichtigungen toggle, and an Abmelden affordance.
 //
 // Benachrichtigungen toggle is disabled when no push-token row is registered
-// (getOwnPushToken returns null). This prevents a silent no-op UPDATE.
+// (getOwnPushToken returns null). Prevents a silent no-op UPDATE on the row.
 import {
   ActivityIndicator,
   Alert,
@@ -31,17 +23,78 @@ import { signOut } from '../../lib/data';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 import { useMateProfile } from './useMateProfile';
 
+// Identity card: Avatar + own display name + attuned-to line.
+function IdentityCard({
+  displayName,
+  flowerName,
+  email,
+}: {
+  displayName: string | null;
+  flowerName: string | null;
+  email: string | undefined;
+}) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.identityRow}>
+        <Avatar displayName={displayName} fallback={email} size={56} />
+        <View style={styles.identityText}>
+          <Text style={styles.displayName}>{displayName ?? 'Kein Name gesetzt'}</Text>
+          <Text style={styles.attunedLine}>
+            {flowerName !== null ? `Eingestimmt auf ${flowerName}` : 'Keine aktive Verbindung'}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// Settings card: Erscheinungsbild + Benachrichtigungen toggle.
+function SettingsCard({
+  pushEnabled,
+  pushLoading,
+  togglePush,
+}: {
+  pushEnabled: boolean | null;
+  pushLoading: boolean;
+  togglePush: (v: boolean) => Promise<void>;
+}) {
+  return (
+    <View style={styles.card}>
+      {/* Erscheinungsbild — no chevron until a destination screen exists */}
+      <View style={styles.settingRow}>
+        <View style={styles.settingLeft}>
+          <Icon name="appearance" size={20} color={colors.textMuted} />
+          <Text style={styles.settingLabel}>Erscheinungsbild</Text>
+        </View>
+      </View>
+      <View style={styles.divider} />
+      {/* Benachrichtigungen — disabled when pushEnabled is null (no registered row) */}
+      <View style={styles.settingRow}>
+        <View style={styles.settingLeft}>
+          <Icon name="bell" size={20} color={colors.textMuted} />
+          <View style={styles.notifTextCol}>
+            <Text style={styles.settingLabel}>Benachrichtigungen</Text>
+            {pushEnabled === null ? (
+              <Text style={styles.notifCaption}>Kein Gerät registriert</Text>
+            ) : null}
+          </View>
+        </View>
+        <Switch
+          value={pushEnabled ?? false}
+          onValueChange={togglePush}
+          disabled={pushLoading || pushEnabled === null}
+          trackColor={{ false: colors.hairline, true: colors.primary }}
+          thumbColor={colors.onPrimary}
+        />
+      </View>
+    </View>
+  );
+}
+
 export function MateProfileScreen() {
   const { session } = useAuth();
   const { profile, partner, pushEnabled, pushLoading, isLoading, togglePush } =
     useMateProfile();
-
-  function handleSignOut() {
-    Alert.alert('Abmelden', 'Wirklich abmelden?', [
-      { text: 'Abbrechen', style: 'cancel' },
-      { text: 'Abmelden', style: 'destructive', onPress: () => void signOut() },
-    ]);
-  }
 
   if (isLoading) {
     return (
@@ -53,72 +106,28 @@ export function MateProfileScreen() {
     );
   }
 
-  const displayName = profile?.display_name ?? null;
-  const flowerName = partner?.displayName ?? null;
+  function handleSignOut() {
+    Alert.alert('Abmelden', 'Wirklich abmelden?', [
+      { text: 'Abbrechen', style: 'cancel' },
+      { text: 'Abmelden', style: 'destructive', onPress: () => void signOut() },
+    ]);
+  }
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.pageTitle}>Profil</Text>
-
-        {/* Identity card */}
-        <View style={styles.card}>
-          <View style={styles.identityRow}>
-            <Avatar displayName={displayName} fallback={session?.user.email} size={56} />
-            <View style={styles.identityText}>
-              <Text style={styles.displayName}>
-                {displayName ?? 'Kein Name gesetzt'}
-              </Text>
-              {flowerName !== null ? (
-                <Text style={styles.attunedLine}>Eingestimmt auf {flowerName}</Text>
-              ) : (
-                <Text style={styles.attunedLine}>Keine aktive Verbindung</Text>
-              )}
-            </View>
-          </View>
-        </View>
-
-        {/* Settings rows */}
-        <View style={styles.card}>
-          {/* Erscheinungsbild — no chevron until destination exists */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <Icon name="appearance" size={20} color={colors.textMuted} />
-              <Text style={styles.settingLabel}>Erscheinungsbild</Text>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Benachrichtigungen — disabled when no push-token row is registered */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <Icon name="bell" size={20} color={colors.textMuted} />
-              <View style={styles.notifTextCol}>
-                <Text style={styles.settingLabel}>Benachrichtigungen</Text>
-                {pushEnabled === null ? (
-                  <Text style={styles.notifCaption}>
-                    Kein Gerät registriert
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-            <Switch
-              value={pushEnabled ?? false}
-              onValueChange={togglePush}
-              disabled={pushLoading || pushEnabled === null}
-              trackColor={{ false: colors.hairline, true: colors.primary }}
-              thumbColor={colors.onPrimary}
-            />
-          </View>
-        </View>
-
-        {/* Sign out */}
-        <TouchableOpacity
-          style={styles.signOutRow}
-          onPress={handleSignOut}
-          activeOpacity={0.7}
-        >
+        <IdentityCard
+          displayName={profile?.display_name ?? null}
+          flowerName={partner?.displayName ?? null}
+          email={session?.user.email}
+        />
+        <SettingsCard
+          pushEnabled={pushEnabled}
+          pushLoading={pushLoading}
+          togglePush={togglePush}
+        />
+        <TouchableOpacity style={styles.signOutRow} onPress={handleSignOut} activeOpacity={0.7}>
           <Icon name="logout" size={20} color={colors.danger} />
           <Text style={styles.signOutLabel}>Abmelden</Text>
         </TouchableOpacity>

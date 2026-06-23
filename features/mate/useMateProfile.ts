@@ -1,6 +1,6 @@
 // Hook: loads the Mate's own profile, partner identity, and push-token state
-// (issue #111). Extracted so MateProfileScreen stays under the 50-line function
-// limit (constitution: functions ≤ 50 lines).
+// (issue #111). Extracted so MateProfileScreen stays under the 50-line
+// function limit (constitution: functions ≤ 50 lines).
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '../auth/AuthProvider';
@@ -22,6 +22,36 @@ export interface MateProfileState {
   togglePush: (value: boolean) => Promise<void>;
 }
 
+type Setters = {
+  setProfile: (p: Profile | null) => void;
+  setPartner: (p: PartnerProfile | null) => void;
+  setPushEnabled: (v: boolean | null) => void;
+  setIsLoading: (v: boolean) => void;
+};
+
+// Fetches all profile data for a given userId and applies it via setters.
+// Separated so useMateProfile stays within the 50-line function limit.
+async function loadProfile(
+  userId: string,
+  active: { current: boolean },
+  setters: Setters,
+): Promise<void> {
+  try {
+    const [ownProfile, partnerProfile, pushToken] = await Promise.all([
+      getOwnProfile(userId).then((r) => r.profile),
+      getPartnerProfile(),
+      getOwnPushToken(),
+    ]);
+    if (!active.current) return;
+    setters.setProfile(ownProfile);
+    setters.setPartner(partnerProfile);
+    // null = no row → leave toggle disabled; boolean = registered device
+    setters.setPushEnabled(pushToken !== null ? pushToken.enabled : null);
+  } finally {
+    if (active.current) setters.setIsLoading(false);
+  }
+}
+
 export function useMateProfile(): MateProfileState {
   const { session } = useAuth();
   const userId = session?.user.id ?? null;
@@ -34,30 +64,14 @@ export function useMateProfile(): MateProfileState {
 
   useEffect(() => {
     if (!userId) return;
-    let active = true;
-
-    Promise.all([
-      getOwnProfile(userId).then((r) => r.profile),
-      getPartnerProfile(),
-      getOwnPushToken(),
-    ])
-      .then(([ownProfile, partnerProfile, pushToken]) => {
-        if (!active) return;
-        setProfile(ownProfile);
-        setPartner(partnerProfile);
-        // null = no row → leave toggle disabled; boolean = registered device
-        setPushEnabledState(pushToken !== null ? pushToken.enabled : null);
-      })
-      .catch(() => {
-        // Non-fatal; render what we have.
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
+    const active = { current: true };
+    void loadProfile(userId, active, {
+      setProfile,
+      setPartner,
+      setPushEnabled: setPushEnabledState,
+      setIsLoading,
+    });
+    return () => { active.current = false; };
   }, [userId]);
 
   async function togglePush(value: boolean): Promise<void> {
