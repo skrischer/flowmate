@@ -35,6 +35,8 @@ const PHASE_HINTS: Record<Phase, string> = {
 
 /** The phase-level model the Mate screen renders; no raw data ever appears. */
 export type MateAttunement = {
+  /** The typed Phase enum value, or `null` when not yet known. Used by PhaseChip/PhaseTrack. */
+  phase: Phase | null;
   /** German label for the owner's current phase, or `null` when not yet known. */
   phaseLabel: string | null;
   /** Phase-derived attunement hint, or `null` when the phase is unknown. */
@@ -74,10 +76,11 @@ function headsUp(nextPeriodDate: string | null, today: string): string | null {
  */
 export function toMateAttunement(state: SharedState | null, today: string): MateAttunement {
   if (state === null) {
-    return { phaseLabel: null, hint: null, headsUp: null };
+    return { phase: null, phaseLabel: null, hint: null, headsUp: null };
   }
   const phase = toPhase(state.current_phase);
   return {
+    phase,
     phaseLabel: phase === null ? null : PHASE_LABELS[phase],
     hint: phase === null ? null : PHASE_HINTS[phase],
     headsUp: headsUp(state.next_period_date, today),

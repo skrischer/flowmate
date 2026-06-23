@@ -20,6 +20,7 @@ const state = (
 describe('toMateAttunement', () => {
   it('maps a known phase to a German label plus a phase-derived hint', () => {
     const view = toMateAttunement(state('follicular', null), '2026-03-01');
+    expect(view.phase).toBe('follicular');
     expect(view.phaseLabel).toBe('Follikelphase');
     expect(view.hint).not.toBeNull();
     expect(isAttunementEmpty(view)).toBe(false);
@@ -43,18 +44,20 @@ describe('toMateAttunement', () => {
 
   it('degrades an unknown or null phase to no label and no hint', () => {
     const unknown = toMateAttunement(state('zzz', '2026-03-06'), '2026-03-01');
+    expect(unknown.phase).toBeNull();
     expect(unknown.phaseLabel).toBeNull();
     expect(unknown.hint).toBeNull();
     expect(unknown.headsUp).toBe('Periode in etwa 5 Tagen');
 
     const noPhase = toMateAttunement(state(null, null), '2026-03-01');
+    expect(noPhase.phase).toBeNull();
     expect(noPhase.phaseLabel).toBeNull();
     expect(isAttunementEmpty(noPhase)).toBe(true);
   });
 
   it('returns an empty model for a null state (revoked / no edge)', () => {
     const view = toMateAttunement(null, '2026-03-01');
-    expect(view).toEqual({ phaseLabel: null, hint: null, headsUp: null });
+    expect(view).toEqual({ phase: null, phaseLabel: null, hint: null, headsUp: null });
     expect(isAttunementEmpty(view)).toBe(true);
   });
 });
