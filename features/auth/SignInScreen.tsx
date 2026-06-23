@@ -40,6 +40,7 @@ export function SignInScreen() {
 
   const toggleMode = () => {
     setError(null);
+    setShowPassword(false);
     setMode((current) => (current === 'signIn' ? 'signUp' : 'signIn'));
   };
 
@@ -98,6 +99,7 @@ export function SignInScreen() {
                 style={styles.eyeButton}
                 onPress={() => setShowPassword((v) => !v)}
                 accessibilityLabel={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                accessibilityRole="button"
                 hitSlop={8}
               >
                 <Icon
