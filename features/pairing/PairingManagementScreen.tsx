@@ -8,7 +8,8 @@
 // on this surface.
 //
 // Changes (issues #101, #102, #103):
-//   #101 — "Was [Mate] sieht" TransparencyCard (phase/attunement level only).
+//   #101 — "Was [Mate] sieht" TransparencyCard moved to its own /mate-preview
+//          screen (#156); this screen is management/revoke only.
 //   #102 — Mate identity: Avatar + name + "Verbunden" pill badge via getPartnerProfile.
 //   #103 — Remove duplicate "Mein Mate" heading; add trash icon to revoke; add caption.
 import { useCallback, useState } from 'react';
@@ -31,7 +32,6 @@ import {
 import { colors } from '../../lib/theme';
 import { Avatar } from '../../components/Avatar';
 import { Icon } from '../../components/Icon';
-import { TransparencyCard } from './TransparencyCard';
 import { styles } from './PairingManagementScreen.styles';
 
 /** Renders an ISO timestamp as a de-DE long date (e.g. 12. Mai 2026). */
@@ -109,23 +109,20 @@ export function PairingManagementScreen() {
       ) : pairings.length === 0 ? (
         <EmptyState onInvite={() => router.push('/invite')} />
       ) : (
-        <>
-          {pairings.map((pairing) => (
-            <PairingCard
-              key={pairing.id}
-              pairing={pairing}
-              partnerProfile={partnerProfile}
-              isPending={pendingId === pairing.id}
-              isBusy={busyId === pairing.id}
-              onStartRevoke={() => setPendingId(pairing.id)}
-              onCancelRevoke={() => setPendingId(null)}
-              onConfirmRevoke={() => {
-                void revoke(pairing.id);
-              }}
-            />
-          ))}
-          <TransparencyCard mateName={partnerProfile?.displayName ?? null} />
-        </>
+        pairings.map((pairing) => (
+          <PairingCard
+            key={pairing.id}
+            pairing={pairing}
+            partnerProfile={partnerProfile}
+            isPending={pendingId === pairing.id}
+            isBusy={busyId === pairing.id}
+            onStartRevoke={() => setPendingId(pairing.id)}
+            onCancelRevoke={() => setPendingId(null)}
+            onConfirmRevoke={() => {
+              void revoke(pairing.id);
+            }}
+          />
+        ))
       )}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}

@@ -51,8 +51,8 @@ type AppShell = 'flower' | 'mate' | 'onboarding';
 //                 the (tabs) shell at /.
 //   onboarding  — first-run fork, only when shell === 'onboarding'.
 // The remaining screens are shared sub-screens, always registered:
-//   periods (Verlauf) / period-form (modal) / mood-log / invite / accept-invite
-//   (Code eingeben) / pairing (Mein Mate).
+//   periods (Verlauf) / period-form (modal) / mood-log / mate-preview (Was dein
+//   Mate sieht) / invite / accept-invite (Code eingeben) / pairing (Mein Mate).
 function AppStack({ shell }: { shell: AppShell }) {
   const anchor = shell === 'flower' ? '(tabs)' : shell;
   return (
@@ -79,6 +79,7 @@ function AppStack({ shell }: { shell: AppShell }) {
         options={{ presentation: 'modal', headerShown: false }}
       />
       <Stack.Screen name="mood-log" options={{ headerShown: false }} />
+      <Stack.Screen name="mate-preview" options={{ title: 'Was dein Mate sieht' }} />
       <Stack.Screen name="invite" options={{ title: 'Mate einladen' }} />
       <Stack.Screen name="accept-invite" options={{ title: 'Code eingeben' }} />
       <Stack.Screen name="pairing" options={{ title: 'Mein Mate' }} />
