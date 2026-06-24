@@ -105,9 +105,7 @@ function OnboardingGate() {
 
   const refresh = useCallback(() => {
     resolveOnboardingNeeded()
-      .then((needed): Promise<AppShell> =>
-        needed ? Promise.resolve('onboarding') : resolveShell(),
-      )
+      .then((needed) => (needed ? ('onboarding' as const) : resolveShell()))
       .then((next) => {
         if (mounted.current) setShell(next);
       })
