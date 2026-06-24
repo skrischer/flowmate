@@ -63,6 +63,27 @@ truth, milestones and issues are created on GitHub from them.
   (measured duration: ~3s cold, < 1s warm on Node 24)
 - Build: `npx expo prebuild && npm run build` (EAS — live/Phase 7, not v1)
 
+> Native-build RAM budget (measured 2026-06 on a 16 GB WSL2 box + 4 GB swap):
+> ALWAYS check free RAM before starting a native Android build — never kick one
+> off blind. A clean `assembleDebug` runs the new-architecture C++ compile with
+> ninja parallelism ≈ CPU count (20 cores here → ~20 clang at once); the build
+> tree peaks at ~9.7 GB RSS and OOM-killed the Gradle daemon (needs ~10 GB free),
+> even with every Supabase stack paused. Key insight: the peak is driven by
+> COMPILE PARALLELISM, not ABI count — building one ABI instead of all four cut
+> the duration (126 s vs 283 s) but NOT the peak (~9.7 GB either way). Verified
+> OOM-free recipe on this box (BUILD SUCCESSFUL, 2m47s, peak ~7 GB) — cap
+> parallelism (ninja respects CPU affinity) and pause other stacks:
+>
+>     docker stop $(docker ps -q --filter name=supabase)   # frees ~4 GB; docker start to restore (volumes survive)
+>     cd android && taskset -c 0-5 ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+>
+> Levers, in order: (1) cap native parallelism with `taskset -c 0-5` (~6 cores) —
+> the real RAM lever; (2) pause other local Docker stacks (volumes survive); (3)
+> pick ONE ABI for speed (`x86_64` emulator / `arm64-v8a` device) — fewer files,
+> same peak; (4) for a JS-only change skip the build entirely and reload the Metro
+> bundle (Expo Go / `expo start --web`) — no recompile. Incremental rebuilds keep
+> `.cxx` and are far lighter; only clean / first builds hit the full spike.
+
 Verify is the per-iteration gate: run it after every change set and fix until
 green. Run is the local-test loop for app-affecting changes (Build/EAS is a
 live-operation concern, Phase 7). Test (`npm test`) covers machine-checkable
