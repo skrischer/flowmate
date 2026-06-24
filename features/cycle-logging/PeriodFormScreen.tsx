@@ -33,7 +33,10 @@ import { isOnOrAfter, isValidIso, todayIso } from './date';
 
 export function PeriodFormScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, startDate: paramStartDate } = useLocalSearchParams<{
+    id?: string;
+    startDate?: string;
+  }>();
   const isEdit = typeof id === 'string' && id.length > 0;
 
   const [startDate, setStartDate] = useState('');
@@ -48,7 +51,11 @@ export function PeriodFormScreen() {
     useCallback(() => {
       let active = true;
       if (!isEdit) {
-        setStartDate(todayIso());
+        // Prefill the tapped calendar day when navigated from the calendar
+        // (validated); otherwise default to today (e.g. the home/CTA path).
+        setStartDate(
+          paramStartDate && isValidIso(paramStartDate) ? paramStartDate : todayIso(),
+        );
         setEndDate('');
         setIsLoaded(true);
         return;
@@ -69,7 +76,7 @@ export function PeriodFormScreen() {
       return () => {
         active = false;
       };
-    }, [id, isEdit]),
+    }, [id, isEdit, paramStartDate]),
   );
 
   const validate = (): string | null => {
