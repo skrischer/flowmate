@@ -1,5 +1,5 @@
 // Initials-based circular avatar — no image upload exists in v1.
-// Derives up to two initials from a display name, falling back to a single
+// Derives a single initial from a display name, falling back to a single
 // letter from the email or a placeholder bullet when neither is available.
 // Token-driven: background from `surfaceRaised`, text from `primary`.
 // Reused by the Flower header (#80) and any partner-identity surface.
@@ -16,14 +16,12 @@ export interface AvatarProps {
   size?: number;
 }
 
-/** Derives up to two uppercase initials from a display name or a single letter fallback. */
+/** Derives a single uppercase initial from a display name, or a single-letter fallback. */
 export function initials(displayName: string | null, fallback?: string | null): string {
   const name = displayName?.trim();
   if (name && name.length > 0) {
-    const parts = name.split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) {
-      return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase();
-    }
+    // Always a single letter: display names carry a parenthetical suffix
+    // ("Mia (Flower-Test)"), so a first+last-word scheme yielded "M(" (#153).
     return name[0]!.toUpperCase();
   }
   const fb = fallback?.trim();
