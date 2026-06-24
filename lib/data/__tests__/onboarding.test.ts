@@ -41,13 +41,13 @@ interface PairingChain {
   then: (resolve: (value: CountResult) => unknown) => Promise<unknown>;
 }
 
-const mockGetUser = jest.fn();
+const mockGetSession = jest.fn();
 const mockPeriodsHead = jest.fn<Promise<CountResult>, []>();
 const mockPairingHead = jest.fn<Promise<CountResult>, []>();
 
 jest.mock('../client', () => ({
   supabase: {
-    auth: { getUser: () => mockGetUser() },
+    auth: { getSession: () => mockGetSession() },
     from: (table: string) => ({
       select: () => {
         if (table === 'periods') {
@@ -68,7 +68,7 @@ const FOLLOWER = 'follower-uuid';
 beforeEach(() => {
   jest.clearAllMocks();
   mockedStore.__store.clear();
-  mockGetUser.mockResolvedValue({ data: { user: { id: FOLLOWER } }, error: null });
+  mockGetSession.mockResolvedValue({ data: { session: { user: { id: FOLLOWER } } }, error: null });
   mockPeriodsHead.mockResolvedValue({ count: 0, error: null });
   mockPairingHead.mockResolvedValue({ count: 0, error: null });
 });
@@ -122,5 +122,14 @@ describe('resolveShell (owner-vs-follower routing)', () => {
 
   it('defaults to the Flower shell for a stateless account', async () => {
     await expect(resolveShell()).resolves.toBe('flower');
+  });
+
+  it('falls back to the Flower shell (no throw) when no session is restored', async () => {
+    // Regression for #145: without a session the follower-edge check returns false
+    // early -- it must not throw and must not consult the pairing table.
+    mockGetSession.mockResolvedValue({ data: { session: null }, error: null });
+    mockPairingHead.mockResolvedValue({ count: 1, error: null });
+    await expect(resolveShell()).resolves.toBe('flower');
+    expect(mockPairingHead).not.toHaveBeenCalled();
   });
 });

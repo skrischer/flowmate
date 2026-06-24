@@ -12,7 +12,7 @@ import type { Tables } from '../database.types';
 type PairingRow = Pick<Tables<'pairing'>, 'owner_id'>;
 type MaybeSingle<T> = { data: T | null; error: unknown };
 
-const mockGetUser = jest.fn();
+const mockGetSession = jest.fn();
 const mockPairingMaybeSingle = jest.fn<Promise<MaybeSingle<PairingRow>>, []>();
 const mockSharedMaybeSingle = jest.fn<Promise<MaybeSingle<Tables<'shared_state'>>>, []>();
 const tablesQueried: string[] = [];
@@ -24,7 +24,7 @@ interface Chain {
 
 jest.mock('../client', () => ({
   supabase: {
-    auth: { getUser: () => mockGetUser() },
+    auth: { getSession: () => mockGetSession() },
     from: (table: string) => {
       tablesQueried.push(table);
       const resolver =
@@ -51,7 +51,7 @@ const sharedRow: Tables<'shared_state'> = {
 beforeEach(() => {
   jest.clearAllMocks();
   tablesQueried.length = 0;
-  mockGetUser.mockResolvedValue({ data: { user: { id: FOLLOWER } }, error: null });
+  mockGetSession.mockResolvedValue({ data: { session: { user: { id: FOLLOWER } } }, error: null });
   mockPairingMaybeSingle.mockResolvedValue({ data: { owner_id: OWNER }, error: null });
   mockSharedMaybeSingle.mockResolvedValue({ data: sharedRow, error: null });
 });
@@ -78,7 +78,7 @@ describe('getFollowedSharedState', () => {
   });
 
   it('returns { connected: false } when there is no session', async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockGetSession.mockResolvedValue({ data: { session: null }, error: null });
     await expect(getFollowedSharedState()).resolves.toEqual({ connected: false });
     expect(tablesQueried).toEqual([]);
   });

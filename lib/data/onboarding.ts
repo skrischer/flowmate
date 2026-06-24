@@ -66,17 +66,23 @@ async function hasOwnLogs(): Promise<boolean> {
 
 /** Whether the current account is the follower on an active pairing edge. */
 async function hasActiveFollowerEdge(): Promise<boolean> {
-  const { data, error } = await supabase.auth.getUser();
+  // Read the user id from the LOCAL session (getSession), not getUser(): the gate
+  // runs this at cold start, where getUser()'s network validation can transiently
+  // return null during a token refresh -> the edge check would wrongly resolve to
+  // "no edge" and route a follower to the Flower shell (#145). getSession reads the
+  // already-restored session synchronously; RLS still enforces real access.
+  const { data, error } = await supabase.auth.getSession();
   if (error) {
     throw error;
   }
-  if (!data.user) {
+  const userId = data.session?.user.id;
+  if (!userId) {
     return false;
   }
   const { count, error: pairingError } = await supabase
     .from('pairing')
     .select('id', { count: 'exact', head: true })
-    .eq('follower_id', data.user.id)
+    .eq('follower_id', userId)
     .eq('status', 'active');
   if (pairingError) {
     throw pairingError;
