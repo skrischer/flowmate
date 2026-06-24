@@ -78,7 +78,12 @@ export function CalendarScreen() {
         {/* #85: 4 dot-chip legend directly under the header, before the grid */}
         <Legend />
 
-        <MonthGridView grid={grid} onDayPress={() => router.push('/period-form')} />
+        <MonthGridView
+          grid={grid}
+          onDayPress={(date) =>
+            router.push({ pathname: '/period-form', params: { startDate: date } })
+          }
+        />
 
         {/* #87: calendar-specific disclaimer (outlined = predicted) */}
         <CalendarDisclaimer />
@@ -100,7 +105,13 @@ export function CalendarScreen() {
 }
 
 // The weekday header plus the Monday-first weeks of day cells.
-function MonthGridView({ grid, onDayPress }: { grid: MonthGrid; onDayPress: () => void }) {
+function MonthGridView({
+  grid,
+  onDayPress,
+}: {
+  grid: MonthGrid;
+  onDayPress: (date: string) => void;
+}) {
   return (
     <View style={styles.gridBlock}>
       <View style={styles.weekdays}>
@@ -126,7 +137,7 @@ function MonthGridView({ grid, onDayPress }: { grid: MonthGrid; onDayPress: () =
 // One day cell: a solid fill for logged days, an outlined ring for the predicted
 // start day, a soft caramel fill for fertile days, and a ring for today. Tapping
 // an in-month day opens the period log (the design's tap-a-day affordance).
-function DayView({ cell, onPress }: { cell: DayCell; onPress: () => void }) {
+function DayView({ cell, onPress }: { cell: DayCell; onPress: (date: string) => void }) {
   return (
     <Pressable
       style={({ pressed }) => [
@@ -135,7 +146,7 @@ function DayView({ cell, onPress }: { cell: DayCell; onPress: () => void }) {
         cell.isToday && styles.today,
         pressed && cell.inMonth && styles.cellPressed,
       ]}
-      onPress={onPress}
+      onPress={() => onPress(cell.date)}
       disabled={!cell.inMonth}
     >
       <Text style={[styles.cellText, !cell.inMonth && styles.cellTextOut, textStyles[cell.marker]]}>
