@@ -49,12 +49,9 @@ export function MoodRow({ selectedMood, onSelect }: MoodRowProps) {
 }
 
 const styles = StyleSheet.create({
+  // No raised surface: per design only the prediction card is a raised card; the
+  // mood row sits on the base background (#151).
   card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
-    borderWidth: 1,
-    borderRadius: radii.lg,
-    padding: 22,
     gap: 14,
   },
   heading: {
