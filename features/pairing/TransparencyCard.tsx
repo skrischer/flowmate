@@ -1,5 +1,6 @@
 // "Was [Mate] sieht" transparency card (#101): data-sovereignty centrepiece shown
-// on the Flower · Pairing-Management screen. Lists only phase-level fields shared
+// on the Flower · "Was mein Mate sieht" preview screen (/mate-preview, #156).
+// Lists only phase-level fields shared
 // via shared_state — never raw logs, moods, or exact dates. Row values are
 // illustrative labels, not live data. Lock footnote makes the guarantee explicit.
 import { StyleSheet, Text, View } from 'react-native';
