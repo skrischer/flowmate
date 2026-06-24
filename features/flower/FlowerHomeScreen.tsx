@@ -217,7 +217,11 @@ export function FlowerHomeScreen() {
           <Text style={styles.ctaText}>Periode eintragen</Text>
         </Pressable>
 
-        <MoodRow selectedMood={selectedMood} onSelect={handleMoodSelect} />
+        <MoodRow
+          selectedMood={selectedMood}
+          onSelect={handleMoodSelect}
+          onOpenDetail={() => router.push('/mood-log')}
+        />
       </ScrollView>
     </SafeAreaView>
   );

@@ -15,13 +15,20 @@ export interface MoodRowProps {
   selectedMood: Mood | null;
   /** Called when the user taps a mood chip. */
   onSelect: (mood: Mood) => void;
+  /** Opens the full "Stimmung" screen (log a mood for a chosen day). */
+  onOpenDetail: () => void;
 }
 
 /** Horizontal 6-chip mood row with "Wie fuehlst du dich heute?" heading. */
-export function MoodRow({ selectedMood, onSelect }: MoodRowProps) {
+export function MoodRow({ selectedMood, onSelect, onOpenDetail }: MoodRowProps) {
   return (
     <View style={styles.card}>
-      <Text style={styles.heading}>Wie fuehlst du dich heute?</Text>
+      <View style={styles.header}>
+        <Text style={styles.heading}>Wie fuehlst du dich heute?</Text>
+        <Pressable onPress={onOpenDetail} hitSlop={8} accessibilityRole="button">
+          <Text style={styles.detailLink}>Stimmung</Text>
+        </Pressable>
+      </View>
       <View style={styles.chips}>
         {MOOD_OPTIONS.map((opt) => {
           const isSelected = opt.value === selectedMood;
@@ -54,9 +61,18 @@ const styles = StyleSheet.create({
   card: {
     gap: 14,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   heading: {
     ...typography.title,
     color: colors.text,
+  },
+  detailLink: {
+    ...typography.bodySm,
+    color: colors.primary,
   },
   chips: {
     flexDirection: 'row',
