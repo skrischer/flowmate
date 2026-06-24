@@ -1,10 +1,11 @@
 // Shared · Onboarding (docs/design.md, spec-pairing.md): the first-run fork after
 // sign-up. A gate, not a wizard — it routes only and persists NO role (the shell
 // stays derived from the pairing edge; constitution). "Eigenen Zyklus tracken"
-// marks the device-local completion flag and lands on the Flower shell;
-// "Partner:in folgen" opens Mate · Code eingeben (accept_invite). Completion of
-// the follow path is the pairing edge itself, so the flag stays unset there — an
-// abandoned follow choice simply re-shows this gate on relaunch.
+// marks the device-local completion flag and re-resolves the shell, which flips
+// the gate to the Flower shell (refresh, not a navigation into a guarded-out
+// screen — #147); "Partner:in folgen" opens Mate · Code eingeben (accept_invite).
+// Completion of the follow path is the pairing edge itself, so the flag stays
+// unset there — an abandoned follow choice simply re-shows this gate on relaunch.
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +15,7 @@ import { setOnboardingComplete } from '../../lib/data';
 import { colors, radii, spacing } from '../../lib/theme';
 import { BrandMark } from '../../components/BrandMark';
 import { Icon, type IconName } from '../../components/Icon';
+import { useShell } from '../shell/ShellContext';
 
 type Choice = {
   key: 'track' | 'follow';
@@ -39,6 +41,7 @@ const CHOICES: readonly Choice[] = [
 
 export function OnboardingForkScreen() {
   const router = useRouter();
+  const { refresh } = useShell();
   const [isBusy, setIsBusy] = useState(false);
 
   const choose = async (key: Choice['key']) => {
@@ -49,7 +52,7 @@ export function OnboardingForkScreen() {
     }
     setIsBusy(true);
     await setOnboardingComplete();
-    router.replace('/');
+    refresh();
   };
 
   return (

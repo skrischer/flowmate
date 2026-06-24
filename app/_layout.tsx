@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
@@ -16,6 +16,7 @@ import {
 import { AuthProvider, useAuth } from '../features/auth/AuthProvider';
 import { SignInScreen } from '../features/auth/SignInScreen';
 import { resolveOnboardingNeeded, resolveShell } from '../lib/data';
+import { ShellContext } from '../features/shell/ShellContext';
 import { colors } from '../lib/theme';
 
 function Spinner() {
@@ -26,38 +27,52 @@ function Spinner() {
   );
 }
 
+// The three destinations the authenticated app can resolve to: the Flower shell,
+// the Mate shell, or the first-run onboarding fork.
+type AppShell = 'flower' | 'mate' | 'onboarding';
+
 // Authenticated app stack. The first-run fork and the owner-vs-follower shell are
-// layered in front of it via initialRouteName (spec-pairing.md / spec-mate-push.md):
-// a stateless, unflagged account starts on the onboarding gate; otherwise the
-// shell is edge-derived — an active follower lands on the Mate tab shell,
-// everyone else on the Flower tab shell. Navigation-only: no role is persisted.
+// gated declaratively with Stack.Protected, keyed on the resolved shell
+// (spec-pairing.md / spec-mate-push.md). Only the active shell's screen is
+// registered, so the cold-start launch URL "/" cannot resolve to the wrong shell:
+// a follower no longer lands on the Flower home at "/" (#147 — initialRouteName
+// alone does not override the launch URL; removing the screen does). When the URL
+// matches a guarded-out screen, the navigator falls back to the anchor
+// (initialRouteName). Flipping the resolved shell (onboarding completion) flips
+// the guards and moves the user — we never navigate into a guarded-out screen.
+// Navigation-only: no role is persisted.
 //
-// Route structure:
-//   (tabs)          — Flower tab bar (Heute / Kalender / Profil); headerShown: false
-//                     because the Tabs navigator manages its own headers per tab.
-//   mate            — Mate tab bar (Eingestimmt / Profil) at /mate; a real path
-//                     segment, not a route group, so it never collides with the
-//                     (tabs) shell at /; headerShown: false
-//   onboarding      — first-run fork (no header)
-//   periods         — Verlauf / Zyklus-Historie (stack-presented from Profil tab)
-//   period-form     — Periode eintragen (modal sheet; self-managed header)
-//   mood-log        — Stimmung eintragen (stack-presented from Heute)
-//   invite          — Mate einladen (stack-presented from Profil tab)
-//   accept-invite   — Code eingeben (reached via onboarding fork)
-//   pairing         — Mein Mate management (stack-presented from Profil tab)
-function AppStack({ initialRoute }: { initialRoute: string }) {
+// Guards:
+//   (tabs)      — Flower tab bar at /, only when shell === 'flower'.
+//   mate        — Mate shell at /mate, whenever shell !== 'flower' (mate AND
+//                 onboarding), so the shared accept-invite screen can land on
+//                 /mate from both the onboarding follow-path and the Mate re-pair
+//                 (EndedView). /mate is a real path segment, never colliding with
+//                 the (tabs) shell at /.
+//   onboarding  — first-run fork, only when shell === 'onboarding'.
+// The remaining screens are shared sub-screens, always registered:
+//   periods (Verlauf) / period-form (modal) / mood-log / invite / accept-invite
+//   (Code eingeben) / pairing (Mein Mate).
+function AppStack({ shell }: { shell: AppShell }) {
+  const anchor = shell === 'flower' ? '(tabs)' : shell;
   return (
     <Stack
-      initialRouteName={initialRoute}
+      initialRouteName={anchor}
       screenOptions={{
         headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.text,
         contentStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="mate" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Protected guard={shell === 'flower'}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={shell !== 'flower'}>
+        <Stack.Screen name="mate" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={shell === 'onboarding'}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack.Protected>
       <Stack.Screen name="periods" options={{ title: 'Verlauf' }} />
       <Stack.Screen
         name="period-form"
@@ -71,36 +86,50 @@ function AppStack({ initialRoute }: { initialRoute: string }) {
   );
 }
 
-// Onboarding + shell gate: resolves the first-run destination once a session
-// exists. The fork wins when needed (spec precedence: own logs / active follower
-// edge / completion flag all skip it); otherwise the shell is edge-derived — an
-// active follower opens the Mate view, everyone else the Flower home. We hold the
-// spinner while resolving so the stack never mounts at the wrong initial route.
+// Onboarding + shell gate: resolves the destination once a session exists (spec
+// precedence: own logs / active follower edge / completion flag all skip the
+// fork). The resolved shell drives the Stack.Protected guards. `refresh`
+// re-resolves it in place, so completing onboarding flips the guards instead of
+// navigating into a guarded-out screen. We hold the spinner only on the initial
+// resolve, so the stack never mounts before the shell is known.
 function OnboardingGate() {
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const [shell, setShell] = useState<AppShell | null>(null);
+  const mounted = useRef(true);
 
   useEffect(() => {
-    let active = true;
-    resolveOnboardingNeeded()
-      .then(async (needed) => {
-        if (needed) return 'onboarding';
-        return (await resolveShell()) === 'mate' ? 'mate' : '(tabs)';
-      })
-      .then((route) => {
-        if (active) setInitialRoute(route);
-      })
-      .catch(() => {
-        if (active) setInitialRoute('(tabs)');
-      });
+    mounted.current = true;
     return () => {
-      active = false;
+      mounted.current = false;
     };
   }, []);
 
-  if (initialRoute === null) {
+  const refresh = useCallback(() => {
+    resolveOnboardingNeeded()
+      .then((needed): Promise<AppShell> =>
+        needed ? Promise.resolve('onboarding') : resolveShell(),
+      )
+      .then((next) => {
+        if (mounted.current) setShell(next);
+      })
+      .catch(() => {
+        if (mounted.current) setShell('flower');
+      });
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const value = useMemo(() => ({ refresh }), [refresh]);
+
+  if (shell === null) {
     return <Spinner />;
   }
-  return <AppStack initialRoute={initialRoute} />;
+  return (
+    <ShellContext.Provider value={value}>
+      <AppStack shell={shell} />
+    </ShellContext.Provider>
+  );
 }
 
 // Auth gate: while the persisted session loads we show a spinner, then route
