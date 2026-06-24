@@ -64,17 +64,22 @@ async function requireOwnerId(): Promise<string> {
  * for the former. There is no write path here.
  */
 export async function getFollowedSharedState(): Promise<FollowedSharedState> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError) {
-    throw userError;
+  // Local session (getSession), not getUser(): this loads when the Mate shell
+  // mounts at cold start, where getUser()'s network validation can transiently
+  // return null during a token refresh and wrongly yield the ended state (#145).
+  // getSession reads the already-restored session synchronously; RLS still gates.
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) {
+    throw sessionError;
   }
-  if (!userData.user) {
+  const userId = sessionData.session?.user.id;
+  if (!userId) {
     return { connected: false };
   }
   const { data: edge, error: edgeError } = await supabase
     .from('pairing')
     .select('owner_id')
-    .eq('follower_id', userData.user.id)
+    .eq('follower_id', userId)
     .eq('status', 'active')
     .maybeSingle();
   if (edgeError) {
