@@ -76,12 +76,19 @@ describe('buildMonthGrid', () => {
     expect(grid.weeks[0]?.[0]?.inMonth).toBe(true);
   });
 
-  it('marks logged days, the predicted start day, and the fertile window', () => {
+  it('marks logged days, the predicted span, ovulation, and the fertile window', () => {
     const cells = grid.weeks.flat();
     const byDate = (date: string) => cells.find((cell) => cell.date === date);
     expect(byDate('2026-06-10')?.marker).toBe('logged');
     expect(byDate('2026-06-12')?.marker).toBe('logged');
+    // Predicted next period is a 5-day span from nextPeriodDate (MENSTRUAL_DAYS).
     expect(byDate('2026-06-28')?.marker).toBe('predicted');
+    expect(byDate('2026-06-30')?.marker).toBe('predicted');
+    // The span spills into the trailing July pad of June's grid.
+    expect(byDate('2026-07-02')?.marker).toBe('predicted');
+    expect(byDate('2026-07-03')?.marker).toBe('none');
+    // Ovulation wins over the fertile window it sits inside.
+    expect(byDate('2026-06-14')?.marker).toBe('ovulation');
     expect(byDate('2026-06-09')?.marker).toBe('fertile');
     expect(byDate('2026-06-15')?.marker).toBe('fertile');
     expect(byDate('2026-06-20')?.marker).toBe('none');
@@ -99,7 +106,21 @@ describe('buildMonthGrid', () => {
     const markers = noPred.weeks.flat().map((cell) => cell.marker);
     expect(markers).toContain('logged');
     expect(markers).not.toContain('predicted');
+    expect(markers).not.toContain('ovulation');
     expect(markers).not.toContain('fertile');
+  });
+
+  it('lets logged days win over an overlapping predicted span', () => {
+    const overlap = buildMonthGrid(
+      '2026-06-01',
+      [period('2026-06-28', '2026-06-29')],
+      prediction,
+      '2026-06-22',
+    );
+    const byDate = (date: string) =>
+      overlap.weeks.flat().find((cell) => cell.date === date);
+    expect(byDate('2026-06-28')?.marker).toBe('logged');
+    expect(byDate('2026-06-30')?.marker).toBe('predicted');
   });
 });
 

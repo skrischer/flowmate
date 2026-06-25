@@ -8,10 +8,10 @@
 
 import { addDays, daysBetween, isIsoDate } from '../../lib/prediction/dates';
 import type { Period } from '../../lib/data';
-import type { DateRange, Prediction } from '../../lib/prediction';
+import { MENSTRUAL_DAYS, type DateRange, type Prediction } from '../../lib/prediction';
 
 /** How a single day is highlighted on the calendar grid. */
-export type DayMarker = 'logged' | 'predicted' | 'fertile' | 'none';
+export type DayMarker = 'logged' | 'predicted' | 'ovulation' | 'fertile' | 'none';
 
 /** One day cell in the month grid. */
 export type DayCell = {
@@ -23,7 +23,7 @@ export type DayCell = {
   inMonth: boolean;
   /** True when this cell is the reference `today`. */
   isToday: boolean;
-  /** The primary highlight for the day (logged wins over predicted/fertile). */
+  /** The primary highlight for the day (logged > predicted > ovulation > fertile). */
   marker: DayMarker;
 };
 
@@ -96,11 +96,22 @@ export function buildMonthGrid(
   const [year, month] = splitIso(start);
   const logged = loggedDays(periods);
   const fertile = prediction?.fertileWindow ?? null;
-  const predictedStart = prediction?.nextPeriodDate ?? null;
+  const ovulation = prediction?.ovulationDate ?? null;
+  const predicted = predictedSpan(prediction?.nextPeriodDate ?? null);
   const cells = gridDays(start).map((date) =>
-    toCell(date, year, month, today, logged, fertile, predictedStart),
+    toCell(date, year, month, today, logged, fertile, ovulation, predicted),
   );
   return { monthStart: start, year, month, weeks: chunkWeeks(cells) };
+}
+
+// The predicted next period as an inclusive 5-day span starting on the predicted
+// start day (nextPeriodDate .. nextPeriodDate + MENSTRUAL_DAYS - 1). Reuses the
+// engine's MENSTRUAL_DAYS so the band length stays in lockstep with prediction.
+function predictedSpan(nextPeriodDate: string | null): DateRange | null {
+  if (nextPeriodDate === null) {
+    return null;
+  }
+  return { start: nextPeriodDate, end: addDays(nextPeriodDate, MENSTRUAL_DAYS - 1) };
 }
 
 /** Expands logged periods into the set of ISO days they cover (inclusive). */
@@ -121,8 +132,9 @@ export function loggedDays(periods: readonly Period[]): ReadonlySet<string> {
   return days;
 }
 
-// Resolves a single day's highlight. Logged days win, then the predicted start
-// day, then the fertile window — so an overlap reads as the more certain signal.
+// Resolves a single day's highlight. Logged days win, then the predicted period
+// span, then the ovulation day, then the fertile window — so an overlap reads as
+// the more certain signal (ovulation lies inside the fertile window).
 function toCell(
   date: string,
   year: number,
@@ -130,7 +142,8 @@ function toCell(
   today: string,
   logged: ReadonlySet<string>,
   fertile: DateRange | null,
-  predictedStart: string | null,
+  ovulation: string | null,
+  predicted: DateRange | null,
 ): DayCell {
   const [cellYear, cellMonth, cellDay] = splitIso(date);
   return {
@@ -138,7 +151,7 @@ function toCell(
     day: cellDay,
     inMonth: cellYear === year && cellMonth === month,
     isToday: date === today,
-    marker: markerFor(date, logged, fertile, predictedStart),
+    marker: markerFor(date, logged, fertile, ovulation, predicted),
   };
 }
 
@@ -146,13 +159,17 @@ function markerFor(
   date: string,
   logged: ReadonlySet<string>,
   fertile: DateRange | null,
-  predictedStart: string | null,
+  ovulation: string | null,
+  predicted: DateRange | null,
 ): DayMarker {
   if (logged.has(date)) {
     return 'logged';
   }
-  if (predictedStart !== null && date === predictedStart) {
+  if (predicted !== null && date >= predicted.start && date <= predicted.end) {
     return 'predicted';
+  }
+  if (ovulation !== null && date === ovulation) {
+    return 'ovulation';
   }
   if (fertile !== null && date >= fertile.start && date <= fertile.end) {
     return 'fertile';
