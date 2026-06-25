@@ -43,6 +43,7 @@ Not sequenced phases — work that spans surfaces built in Phases 1–6.
 | Theme | Spec | Milestone |
 |---|---|---|
 | Design-fidelity reconciliation — reconcile the implemented screens with the design contract, bidirectionally (code→design default; design→code where the build is better) | [spec](specs/spec-design-reconciliation.md) | [#7](https://github.com/skrischer/flowmate/milestone/7) |
+| Design reconciliation — round 2 — QA follow-up to the theme (six annotated app-vs-design comparisons) + resolves the phase-track issue #152 | [spec](specs/spec-design-reconciliation-2.md) | [#8](https://github.com/skrischer/flowmate/milestone/8) |
 
 ## North star
 
