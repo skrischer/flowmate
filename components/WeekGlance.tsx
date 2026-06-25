@@ -1,7 +1,7 @@
 // 'Diese Woche' week-glance strip for the Flower home (#77).
 // Shows Mon-Sun of the current week; today is highlighted with a filled primary
-// pill. Indicator dots below days that have logged period data or a mood entry.
-// A "Kalender" link in the header navigates to /calendar.
+// column-filling rounded-rect. Indicator dots below days that have logged period
+// data or a mood entry. A "Kalender" link in the header navigates to /calendar.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, typography } from '../lib/theme';
@@ -100,10 +100,12 @@ const styles = StyleSheet.create({
   weekLabelToday: {
     color: colors.primary,
   },
+  // Per design the today marker is a column-filling rounded-rect (r14), not a
+  // pill: it stretches to the column width and is ~43px tall.
   dayPill: {
-    width: 32,
-    height: 32,
-    borderRadius: radii.pill,
+    alignSelf: 'stretch',
+    height: 43,
+    borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
