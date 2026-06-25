@@ -62,8 +62,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // "Verbindung beendet": H2 (22/28) per the artboard, not H1.
   headline: {
-    ...typography.h1,
+    ...typography.h2,
     color: colors.text,
     textAlign: 'center',
   },

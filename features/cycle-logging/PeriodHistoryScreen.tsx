@@ -18,7 +18,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { listPeriods, type Period } from '../../lib/data';
 import { daysBetween } from '../../lib/prediction/dates';
 import { cycleLengthStats } from '../../lib/prediction/cycle-stats';
-import { colors, radii, spacing, typography } from '../../lib/theme';
+import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
 import { Icon } from '../../components/Icon';
 import { TopBar } from '../../components/TopBar';
 import { formatIso } from './date';
@@ -253,14 +253,20 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   statItem: { flex: 1, alignItems: 'center', gap: 4 },
+  // Stat number: DM Sans 600 24/30 per the artboard (not Title 16).
   statValue: {
     ...typography.title,
+    fontSize: 24,
+    lineHeight: 30,
     color: colors.text,
   },
+  // Stat label: Inter 500 12/16 per the artboard (not Caption 11).
   statLabel: {
     ...typography.caption,
+    fontSize: 12,
+    lineHeight: 16,
     color: colors.textMuted,
-    letterSpacing: 0.04 * 11,
+    letterSpacing: 0,
   },
   cardDivider: {
     width: 1,
@@ -297,12 +303,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.period,
   },
   rowMain: { flex: 1 },
+  // Date label: DM Sans 600 16/20 (Title) per the artboard (not Label Inter 13).
   rowDate: {
-    ...typography.label,
+    ...typography.title,
+    lineHeight: 20,
     color: colors.text,
   },
+  // Meta subtitle: Inter 400 13/16 per the artboard (not Caption Inter 500 11).
   rowMeta: {
-    ...typography.caption,
+    fontFamily: fonts.body,
+    fontSize: 13,
+    lineHeight: 16,
     color: colors.textMuted,
     marginTop: 2,
   },

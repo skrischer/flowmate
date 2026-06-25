@@ -67,11 +67,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heading: {
-    ...typography.title,
+    ...typography.sectionTitle,
     color: colors.text,
   },
   detailLink: {
-    ...typography.bodySm,
+    ...typography.navLink,
     color: colors.primary,
   },
   chips: {

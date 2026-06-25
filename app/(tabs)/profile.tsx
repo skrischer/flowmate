@@ -173,8 +173,11 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     gap: 24,
   },
+  // "Profil" heading: DM Sans 600 24/30 per the artboard (not H1 34).
   heading: {
-    ...typography.h1,
+    ...typography.h2,
+    fontSize: 24,
+    lineHeight: 30,
     color: colors.text,
   },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 16 },

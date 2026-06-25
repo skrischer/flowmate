@@ -253,17 +253,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
   },
   closeBtnPressed: { opacity: 0.7 },
+  // Sheet title: DM Sans 600 18/22 per the artboard (not Title 16).
   sheetTitle: {
     ...typography.title,
+    fontSize: 18,
+    lineHeight: 22,
     color: colors.text,
     flex: 1,
     textAlign: 'center',
   },
   headerSpacer: { width: 36 },
 
-  // Intro line
+  // Intro line: Inter 400 15/22 per the artboard (not bodySm 14/20).
   intro: {
     ...typography.bodySm,
+    fontSize: 15,
+    lineHeight: 22,
     color: colors.textMuted,
     paddingHorizontal: spacing.screen,
     paddingBottom: 8,

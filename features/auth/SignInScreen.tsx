@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 
 import { signIn, signUp } from '../../lib/data';
-import { colors, radii, typography } from '../../lib/theme';
+import { colors, fonts, radii, typography } from '../../lib/theme';
 import { BrandMark } from '../../components/BrandMark';
 import { Icon } from '../../components/Icon';
 
@@ -155,11 +155,15 @@ const styles = StyleSheet.create({
     gap: 36,
   },
   header: { alignItems: 'center', gap: 8 },
+  // Wordmark: DM Sans 600 30/36 (H1 range, low end) per the Auth artboard.
   wordmark: {
-    ...typography.h2,
+    ...typography.h1,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.025 * 30,
     color: colors.text,
   },
-  tagline: { ...typography.bodySm, color: colors.textMuted },
+  tagline: { ...typography.bodySm, fontSize: 15, lineHeight: 18, color: colors.textMuted },
   form: { gap: 16 },
   fieldGroup: { gap: 8 },
   label: { ...typography.label, color: colors.label },
@@ -200,10 +204,12 @@ const styles = StyleSheet.create({
   },
   ctaPressed: { backgroundColor: colors.primaryPress },
   ctaDisabled: { opacity: 0.6 },
-  ctaText: { ...typography.title, color: colors.onPrimary },
+  // CTA label: Inter 600 16/20 per design (not DM Sans Title).
+  ctaText: { fontFamily: fonts.bodySemiBold, fontSize: 16, lineHeight: 20, color: colors.onPrimary },
   footer: { alignItems: 'center', gap: 20 },
   switchRow: { flexDirection: 'row', gap: 6 },
   footerPrompt: { ...typography.bodySm, color: colors.textMuted },
-  switchLabel: { ...typography.bodySm, color: colors.primary },
+  // "Registrieren"/"Anmelden" toggle: Inter 600 14/18 per design.
+  switchLabel: { fontFamily: fonts.bodySemiBold, fontSize: 14, lineHeight: 18, color: colors.primary },
   trust: { ...typography.caption, color: colors.textSubtle },
 });

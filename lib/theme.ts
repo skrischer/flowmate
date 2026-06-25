@@ -57,9 +57,9 @@ export const typography = {
   },
   h1: {
     fontFamily: fonts.display,
-    fontSize: 32, // mid-range pick from the 30–34 spec range (design.md)
-    lineHeight: 36, // spec: 34–36; high end for the chosen 32px size
-    letterSpacing: -0.02 * 32,
+    fontSize: 34, // high end of the 30–34 spec range (design.md) — the phase-card headline
+    lineHeight: 36, // spec: 34–36
+    letterSpacing: -0.02 * 34,
   },
   h2: {
     fontFamily: fonts.display,
@@ -72,6 +72,15 @@ export const typography = {
     fontSize: 16,
     lineHeight: 22, // spec does not specify; ~1.375× convention
     letterSpacing: -0.02 * 16,
+  },
+  // Section heading inside a card ("Diese Woche", "Wie fühlst du dich heute?"):
+  // DM Sans 600 15/18 per the Paper artboards — one step down from Title (16).
+  // Not a named design.md role, but a recurring slot shared across home sections.
+  sectionTitle: {
+    fontFamily: fonts.display,
+    fontSize: 15,
+    lineHeight: 18,
+    letterSpacing: -0.02 * 15,
   },
   body: {
     fontFamily: fonts.body,
@@ -97,5 +106,13 @@ export const typography = {
     lineHeight: 15, // spec does not specify; ~1.36× convention
     // 0.04em at the low end of the 0.04–0.16em spec range (design.md)
     letterSpacing: 0.04 * 11,
+  },
+  // Inline section nav-link ("Kalender", "Stimmung"): Inter 500 13/16 per the
+  // Paper artboards — distinct from bodySm (Inter 400 14/20) used for body copy.
+  navLink: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 13,
+    lineHeight: 16,
+    letterSpacing: 0,
   },
 } as const;

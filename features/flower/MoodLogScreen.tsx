@@ -215,7 +215,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
   },
-  dateChipText: { ...typography.label, color: colors.label },
+  // Date chip: Inter 600 13/16, no tracking per the artboard (Label lh/ls differ).
+  dateChipText: { ...typography.label, lineHeight: 16, letterSpacing: 0, color: colors.label },
   heading: {
     fontFamily: fonts.display,
     fontSize: 24,
