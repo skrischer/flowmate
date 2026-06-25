@@ -96,7 +96,7 @@ prefix; listed state variants are separate artboards.
 | Flower · Home | `spec-flower-experience.md` | Phase card + **fertile window** + week glance + mood row + **"Periode eintragen" CTA** |
 | Flower · Home (keine Prognose) | `spec-flower-experience.md` | `confidence: none` variant — backfill prompt, **no fabricated window**, CTA |
 | Flower · Home (niedrige Sicherheit) | `spec-flower-experience.md` | `confidence: low` variant — prediction (`~`) + a **low-confidence caveat** distinct from the disclaimer |
-| Flower · Kalender | `spec-flower-experience.md` | Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** affordance |
+| Flower · Kalender | `spec-flower-experience.md` | Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** affordance; a **"Verlauf" header link → Flower · Zyklus-Historie** (`/periods`) — the Zyklus-Historie entry lives off the Kalender, not Profil and not a new tab (spec-design-reconciliation F2) |
 | Flower · Periode eintragen | `spec-cycle-logging.md` | Log/edit sheet: start-date picker (**past-date backfill**), optional end-date, **delete** |
 | Flower · Zyklus-Historie | `spec-cycle-logging.md` | Chronological period list (descending) + stats; row → edit/delete |
 | Flower · Mood-Logging | `spec-flower-experience.md` | 6-mood set, past-date backfill chip — **mood-only, no free-text note** |

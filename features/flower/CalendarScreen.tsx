@@ -34,6 +34,14 @@ import {
 } from './calendar';
 import { useFlowerCalendar } from './useFlowerCalendar';
 
+// Calendar-specific day colors from the artboard. Not shared tokens — they only
+// describe the grid's marker states (fertile/predicted/out-of-month), so they
+// live with the surface rather than polluting lib/theme.
+const FERTILE_TINT = '#D8B79C29'; // secondary at ~16% opacity (8-digit RGBA hex)
+const FERTILE_TEXT = '#E0C7AE'; // warm tan, softer than secondary on the tint
+const PREDICTED_TEXT = '#D69BA1'; // muted period tone for the outlined start day
+const OUT_OF_MONTH_TEXT = '#4A4252'; // dimmer than the card hairline for padding days
+
 export function CalendarScreen() {
   const router = useRouter();
   const { periods, prediction, isLoading, error } = useFlowerCalendar();
@@ -73,6 +81,13 @@ export function CalendarScreen() {
             <NavButton direction="back" onPress={() => setMonthStart(shiftMonth(visibleMonth, -1))} />
             <NavButton direction="forward" onPress={() => setMonthStart(shiftMonth(visibleMonth, 1))} />
           </View>
+        </View>
+
+        {/* #171: the Zyklus-Historie entry lives here — a header "Verlauf" link to /periods. */}
+        <View style={styles.historyRow}>
+          <Pressable onPress={() => router.push('/periods')} hitSlop={8}>
+            <Text style={styles.historyLink}>Verlauf</Text>
+          </Pressable>
         </View>
 
         {/* #85: 4 dot-chip legend directly under the header, before the grid */}
@@ -212,17 +227,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   errorText: { color: colors.danger, fontSize: 14 },
-  content: { padding: spacing.screen, gap: 18 },
+  content: { padding: spacing.screen, gap: 14 },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   // DM Sans SemiBold; fontSize 24 matches the artboard (h2 spec: 22–24).
   monthTitle: { ...typography.h2, fontSize: 24, color: colors.text },
   navGroup: { flexDirection: 'row', gap: 8 },
+  // #171: Verlauf link mirrors the WeekGlance "Kalender" affordance (navLink + primary).
+  historyRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: -6 },
+  historyLink: { ...typography.navLink, color: colors.primary },
   navButton: {
     width: 38,
     height: 38,
     borderRadius: radii.md,
     backgroundColor: colors.inputDisabled,
-    borderColor: colors.hairline,
+    borderColor: colors.chipBorder,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -245,13 +263,13 @@ const styles = StyleSheet.create({
   },
   cellPressed: { opacity: 0.6 },
   cellText: { color: colors.label, fontFamily: typography.h2.fontFamily, fontSize: 15 },
-  cellTextOut: { color: colors.hairline },
+  cellTextOut: { color: OUT_OF_MONTH_TEXT },
   loggedCell: { backgroundColor: colors.period, borderColor: 'transparent' },
   loggedText: { color: '#2A1E22' },
   predictedCell: { borderColor: colors.period },
-  predictedText: { color: colors.period },
-  fertileCell: { backgroundColor: colors.surfaceRaised, borderColor: 'transparent' },
-  fertileText: { color: colors.secondary },
+  predictedText: { color: PREDICTED_TEXT },
+  fertileCell: { backgroundColor: FERTILE_TINT, borderColor: 'transparent' },
+  fertileText: { color: FERTILE_TEXT },
   today: { borderColor: colors.primary },
   // #85: legend row — wrapping chips above the grid
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
