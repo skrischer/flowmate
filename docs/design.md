@@ -76,11 +76,14 @@ Paper file's theme tiles if the theme is revisited.
   1.5px `primary` border.
 - **Chip:** pill; **selected** = `primary` fill + `on-primary` text; **default**
   = `#241F2E` + `#322B3D` border; **phase chip** = `surface-raised` + dot.
-- **Phase track:** 4 segments (menstrual/follicular/ovulation/luteal) with
-  legibility-first proportions ≈ `7/10/5/8`, inactive `#352C42`, active
-  `primary`. Labels **alternate above/below** the bar — Menstruation + Eisprung
-  **below**, Follikel + Luteal **above** — so each renders in full without
-  crowding or wrapping (no ellipsis); each label aligns to its segment.
+- **Phase track:** ONE shared component (`components/PhaseTrack.tsx`) with a
+  per-surface segment **variant** — joined **bar** (Flower, default) / individual
+  **pills** (Mate). 4 segments (menstrual/follicular/ovulation/luteal) with
+  legibility-first proportions ≈ `7/10/5/8`, inactive `#352C42`, active `primary`
+  (segment and label). Labels **alternate above/below** the bar — Menstruation +
+  Eisprung **below**, Follikel + Luteal **above** — each positioned absolutely so
+  it renders in full on one line without crowding, wrapping, or ellipsis; each
+  label aligns to its segment.
 - **Disclaimer:** 14px circled "i" (`#463C54` border) + caption — rendered on
   **every** prediction/fertility surface (constitution).
 - **Bottom nav:** `#1E1926` bg, `#2A2433` top border; active item `primary`.
