@@ -66,7 +66,15 @@ What is true when this work is done?
 - TypeScript strict; no `any`/`as unknown as`/`@ts-ignore` without a `TODO(...)`
   (constitution). Functions ≤ 50 lines, files ≤ 300 lines.
 - Token/typography fixes are centralized in `lib/theme` first to avoid
-  per-screen drift; screen issues depend on the central fixes.
+  per-screen drift; screen issues depend on the central fixes. The border token
+  is **split** (card/field/button border `#2F2839` vs avatar/brandmark ring
+  `#3A3247`), never collapsed to one value (see Prior decisions).
+- **design→code is recorded at a defined place in `docs/design.md`:** a
+  kept-implementation deviation is written as a note in the **Surfaces** table's
+  Notes column for that surface, and — if it changes a token/scale/component
+  rule — as a bullet under **Design rules**; the Decision log entry
+  cross-references it. (Paper-artboard touch-up optional, not the source of
+  truth.)
 - Mate surfaces must keep showing **no raw health data / no day-calendar**
   (constitution) — reconciliation is visual, never a data-exposure change.
 
@@ -86,7 +94,7 @@ What is true when this work is done?
 | Decision | Rationale | Date |
 |---|---|---|
 | **Reconciliation is bidirectional, with a default and an exception.** Default: **code→design** — when the design clearly leads, or a discrepancy is unjustifiable, the code is changed to match `docs/design.md`/Paper. Exception: **design→code** — when the implemented solution is demonstrably better, the design is updated (edit `docs/design.md`; optionally the Paper artboard) and the rationale recorded in the Decision log. | The user's directive; matches `docs/design.md` being the contract while allowing the build to inform it. | 2026-06-25 |
-| Token findings (card border `#2F2839`, type scale per design.md §Type scale, chip/badge surfaces, radii) are **design-authoritative → code→design**. `lib/theme.colors.hairline` is `#3A3247` but `docs/design.md` specifies `#2F2839`; the code value is the defect. | The documented contract and the Paper artboards agree; the code diverges. Not an open question. | 2026-06-25 |
+| Token findings are design-authoritative → code→design — **but the border token must be SPLIT, not swapped.** Today `colors.hairline = #3A3247` serves two distinct design roles: (a) card/field/button **borders**, where the design wants `#2F2839`, and (b) the **avatar/brandmark ring**, where `#3A3247` is the correct Soll. The fix repoints role (a) to `#2F2839` and keeps role (b) at `#3A3247` under a distinct token (e.g. `ring`/`avatarBorder`), repointing usages accordingly. A blanket `hairline := #2F2839` is WRONG — it would regress the avatar/brandmark borders. Type scale (design.md §Type scale), chip/badge surfaces, and radii follow the same code→design rule per role. | design.md + Paper agree per role; the single-token collision is a code-structuring defect, not an open question. | 2026-06-25 |
 | ASCII-umlaut substitutions in visible German copy are defects → fix to real Unicode. | Constitution: German UI; the substitutions are unambiguous errors. | 2026-06-25 |
 | Issues are grouped by fix-area (central tokens first, then per-surface), not one-per-finding; each issue cites the findings doc. | 283 findings; one-per-finding is unworkable, central fixes close many at once. | 2026-06-25 |
 | OPEN — `/mate-preview`: keep the #156 split (separate "Was mein Mate sieht" screen) and give it a Paper artboard + a nav entry from Pairing-Management, **or** fold the visibility card back onto Pairing-Management (per current `docs/design.md`) and drop the screen? | resolved at the spec-acceptance gate | — |
@@ -107,13 +115,18 @@ The project Test command covers little UI; most checks are the human
 milestone-QA gate (UI smoke against the Paper artboards). Done when:
 
 - [ ] `npm run verify` green (eslint + tsc) and `npm test` green.
-- [ ] Central tokens: `colors.hairline === #2F2839`; type-scale tokens map to the
-      design roles; no ASCII-umlaut copy remains (grep clean for `ae`/`ue`/`ss`
-      in visible strings); the shared back-button renders on the four affected
-      screens.
+- [ ] Central tokens: card/field/button borders use `#2F2839` **and** the
+      avatar/brandmark ring uses `#3A3247` (the hairline token split, not a
+      blanket swap); type-scale tokens map to the design roles; the **specific
+      ASCII-substituted strings enumerated in the findings doc** now render real
+      umlauts (verified against that list — not a blind `ae`/`ue`/`ss` digraph
+      grep, which false-positives on legitimate German words); the shared
+      back-button renders on the four affected screens.
 - [ ] Each audited screen, captured at 390px, matches its Paper artboard — or
-      `docs/design.md` records the kept-impl deviation with rationale. (Re-run
-      the gap-capture pipeline as the QA evidence.)
+      `docs/design.md` records the kept-impl deviation with rationale (Surfaces
+      Notes / Design rules, per Constraints). Screens whose artboard is newly
+      created under a resolved fork (e.g. `/mate-preview`, if kept) are checked
+      against that new artboard. (Re-run the gap-capture pipeline as QA evidence.)
 - [ ] Invite-Code shows a short formatted code with no horizontal overflow.
 - [ ] The three forks are implemented as accepted, and `/mate-preview` (if kept)
       is reachable from Pairing-Management.
@@ -134,3 +147,9 @@ milestone-QA gate (UI smoke against the Paper artboards). Done when:
   Bidirectional policy adopted; token/typo/umlaut findings classified as
   design-authoritative (code→design); three product forks marked OPEN for the
   spec-acceptance gate.
+- 2026-06-25 (spec review): corrected the border-token decision from a value
+  swap to a **token split** — `#3A3247` is the correct ring colour for
+  avatar/brandmark and must not be collapsed into the `#2F2839` card-border fix.
+  Defined the design→code recording location in `docs/design.md`. Scoped the
+  umlaut check to the findings doc's enumerated strings (not a blind digraph
+  grep).
