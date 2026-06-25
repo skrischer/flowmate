@@ -20,12 +20,14 @@ export default function TabsLayout() {
           backgroundColor: TAB_BAR_BG,
           borderTopColor: TAB_BAR_BORDER,
           borderTopWidth: 1,
-          // Top breathing room so icons are not flush to the border
-          // (docs/design.md — Bottom nav). No explicit height: the navigator
-          // still adds the device bottom safe-area inset on top of this.
+          // Symmetric vertical breathing room: equal padding above the icons
+          // and below the labels (docs/design.md — Bottom nav). No explicit
+          // height — the navigator adds the device bottom safe-area inset on
+          // top of this padding, so a fixed height would fight the inset.
           paddingTop: 8,
+          paddingBottom: 8,
         },
-        tabBarItemStyle: { paddingTop: 2 },
+        tabBarItemStyle: { paddingTop: 2, paddingBottom: 2 },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSubtle,
       }}
