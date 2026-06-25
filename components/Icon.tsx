@@ -10,7 +10,7 @@
 // raw glyph strings — swap the glyph in one place if the design changes.
 //
 // Available names:
-//   Navigation / tabs:  today, calendar, person, attunement
+//   Navigation / tabs:  today, calendar, cycle, person, attunement
 //   Actions:            plus, copy, share, refresh, trash, logout, close
 //   State / feedback:   check, eye, eyeOff, info, bell, lock, clock
 //   Navigation arrows:  chevron, back
@@ -25,6 +25,7 @@ export type IconName =
   // bottom-tab icons
   | 'today'
   | 'calendar'
+  | 'cycle' // self-tracking onboarding card — circular loop glyph
   | 'person'
   | 'attunement' // Mate "Eingestimmt" tab — wave/pulse glyph
   // actions
@@ -57,6 +58,7 @@ type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 const ICON_MAP: Record<IconName, IoniconName> = {
   today: 'home',
   calendar: 'calendar',
+  cycle: 'sync-outline',
   person: 'person',
   attunement: 'pulse-outline',
   plus: 'add',

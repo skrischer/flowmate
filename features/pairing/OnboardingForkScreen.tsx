@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { setOnboardingComplete } from '../../lib/data';
-import { colors, radii, spacing } from '../../lib/theme';
+import { colors, radii, spacing, typography } from '../../lib/theme';
 import { BrandMark } from '../../components/BrandMark';
 import { Icon, type IconName } from '../../components/Icon';
 import { useShell } from '../shell/ShellContext';
@@ -27,7 +27,7 @@ type Choice = {
 const CHOICES: readonly Choice[] = [
   {
     key: 'track',
-    icon: 'calendar',
+    icon: 'cycle',
     title: 'Eigenen Zyklus tracken',
     body: 'Du loggst deinen Zyklus und behältst die volle Hoheit über deine Daten.',
   },
@@ -58,7 +58,7 @@ export function OnboardingForkScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <BrandMark size={88} />
+        <BrandMark size={64} />
         <Text style={styles.wordmark}>Flowmate</Text>
         <Text style={styles.heading}>Wie nutzt du die App?</Text>
       </View>
@@ -91,20 +91,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     paddingHorizontal: spacing.screen,
     justifyContent: 'center',
-    gap: 40,
+    gap: 34,
   },
   header: { alignItems: 'center', gap: 16 },
+  // Wordmark: DM Sans 600 30/36 (H1 range, low end) — matches the Auth artboard.
   wordmark: {
+    ...typography.h1,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.025 * 30,
     color: colors.text,
-    fontSize: 40,
-    fontWeight: '600',
-    letterSpacing: -1,
   },
   heading: {
+    ...typography.h2,
     color: colors.text,
-    fontSize: 22,
-    fontWeight: '600',
-    letterSpacing: -0.4,
   },
   choices: { gap: 16 },
   card: {
@@ -119,15 +119,16 @@ const styles = StyleSheet.create({
   },
   cardPressed: { opacity: 0.7 },
   cardIcon: {
-    width: 52,
-    height: 52,
+    width: 44,
+    height: 44,
     borderRadius: radii.md,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: colors.inputDisabled,
     flexShrink: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardText: { flex: 1, gap: 6 },
-  cardTitle: { color: colors.text, fontSize: 18, fontWeight: '600' },
-  cardBody: { color: colors.textMuted, fontSize: 15, lineHeight: 21 },
+  // Card title: DM Sans 600 16 ls -0.02em; body: Inter 400 14/20.
+  cardTitle: { ...typography.title, color: colors.text },
+  cardBody: { ...typography.bodySm, color: colors.textMuted },
 });
