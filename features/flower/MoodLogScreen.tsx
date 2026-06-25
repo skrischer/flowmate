@@ -13,11 +13,11 @@ import { todayIso } from './today';
 import { MOOD_OPTIONS, parseMood } from './mood';
 
 // Per-mood dot colors (design.md / Paper artboard "Flower · Mood-Logging").
-// low (#8E8AA8) and anxious (#A88FB8) are mood-specific palette extensions not
-// represented by existing system tokens.
+// calm (#3B2F4A), low (#8E8AA8) and anxious (#A88FB8) are mood-specific palette
+// extensions not represented by existing system tokens.
 const MOOD_DOT_COLORS: Record<Mood, string> = {
   content: colors.success,
-  calm: colors.success,
+  calm: '#3B2F4A',
   sensitive: colors.secondary,
   irritable: colors.danger,
   low: '#8E8AA8',
@@ -240,7 +240,8 @@ const styles = StyleSheet.create({
   gridCellSelected: { backgroundColor: colors.primary, borderWidth: 0 },
   gridCellPressed: { opacity: 0.7 },
   dot: { width: 11, height: 11, borderRadius: radii.pill, flexShrink: 0 },
-  cellText: { fontFamily: fonts.bodyMedium, fontSize: 15, lineHeight: 18, color: colors.label, flexShrink: 1 },
+  // Chip label: #D7D1DC per the artboard — a touch brighter than colors.label.
+  cellText: { fontFamily: fonts.bodyMedium, fontSize: 15, lineHeight: 18, color: '#D7D1DC', flexShrink: 1 },
   cellTextSelected: { fontFamily: fonts.bodySemiBold, color: colors.onPrimary },
   error: { color: colors.danger, fontSize: 14 },
   ctaContainer: { paddingHorizontal: spacing.screen, paddingBottom: 30, paddingTop: 16 },
