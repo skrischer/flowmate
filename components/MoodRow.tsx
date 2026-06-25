@@ -79,14 +79,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
+  // Default chip: #241F2E (inputDisabled) + #322B3D (chipBorder) per design.md.
   chip: {
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: colors.inputDisabled,
+    borderWidth: 1,
+    borderColor: colors.chipBorder,
     borderRadius: radii.pill,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingVertical: 9,
+    paddingHorizontal: 15,
   },
+  // Selected: primary fill, on-primary text; transparent border keeps box sizing.
   chipSelected: {
     backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   chipPressed: {
     opacity: 0.75,

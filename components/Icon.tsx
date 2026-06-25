@@ -40,6 +40,7 @@ export type IconName =
   | 'eye'
   | 'eyeOff'
   | 'info'
+  | 'warning' // low-confidence caveat banner
   | 'bell'
   | 'lock'
   | 'clock'
@@ -69,6 +70,7 @@ const ICON_MAP: Record<IconName, IoniconName> = {
   eye: 'eye-outline',
   eyeOff: 'eye-off-outline',
   info: 'information-circle-outline',
+  warning: 'warning-outline',
   bell: 'notifications-outline',
   lock: 'lock-closed-outline',
   clock: 'time-outline',

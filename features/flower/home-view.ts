@@ -119,3 +119,16 @@ export function confidenceCaveat(confidence: Confidence): string | null {
 export function isInsufficient(view: FlowerPrediction): boolean {
   return view.prediction === null || view.confidence === 'none';
 }
+
+/**
+ * Periods the backfill prompt asks the Flower to log before a prognosis is shown
+ * (design copy: "Trag mindestens 3 Perioden ein"). The counter row reads
+ * "N von 3 Perioden" against this target.
+ */
+export const BACKFILL_TARGET = 3;
+
+/** Counter copy for the backfill card, clamped to the target ("N von 3 Perioden"). */
+export function backfillCounter(loggedCount: number): string {
+  const shown = Math.min(Math.max(0, loggedCount), BACKFILL_TARGET);
+  return `${shown} von ${BACKFILL_TARGET} Perioden`;
+}

@@ -40,9 +40,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: colors.surfaceRaised,
     borderRadius: radii.pill,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    gap: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    gap: 8,
   },
   dot: {
     width: 7,
@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.label,
-    color: colors.textMuted,
+    // Phase-chip label: #C3B3E6 (light lavender) per the design artboards.
+    color: '#C3B3E6',
   },
 });

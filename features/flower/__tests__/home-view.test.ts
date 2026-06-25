@@ -1,5 +1,7 @@
 /// <reference types="jest" />
 import {
+  BACKFILL_TARGET,
+  backfillCounter,
   confidenceCaveat,
   daysToNextPeriod,
   isInsufficient,
@@ -53,6 +55,16 @@ describe('confidenceCaveat', () => {
     expect(confidenceCaveat('medium')).toBeNull();
     expect(confidenceCaveat('high')).toBeNull();
     expect(confidenceCaveat('none')).toBeNull();
+  });
+});
+
+describe('backfillCounter', () => {
+  it('reads "N von 3 Perioden" and clamps to the target', () => {
+    expect(backfillCounter(0)).toBe(`0 von ${BACKFILL_TARGET} Perioden`);
+    expect(backfillCounter(2)).toBe(`2 von ${BACKFILL_TARGET} Perioden`);
+    expect(backfillCounter(BACKFILL_TARGET)).toBe(`3 von ${BACKFILL_TARGET} Perioden`);
+    expect(backfillCounter(5)).toBe(`3 von ${BACKFILL_TARGET} Perioden`);
+    expect(backfillCounter(-1)).toBe(`0 von ${BACKFILL_TARGET} Perioden`);
   });
 });
 
