@@ -4,7 +4,7 @@
 // Usage:
 //   import { BrandMark } from '../components/BrandMark';
 //   <BrandMark />          // default 56dp
-//   <BrandMark size={72} /> // larger variant for Auth
+//   <BrandMark size={64} /> // Auth + Onboarding variant
 //
 // Design reference: docs/design.md (Heather Dark) + Paper artboard "Shared · Auth".
 // Composition: rounded-square container (surface-raised bg, ring border) with
@@ -12,7 +12,11 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Icon } from './Icon';
-import { colors, radii } from '../lib/theme';
+import { colors } from '../lib/theme';
+
+// Brand-mark corner radius per the Auth/Onboarding artboards — between radii.md
+// (14) and radii.lg (24), so it lives here rather than as a shared spacing token.
+const BRAND_RADIUS = 20;
 
 export interface BrandMarkProps {
   /** Container size in dp (width = height). Defaults to 56. */
@@ -39,7 +43,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
     borderColor: colors.ring,
-    borderRadius: radii.md,
+    borderRadius: BRAND_RADIUS,
     alignItems: 'center',
     justifyContent: 'center',
   },

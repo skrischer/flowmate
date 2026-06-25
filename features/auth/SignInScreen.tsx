@@ -58,7 +58,7 @@ export function SignInScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <BrandMark size={72} />
+          <BrandMark size={64} />
           <Text style={styles.wordmark}>Flowmate</Text>
           <Text style={styles.tagline}>Mitschwingen, statt verwalten.</Text>
         </View>
@@ -139,7 +139,10 @@ export function SignInScreen() {
             <Text style={styles.footerPrompt}>{prompt}</Text>
             <Text style={styles.switchLabel}>{switchLabel}</Text>
           </Pressable>
-          <Text style={styles.trust}>Datenhoheit bleibt bei dir.</Text>
+          <View style={styles.trustRow}>
+            <Icon name="lock" size={14} color={colors.textSubtle} />
+            <Text style={styles.trust}>Datenhoheit bleibt bei dir.</Text>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     gap: 36,
   },
-  header: { alignItems: 'center', gap: 8 },
+  header: { alignItems: 'center', gap: 16 },
   // Wordmark: DM Sans 600 30/36 (H1 range, low end) per the Auth artboard.
   wordmark: {
     ...typography.h1,
@@ -211,5 +214,7 @@ const styles = StyleSheet.create({
   footerPrompt: { ...typography.bodySm, color: colors.textMuted },
   // "Registrieren"/"Anmelden" toggle: Inter 600 14/18 per design.
   switchLabel: { fontFamily: fonts.bodySemiBold, fontSize: 14, lineHeight: 18, color: colors.primary },
+  // Trust line: 14x14 lock glyph before the caption (Auth artboard).
+  trustRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   trust: { ...typography.caption, color: colors.textSubtle },
 });
