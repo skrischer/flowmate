@@ -74,9 +74,10 @@ What is true when this work is done?
 - design→code is recorded in `docs/design.md` at the defined place: a note in the
   **Surfaces** table's Notes column for that surface, and — if it changes a rule —
   a bullet under **Design rules**; the Decision log cross-references it.
-- `docs/design.md` is a shared file touched by several issues (Kalender, Mood,
-  Historie, Mein Mate) → those issues serialize via `Depends on:` to avoid
-  conflicting edits (lane discipline).
+- Shared files force lane discipline: `docs/design.md` (touched by Kalender,
+  Mood, Historie, Mein Mate) and `app/_layout.tsx` (touched by Mood and Mein
+  Mate — each removes a `Stack.Screen` plus the shared sub-screens comment) →
+  those issues serialize via `Depends on:` to avoid conflicting edits.
 - No emojis; German UI copy, English code/comments/commits (constitution).
 - TypeScript strict; no `any`/`as unknown as`/`@ts-ignore` without `TODO(...)`;
   functions ≤ 50 lines, files ≤ 300 lines.
@@ -113,14 +114,14 @@ Measured artboard values and resolved directions the implementer must respect.
 | Decision | Rationale | Date |
 |---|---|---|
 | Reconciliation stays **bidirectional**: default code→design; exception design→code (update `docs/design.md`, record rationale). | Continues the round-1 policy. | 2026-06-25 |
-| **REVERSES round-1 F1.** "Mein Mate" is **re-merged**: the TransparencyCard returns inline to Pairing-Management (matching artboard `VX-0`); the `/mate-preview` screen (`app/mate-preview.tsx`, `features/pairing/MatePreviewScreen.tsx`), the Pairing-Management `PreviewNavRow`, the Profil "Was mein Mate sieht" row, and the `_layout` `mate-preview` route + stale `title: 'Was dein Mate sieht'` are removed. `docs/design.md` drops the "Flower · Mate-preview" Surfaces row and the Profil row mention; artboard `PC-0`'s "Was mein Mate sieht" row is removed best-effort. | The design never had a separate preview artboard — the card is inline in "Mein Mate"; the round-1 split (#156/#177/#178) diverged from it. User directive (image 6). | 2026-06-25 |
+| **REVERSES round-1 F1.** "Mein Mate" is **re-merged**: the TransparencyCard returns inline to Pairing-Management (matching artboard `VX-0`); the `/mate-preview` screen (`app/mate-preview.tsx`, `features/pairing/MatePreviewScreen.tsx`), the Pairing-Management `PreviewNavRow`, the Profil "Was mein Mate sieht" row (`app/(tabs)/profile.tsx`), and the `mate-preview` `Stack.Screen` in `app/_layout.tsx` (with its stale `title: 'Was dein Mate sieht'`) are removed; the stale `_layout.tsx` comment (lines ~53–55) enumerating `mate-preview`/`mood-log` as shared sub-screens is corrected too. `docs/design.md` drops the "Flower · Mate-preview" Surfaces row, removes the Profil row mention, **and** rewrites the `Flower · Pairing-Management` Notes column so it describes the inline TransparencyCard (not a "from Flower · Profil" path). Artboard `PC-0`'s "Was mein Mate sieht" row is removed best-effort. | The design never had a separate preview artboard — the card is inline in "Mein Mate"; the round-1 split (#156/#177/#178) diverged from it. User directive (image 6). | 2026-06-25 |
 | **#152 resolved from measured `A5-0` values:** phase-track segment proportions are legibility-first ≈ `7/10/5/8` (Menstruation ~24%, Follikel ~32%, Eisprung ~17%, Luteal ~27%) — **not** literal cycle-day weights `5/9/2/14` (which starved Eisprung to ~7% and truncated labels). Labels render full, left-aligned at each segment start, **no `numberOfLines`/ellipse**. | The design deliberately trades literal duration for label legibility; the active-segment fill carries the current-phase signal. | 2026-06-25 |
 | **Diese Woche** today marker = full-column rounded container (artboard `BS-0`: `borderRadius 14`, `paddingBlock 9`, `gap 7`, fill `#B3A0D9`) wrapping weekday + day number + indicator dot; the dot sits inside on an on-primary tone. | code→design (1.3). | 2026-06-25 |
 | **Fertile window (Home)** = one inline row `Fruchtbares Fenster · <range>` in the caramel/`secondary` tone, range as a month-name form (e.g. `22.–28. Juni`), not numeric `DD.MM.YYYY` and not a separate white line. | code→design (1.2); reuses the new date helper. | 2026-06-25 |
 | **Date helper** centralizes German long dates in `date.ts` (`15. Juni 2026`; optional weekday prefix `Do · 15. Juni 2026`); `DatePickerField` shows the value once (no `relativeLabel · formatIso` duplication). The existing month-name range logic in `PeriodHistoryScreen` is the reference for the range form and may be lifted into the shared helper. | code→design (3.1) + de-duplication; one helper serves 1.2/3.1/history. | 2026-06-25 |
-| **Kalender prediction**: mark the predicted next period as a **span** (`nextPeriodDate` .. + average logged period length − 1; fallback `MENSTRUAL_DAYS` = 5) with the existing `predicted` outline, and add an **`ovulation`** `DayMarker` (caramel/`secondary` outline, distinct from the `fertile` fill) at `ovulationDate`. Legend stays the design's 4 items (the ovulation outline reads within "fruchtbar"). | code→design (2.2, 2.3); engine already yields the dates. | 2026-06-25 |
+| **Kalender prediction** (in `features/flower/calendar.ts`): add an **`ovulation`** member to the `DayMarker` union and extend `buildMonthGrid`/`markerFor` to take `ovulationDate` (already on `Prediction`) and mark it with a caramel/`secondary` **outline** (distinct from the `fertile` fill). Mark the predicted next period as a **5-day span** — `nextPeriodDate` .. `nextPeriodDate + MENSTRUAL_DAYS − 1`, reusing the already-exported `MENSTRUAL_DAYS` (= 5) from `lib/prediction` (no engine change) — with the existing `predicted` outline (matches the artboard's 5-cell band). Marker precedence: `logged` > `predicted` > `ovulation` > `fertile`. `CalendarScreen` adds the `ovulation` cell/text style; legend stays the design's 4 items (the ovulation outline reads within "fruchtbar"). | code→design (2.2, 2.3); engine already yields `nextPeriodDate`/`ovulationDate`. | 2026-06-25 |
 | **Kalender header**: month arrows flank the title on the left (`‹ Juni 2026 ›`); the "Verlauf" link moves to the top-right (matching the Home section-header link convention). | Resolved fork — user choice; mirror in `docs/design.md` + `HV-0`. | 2026-06-25 |
-| **Mood-Logging**: remove the standalone screen + route + the Home "Stimmung" link; mood is logged inline-for-today on Home only. `docs/design.md` drops the Mood-Logging surface; `4.2` (chip wrap) is moot. | Resolved fork — user choice; prior-art-aligned, vision-minimal. | 2026-06-25 |
+| **Mood-Logging**: delete `app/mood-log.tsx`, `features/flower/MoodLogScreen.tsx`, and the `mood-log` `Stack.Screen` registration in `app/_layout.tsx`; remove `MoodRow`'s `onOpenDetail` prop + the `detailLink`/"Stimmung" Pressable and drop the prop at its `FlowerHomeScreen` caller. Mood is logged inline-for-today on Home only. `docs/design.md` drops the `Flower · Mood-Logging` Surfaces row **and** updates the "Mood logging is mood-only" Design-rules bullet to state mood is logged inline on Home. `4.2` (chip wrap) is moot. | Resolved fork — user choice; prior-art-aligned, vision-minimal. | 2026-06-25 |
 | **Zyklus-Historie**: drop the "T" suffix on the KPI values (units live in the labels); **keep** the "Periode eintragen" CTA and add it to `docs/design.md`/`TB-0`. | Resolved fork — user choice (5.1 code→design, 5.2 design→code). | 2026-06-25 |
 | **Tab bar** gets the designed top spacing (`tabBarStyle` height/padding) so icons are not flush to the top border. | code→design (1.5). | 2026-06-25 |
 
@@ -175,3 +176,10 @@ milestone-QA gate (UI smoke against the Paper artboards). Done when:
   split and the Profil row removed in code and `docs/design.md`.
 - 2026-06-25: **#152 resolved** with measured `A5-0` artboard proportions
   (≈ `7/10/5/8`) and full, un-truncated labels.
+- 2026-06-25 (spec review): made deletion artifacts explicit — Mood removal now
+  names `app/mood-log.tsx`, `MoodLogScreen`, the `_layout` `Stack.Screen`, and
+  the `MoodRow` prop/link; the Mein-Mate re-merge names the `_layout` comment and
+  the Pairing-Management Notes-column rewrite; the Kalender change names the
+  `DayMarker` `ovulation` member, the `buildMonthGrid` extension, the fixed 5-day
+  span via the exported `MENSTRUAL_DAYS`, and marker precedence. Added
+  `app/_layout.tsx` to the shared-file lane-discipline constraint.
