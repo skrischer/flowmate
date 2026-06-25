@@ -120,7 +120,7 @@ Decisions already made that the implementor must respect.
 | **Context-aware CTA:** when the most recent period has no `end_date`, Flower · Home and Flower · Zyklus-Historie show **"Periode-Ende eintragen"**, routing to the edit form of that ongoing period with the picker anchored on its start; otherwise "Periode eintragen". | Flo/Clue pattern (explicit ongoing state + a dedicated end action); reuses the existing edit route; the label is the visible ongoing signal. | 2026-06-25 |
 | **Per-day painting (drip/Periodical) is NOT adopted.** | It would break our `start_date`/`end_date` range model; the range picker fits the model and is the smaller change. | 2026-06-25 |
 | The "Periode-Ende eintragen" entry **reuses the existing edit sheet as-is** — title "Periode bearbeiten", intro "Passe den Zeitraum …". The end-entry framing lives on the CTA, not in a new sheet header. | The sheet genuinely edits the period to add an end; a separate header variant is needless ceremony. | 2026-06-25 |
-| OPEN — calendar behavior after the end is tapped: keep the calendar **open** with explicit "Fertig" / "Läuft noch" actions (correctable, true range-picker feel), or **auto-close** on the second tap (like the current single picker). | resolved at the spec-acceptance gate | — |
+| After the end is tapped the calendar **stays open** with explicit **"Fertig"** (apply + close) and **"Läuft noch"** (leave the end open + close) actions — start and end remain correctable without reopening. No auto-close on the second tap. | Resolved at the spec-acceptance gate — user choice: a true range-picker feel, correctable in place. | 2026-06-25 |
 
 ## Tracking
 
@@ -140,7 +140,8 @@ the rest is the human milestone-QA gate (UI smoke). Done when:
 - [ ] Periode eintragen shows **one** range field; opening it shows a single
       month calendar where the first tap sets the start, a tap on/after the start
       sets the end (the span between is filled), a tap **before** the start
-      re-anchors the start, and "Läuft noch" leaves the end open.
+      re-anchors the start. After the end is tapped the calendar stays open;
+      **"Fertig"** applies and closes, **"Läuft noch"** closes with the end open.
 - [ ] A fresh log saved with no picker interaction stores start = today, end null;
       the calendar entry path still pre-fills the tapped day as the start.
 - [ ] Editing a period that has an end shows both endpoints; the range can be
@@ -184,3 +185,6 @@ the rest is the human milestone-QA gate (UI smoke). Done when:
   ≤ 300 via the model/component extraction); recorded that the end-entry reuses
   the existing edit sheet as-is; reworded the design.md verification item to an
   inline cross-reference (no Decision-log section in design.md).
+- 2026-06-25 (acceptance gate): post-end-tap behavior resolved — the calendar
+  stays open with "Fertig" (apply + close) and "Läuft noch" (open end + close);
+  no auto-close on the second tap.
