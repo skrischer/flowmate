@@ -5,8 +5,12 @@
 // The track is rendered inline here (not via the shared components/PhaseTrack,
 // which the Flower home screen owns) so the Mate surface can match the Paper
 // "Mate · Eingestimmt" artboard (#135): individually pill-rounded segments with
-// the design's balanced weights, and the current phase surfaced as a highlighted
-// label per the settled decision (keep the labels, highlight the current phase).
+// a row gap, and the current phase surfaced as a highlighted label per the
+// settled decision (keep the labels, highlight the current phase). Labels
+// alternate around the bar — Menstruation + Eisprung below, Follikel + Luteal
+// above — so each renders in full without truncation, and the segments use the
+// design's legibility-first proportions (see spec-design-reconciliation-2,
+// #152/#235).
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '../../components/Icon';
@@ -17,13 +21,21 @@ import type { Phase } from '../../lib/prediction';
 // in the shared palette, matching the Paper artboard's #352C42.
 const PHASE_INACTIVE = '#352C42';
 
-// Segment weights from the Paper artboard (1 / 1.4 / 0.7 / 1.2): more balanced
-// than a true cycle would be, so the German labels stay readable under each.
-const SEGMENTS: readonly { key: Phase; label: string; weight: number }[] = [
-  { key: 'menstrual', label: 'Menstruation', weight: 1 },
-  { key: 'follicular', label: 'Follikel', weight: 1.4 },
-  { key: 'ovulation', label: 'Eisprung', weight: 0.7 },
-  { key: 'luteal', label: 'Luteal', weight: 1.2 },
+type Placement = 'above' | 'below';
+
+// Legibility-first segment proportions (7 / 10 / 5 / 8) from the measured
+// artboard A5-0 (#152) — balanced so the full German labels stay readable.
+// Labels alternate above/below the bar to avoid crowding (#228/#235).
+const SEGMENTS: readonly {
+  key: Phase;
+  label: string;
+  weight: number;
+  placement: Placement;
+}[] = [
+  { key: 'menstrual', label: 'Menstruation', weight: 7, placement: 'below' },
+  { key: 'follicular', label: 'Follikel', weight: 10, placement: 'above' },
+  { key: 'ovulation', label: 'Eisprung', weight: 5, placement: 'below' },
+  { key: 'luteal', label: 'Luteal', weight: 8, placement: 'above' },
 ] as const;
 
 interface PhaseTrackSectionProps {
@@ -44,11 +56,31 @@ export function PhaseTrackSection({ phase, flowerName }: PhaseTrackSectionProps)
   );
 }
 
-// 4-segment pill track + per-phase labels, with the current phase highlighted.
+// One label row. Every segment gets a flex slot so columns line up with the
+// bar, but only the segments assigned to this row's placement are filled — the
+// rest are empty spacers preserving horizontal alignment.
+function LabelRow({ placement, phase }: { placement: Placement; phase: Phase }) {
+  return (
+    <View style={styles.labels}>
+      {SEGMENTS.map((seg) => (
+        <View key={seg.key} style={[styles.labelSlot, { flex: seg.weight }]}>
+          {seg.placement === placement ? (
+            <Text style={seg.key === phase ? styles.labelActive : styles.label}>
+              {seg.label}
+            </Text>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// 4-segment pill track + alternating per-phase labels, current phase highlighted.
 // Named distinctly from the shared components/PhaseTrack to avoid shadowing it.
 function MatePhaseTrack({ phase }: { phase: Phase }) {
   return (
-    <View>
+    <View style={styles.trackContainer}>
+      <LabelRow placement="above" phase={phase} />
       <View style={styles.track}>
         {SEGMENTS.map((seg) => (
           <View
@@ -63,18 +95,7 @@ function MatePhaseTrack({ phase }: { phase: Phase }) {
           />
         ))}
       </View>
-      <View style={styles.labels}>
-        {SEGMENTS.map((seg) => (
-          <View key={seg.key} style={{ flex: seg.weight }}>
-            <Text
-              style={seg.key === phase ? styles.labelActive : styles.label}
-              numberOfLines={1}
-            >
-              {seg.label}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <LabelRow placement="below" phase={phase} />
     </View>
   );
 }
@@ -101,9 +122,14 @@ const styles = StyleSheet.create({
     color: colors.textSubtle,
     letterSpacing: 0.06 * 12,
   },
+  trackContainer: { gap: 8 },
   track: { flexDirection: 'row', gap: 5, height: 7 },
   segment: { height: 7, borderRadius: radii.pill },
-  labels: { flexDirection: 'row', gap: 5, marginTop: 8 },
+  labels: { flexDirection: 'row', gap: 5 },
+  // overflow: 'visible' lets a label overrun its (narrow) segment slot instead
+  // of being clipped — the design allows the full label to extend past its
+  // segment start (artboard A5-0, #152).
+  labelSlot: { overflow: 'visible' },
   label: { ...typography.caption, color: colors.textSubtle },
   labelActive: { ...typography.caption, fontFamily: fonts.bodySemiBold, color: colors.primary },
   reassuranceCard: {
