@@ -4,8 +4,9 @@
 // artboard A5-0 (~24% / 32% / 17% / 27%), deliberately trading literal cycle
 // durations for labels that fit (see spec-design-reconciliation-2, #152). The
 // active segment is filled with the primary lavender accent; inactive segments
-// use the inactive token. Labels sit below each segment, left-aligned at the
-// segment start and allowed to overrun their segment width.
+// use the inactive token. Labels alternate around the bar — Menstruation +
+// Eisprung below, Follikel + Luteal above — so each renders in full without
+// crowding or wrapping (see spec-design-reconciliation-2, #228).
 // Reusable by the Mate surface — pass the same currentPhase prop.
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -14,11 +15,18 @@ import { colors, typography } from '../lib/theme';
 
 const PHASE_INACTIVE = '#352C42';
 
-const SEGMENTS: readonly { key: Phase; label: string; weight: number }[] = [
-  { key: 'menstrual', label: 'Menstruation', weight: 7 },
-  { key: 'follicular', label: 'Follikel', weight: 10 },
-  { key: 'ovulation', label: 'Eisprung', weight: 5 },
-  { key: 'luteal', label: 'Luteal', weight: 8 },
+type Placement = 'above' | 'below';
+
+const SEGMENTS: readonly {
+  key: Phase;
+  label: string;
+  weight: number;
+  placement: Placement;
+}[] = [
+  { key: 'menstrual', label: 'Menstruation', weight: 7, placement: 'below' },
+  { key: 'follicular', label: 'Follikel', weight: 10, placement: 'above' },
+  { key: 'ovulation', label: 'Eisprung', weight: 5, placement: 'below' },
+  { key: 'luteal', label: 'Luteal', weight: 8, placement: 'above' },
 ] as const;
 
 const TOTAL_WEIGHT = SEGMENTS.reduce((sum, s) => sum + s.weight, 0);
@@ -31,10 +39,49 @@ export interface PhaseTrackProps {
   currentPhase: Phase;
 }
 
-/** 4-segment weighted phase bar with German labels. */
+/**
+ * One row of labels. Every segment gets a flex slot so columns line up across
+ * rows and with the bar, but only the segments assigned to this row's placement
+ * are filled — the rest are empty spacers preserving horizontal alignment.
+ */
+function LabelRow({
+  placement,
+  currentPhase,
+}: {
+  placement: Placement;
+  currentPhase: Phase;
+}) {
+  return (
+    <View style={styles.labels}>
+      {SEGMENTS.map((seg) => (
+        <View
+          key={seg.key}
+          style={[styles.labelSlot, { flex: seg.weight / TOTAL_WEIGHT }]}
+        >
+          {seg.placement === placement ? (
+            <Text
+              style={[
+                styles.label,
+                {
+                  color:
+                    seg.key === currentPhase ? colors.primary : colors.textSubtle,
+                },
+              ]}
+            >
+              {seg.label}
+            </Text>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** 4-segment weighted phase bar with German labels alternating around it. */
 export function PhaseTrack({ currentPhase }: PhaseTrackProps) {
   return (
     <View style={styles.container}>
+      <LabelRow placement="above" currentPhase={currentPhase} />
       <View style={styles.track}>
         {SEGMENTS.map((seg, idx) => {
           const isActive = seg.key === currentPhase;
@@ -60,23 +107,7 @@ export function PhaseTrack({ currentPhase }: PhaseTrackProps) {
           );
         })}
       </View>
-      <View style={styles.labels}>
-        {SEGMENTS.map((seg) => (
-          <View
-            key={seg.key}
-            style={[styles.labelSlot, { flex: seg.weight / TOTAL_WEIGHT }]}
-          >
-            <Text
-              style={[
-                styles.label,
-                { color: seg.key === currentPhase ? colors.primary : colors.textSubtle },
-              ]}
-            >
-              {seg.label}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <LabelRow placement="below" currentPhase={currentPhase} />
     </View>
   );
 }
