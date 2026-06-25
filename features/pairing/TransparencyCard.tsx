@@ -1,8 +1,7 @@
 // "Was [Mate] sieht" transparency card (#101): data-sovereignty centrepiece shown
-// on the Flower · "Was mein Mate sieht" preview screen (/mate-preview, #156).
-// Lists only phase-level fields shared
-// via shared_state — never raw logs, moods, or exact dates. Row values are
-// illustrative labels, not live data. Lock footnote makes the guarantee explicit.
+// inline on Flower · Pairing-Management ("Mein Mate", #212). Lists only phase-level
+// fields shared via shared_state — never raw logs, moods, or exact dates. Row values
+// are illustrative labels, not live data. Lock footnote makes the guarantee explicit.
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, spacing, typography } from '../../lib/theme';
@@ -21,7 +20,7 @@ function TransparencyRow({ label, value }: { label: string; value: string }) {
 
 export function TransparencyCard({ mateName }: { mateName: string | null }) {
   // Unified self-referential copy ("mein Mate") — the Flower views her own
-  // sharing surface, never "dein Mate" (findings: /mate-preview header copy).
+  // sharing surface, never "dein Mate".
   const label = mateName ?? 'mein Mate';
   return (
     <View style={styles.card}>

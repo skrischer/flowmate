@@ -33,26 +33,6 @@ export const styles = StyleSheet.create({
   },
   // "Verbunden" badge: Inter 600 12/16 per the artboard (not Caption Inter 500 11).
   badgeText: { color: colors.successText, fontFamily: typography.label.fontFamily, fontSize: 12, lineHeight: 16 },
-  // Nav row to /mate-preview ("Was mein Mate sieht"): card-styled tappable row,
-  // matching the Profil settings-row affordance (eye icon + label + chevron).
-  navRow: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
-    borderWidth: 1,
-    borderRadius: 18,
-    paddingVertical: 17,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  navRowText: {
-    flex: 1,
-    color: colors.text,
-    fontFamily: typography.body.fontFamily,
-    fontSize: 15,
-    lineHeight: 22,
-  },
   revokeSection: { gap: 8 },
   // Remove button per the artboard: no fill, danger-tinted border #5A3A40, radius 12,
   // fixed 52px height (not surfaceRaised fill + hairline border + radii.md/pad-16).
