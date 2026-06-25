@@ -18,7 +18,7 @@ import {
 } from '../flower/calendar';
 import { Icon } from '../../components/Icon';
 import { colors, fonts, radii } from '../../lib/theme';
-import { formatIso, todayIso } from './date';
+import { formatLongDe, todayIso } from './date';
 
 type Props = {
   label: string;
@@ -36,8 +36,12 @@ type Props = {
   disabled?: boolean;
 };
 
-/** Returns a relative label: 'Heute', 'Gestern', or the formatted ISO date. */
-function relativeLabel(iso: string): string {
+/**
+ * The single value label: 'Heute'/'Gestern' for those two days, otherwise the
+ * German long date with a weekday prefix (e.g. 'Do · 15. Juni 2026'). Shown
+ * once — no `relativeLabel · formatIso` duplication.
+ */
+function dateLabel(iso: string): string {
   const today = todayIso();
   if (iso === today) return 'Heute';
   const yesterday = new Date();
@@ -47,7 +51,7 @@ function relativeLabel(iso: string): string {
   const day = `${yesterday.getDate()}`.padStart(2, '0');
   const yesterdayIso = `${year}-${month}-${day}`;
   if (iso === yesterdayIso) return 'Gestern';
-  return formatIso(iso);
+  return formatLongDe(iso, true);
 }
 
 export function DatePickerField({
@@ -89,13 +93,11 @@ export function DatePickerField({
         onPress={openPicker}
         disabled={disabled}
         accessibilityRole="button"
-        accessibilityLabel={`${label}: ${value ? relativeLabel(value) : placeholderLabel}`}
+        accessibilityLabel={`${label}: ${value ? dateLabel(value) : placeholderLabel}`}
       >
         <Icon name="calendar" size={18} color={colors.textSubtle} />
         <Text style={value ? styles.fieldText : styles.placeholder}>
-          {value
-            ? `${relativeLabel(value)} · ${formatIso(value)}`
-            : placeholderLabel}
+          {value ? dateLabel(value) : placeholderLabel}
         </Text>
         <Icon name="chevron" size={18} color={colors.textSubtle} />
       </Pressable>
