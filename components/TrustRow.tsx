@@ -3,7 +3,7 @@
 // The caption text is passed as a prop so each surface can use context-specific copy.
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, typography } from '../lib/theme';
+import { colors, fonts } from '../lib/theme';
 import { Icon } from './Icon';
 
 export interface TrustRowProps {
@@ -32,10 +32,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8, // design.md / findings: lock-to-caption gap is 8px (not the 6px default)
   },
+  // Revoke/trust note: Inter 400 12/16 per the artboard — not the 11/15 Caption token.
   caption: {
-    ...typography.caption,
+    fontFamily: fonts.body,
+    fontSize: 12,
+    lineHeight: 16,
     flexShrink: 1,
   },
 });

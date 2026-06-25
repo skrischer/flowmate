@@ -22,7 +22,14 @@ import { TrustRow } from '../../components/TrustRow';
 import { Icon } from '../../components/Icon';
 import { TopBar } from '../../components/TopBar';
 import { createInvite, type Invite } from '../../lib/data';
-import { colors, radii, spacing, typography } from '../../lib/theme';
+import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
+
+// Disabled-text grey (design.md: "disabled: #5A5263 text"). Used for the expired
+// token; not a named color token, kept local to this surface.
+const EXPIRED_TOKEN_COLOR = '#5A5263';
+// Copy pill text (design.md / findings): a lighter lavender than `primary`,
+// reading on the raised pill surface. Local to this card's copy affordance.
+const COPY_PILL_TEXT = '#C3B3E6';
 
 /** Returns true when the invite's expiry timestamp has passed. */
 function isExpired(invite: Invite): boolean {
@@ -78,33 +85,51 @@ export function InviteCodeScreen() {
       <TopBar title="Mate einladen" />
       <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.lede}>
-        Teile diesen Code mit deinem Mate. Er sieht danach nur deine Phase und
-        sanfte Hinweise — nie deine Einträge.
+        {expired
+          ? 'Dieser Code ist abgelaufen. Generiere einen neuen, um deinen Mate einzuladen.'
+          : 'Teile diesen Code mit deinem Mate. Er sieht danach nur deine Phase und sanfte Hinweise — nie deine Einträge.'}
       </Text>
 
-      <View style={[styles.codeCard, expired && styles.codeCardExpired]}>
+      <View style={styles.codeCard}>
         <Text style={styles.codeLabel}>DEIN EINLADUNGS-CODE</Text>
 
         {invite ? (
           <>
+            {/* adjustsFontSizeToFit + numberOfLines keeps the token inside the
+                card: it shrinks rather than bleeding past the card edges. */}
             <Text
               style={[styles.code, expired && styles.codeExpired]}
               selectable={!expired}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.4}
             >
               {invite.token}
             </Text>
             {expired ? (
-              <View style={styles.statusRow}>
-                <Icon name="clock" size={13} color={colors.danger} />
-                <Text style={styles.expiredText}>
-                  Code abgelaufen · nicht mehr gültig
-                </Text>
-              </View>
+              <Text style={styles.expiredText}>
+                Code abgelaufen · nicht mehr gültig
+              </Text>
             ) : (
               <Text style={styles.validCaption}>
                 Gültig 24 Stunden · nur einmal verwendbar
               </Text>
             )}
+            {!expired ? (
+              <Pressable
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.copyPill,
+                  pressed && styles.copyPillPressed,
+                ]}
+                onPress={handleCopy}
+              >
+                <Icon name="copy" size={16} color={COPY_PILL_TEXT} />
+                <Text style={styles.copyPillText}>
+                  {copied ? 'Kopiert' : 'Code kopieren'}
+                </Text>
+              </Pressable>
+            ) : null}
           </>
         ) : (
           <Text style={styles.codePlaceholder}>— — — — — — — —</Text>
@@ -114,31 +139,17 @@ export function InviteCodeScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {invite && !expired ? (
-        <View style={styles.primaryActions}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.actionBtn,
-              pressed && styles.actionBtnPressed,
-            ]}
-            onPress={handleCopy}
-          >
-            <Icon name="copy" size={18} color={colors.onPrimary} />
-            <Text style={styles.actionBtnText}>
-              {copied ? 'Kopiert' : 'Code kopieren'}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.actionBtn,
-              pressed && styles.actionBtnPressed,
-            ]}
-            onPress={handleShare}
-          >
-            <Icon name="share" size={18} color={colors.onPrimary} />
-            <Text style={styles.actionBtnText}>Code teilen</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.shareBtn,
+            pressed && styles.shareBtnPressed,
+          ]}
+          onPress={handleShare}
+        >
+          <Icon name="share" size={18} color={colors.onPrimary} />
+          <Text style={styles.shareBtnText}>Code teilen</Text>
+        </Pressable>
       ) : null}
 
       <Pressable
@@ -178,26 +189,27 @@ export function InviteCodeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: spacing.screen, gap: 20 },
+  content: { padding: spacing.screen, gap: 24 },
 
+  // Lede: Inter 400 15/23 per the artboard — one step up from the bodySm token.
   lede: {
-    ...typography.bodySm,
+    fontFamily: fonts.body,
+    fontSize: 15,
+    lineHeight: 23,
     color: colors.textMuted,
   },
 
-  // Code card
+  // Code card — base hairline border (#2F2839) in every state; the expired
+  // variant keeps the same frame (no danger border, no opacity dimming).
   codeCard: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
     borderRadius: radii.lg,
-    padding: 24,
+    paddingVertical: 32,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    gap: 10,
-  },
-  codeCardExpired: {
-    borderColor: colors.danger,
-    opacity: 0.7,
+    gap: 18,
   },
   // "DEIN EINLADUNGS-CODE": Inter 600 12, ls 0.16em per the artboard (not Caption 11 500).
   codeLabel: {
@@ -207,22 +219,25 @@ const styles = StyleSheet.create({
     color: colors.textSubtle,
     letterSpacing: 0.16 * 12,
   },
-  // No token for large code display; DM Sans between h2 (22) and h1 (32).
+  // Invite token: DM Sans 38/46, ls 0.08em, primary text color per the artboard.
+  // (Design specifies weight 700; only DM Sans 600 is loaded app-wide, so the
+  // closest loaded weight is used — see the PR note on the 700 weight.)
   code: {
     fontFamily: typography.h1.fontFamily,
-    fontSize: 28,
-    lineHeight: 34,
-    letterSpacing: 2,
-    color: colors.primary,
+    fontSize: 38,
+    lineHeight: 46,
+    letterSpacing: 0.08 * 38,
+    color: colors.text,
+    textAlign: 'center',
+    alignSelf: 'stretch',
   },
   codeExpired: {
-    color: colors.textSubtle,
-    textDecorationLine: 'line-through',
+    color: EXPIRED_TOKEN_COLOR,
   },
   codePlaceholder: {
     fontFamily: typography.h1.fontFamily,
-    fontSize: 22,
-    lineHeight: 30,
+    fontSize: 28,
+    lineHeight: 36,
     letterSpacing: 3,
     color: colors.textSubtle,
     opacity: 0.35,
@@ -231,36 +246,44 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSubtle,
   },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
   expiredText: {
     ...typography.caption,
     color: colors.danger,
   },
 
-  // Primary actions (copy + share) — shown when an active code is present
-  primaryActions: {
+  // Copy affordance — a pill that sits INSIDE the code card (raised surface fill,
+  // lighter-lavender text) rather than a primary-fill button outside it.
+  copyPill: {
     flexDirection: 'row',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radii.pill,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
   },
-  actionBtn: {
-    flex: 1,
+  copyPillPressed: { backgroundColor: colors.hairline },
+  copyPillText: {
+    ...typography.label,
+    color: COPY_PILL_TEXT,
+  },
+
+  // "Code teilen" — full-width primary button below the card.
+  shareBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 7,
     backgroundColor: colors.primary,
-    borderRadius: radii.md,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    borderRadius: 15,
+    paddingVertical: 17,
   },
-  actionBtnPressed: { backgroundColor: colors.primaryPress },
-  actionBtnText: {
+  shareBtnPressed: { backgroundColor: colors.primaryPress },
+  shareBtnText: {
     ...typography.label,
     color: colors.onPrimary,
+    fontSize: 16,
   },
 
   // Generate button — primary variant (no code yet, or expired)
@@ -277,16 +300,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Generate button — secondary variant (active code already visible)
+  // Generate button — secondary variant (active code already visible): outline,
+  // transparent fill with the base hairline border (not a surfaceRaised fill).
   secondaryBtn: {
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: 'transparent',
     borderColor: colors.hairline,
     borderWidth: 1,
     borderRadius: radii.md,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  secondaryBtnPressed: { backgroundColor: colors.hairline },
+  secondaryBtnPressed: { backgroundColor: colors.surface },
   secondaryBtnText: {
     ...typography.label,
     color: colors.primary,
