@@ -190,10 +190,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     backgroundColor: colors.success,
   },
-  badgeConnected: { backgroundColor: colors.successTint },
+  badgeConnected: { backgroundColor: colors.successSurface },
   badgeEnded: { backgroundColor: colors.surfaceRaised },
   badgeText: { ...typography.caption },
-  badgeTextConnected: { color: colors.success },
+  badgeTextConnected: { color: colors.successText },
   badgeTextEnded: { color: colors.textMuted },
   cards: { gap: 18 },
   loadingCard: {

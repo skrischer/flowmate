@@ -21,6 +21,8 @@ export const colors = {
   inputDisabled: '#241F2E',
   chipBorder: '#322B3D', // default chip border (design.md: Chip · default)
   successTint: '#9CB07E26', // success at ~15 % opacity (8-digit RGBA hex) — badge bg
+  successSurface: '#23301F', // opaque sage "Verbunden" badge surface (design.md)
+  successText: '#B6C79A', // text on the opaque sage badge surface (design.md)
 } as const;
 
 export const radii = {

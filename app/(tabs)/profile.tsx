@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   badgeConnected: {
-    color: colors.success,
+    color: colors.successText,
     fontFamily: typography.bodySm.fontFamily,
     fontSize: 14,
     lineHeight: 18,
