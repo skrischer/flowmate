@@ -62,7 +62,10 @@ export function PhaseTrack({ currentPhase }: PhaseTrackProps) {
       </View>
       <View style={styles.labels}>
         {SEGMENTS.map((seg) => (
-          <View key={seg.key} style={{ flex: seg.weight / TOTAL_WEIGHT }}>
+          <View
+            key={seg.key}
+            style={[styles.labelSlot, { flex: seg.weight / TOTAL_WEIGHT }]}
+          >
             <Text
               style={[
                 styles.label,
@@ -83,6 +86,10 @@ const styles = StyleSheet.create({
   track: { flexDirection: 'row', height: 6 },
   segment: { height: 6 },
   labels: { flexDirection: 'row' },
+  // overflow: 'visible' lets a label overrun its (narrow) segment slot instead
+  // of being clipped by RN's default overflow: 'hidden' — the design allows the
+  // full label to extend past its segment start (artboard A5-0, #152).
+  labelSlot: { overflow: 'visible' },
   label: {
     ...typography.caption,
   },
