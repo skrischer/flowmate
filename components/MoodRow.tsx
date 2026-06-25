@@ -2,8 +2,8 @@
 // Shows 6 mood chips; tapping one logs immediately via upsertDailyLog.
 // The selected chip is filled with primary lavender; others are surface-raised.
 // Mood-only by design (constitution / vision non-goal: no free-text, no symptoms).
-// Does NOT import from features/flower/MoodLogScreen — that file is edited by a
-// parallel agent. Mood set sourced from features/flower/mood.ts (shared constant).
+// Mood is logged inline-for-today here only — there is no standalone screen.
+// Mood set sourced from features/flower/mood.ts (shared constant).
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, typography } from '../lib/theme';
@@ -15,20 +15,13 @@ export interface MoodRowProps {
   selectedMood: Mood | null;
   /** Called when the user taps a mood chip. */
   onSelect: (mood: Mood) => void;
-  /** Opens the full "Stimmung" screen (log a mood for a chosen day). */
-  onOpenDetail: () => void;
 }
 
 /** Horizontal 6-chip mood row with "Wie fuehlst du dich heute?" heading. */
-export function MoodRow({ selectedMood, onSelect, onOpenDetail }: MoodRowProps) {
+export function MoodRow({ selectedMood, onSelect }: MoodRowProps) {
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.heading}>Wie fühlst du dich heute?</Text>
-        <Pressable onPress={onOpenDetail} hitSlop={8} accessibilityRole="button">
-          <Text style={styles.detailLink}>Stimmung</Text>
-        </Pressable>
-      </View>
+      <Text style={styles.heading}>Wie fühlst du dich heute?</Text>
       <View style={styles.chips}>
         {MOOD_OPTIONS.map((opt) => {
           const isSelected = opt.value === selectedMood;
@@ -61,18 +54,9 @@ const styles = StyleSheet.create({
   card: {
     gap: 14,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   heading: {
     ...typography.sectionTitle,
     color: colors.text,
-  },
-  detailLink: {
-    ...typography.navLink,
-    color: colors.primary,
   },
   chips: {
     flexDirection: 'row',
