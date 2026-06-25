@@ -35,7 +35,7 @@ export function TransparencyCard({ mateName }: { mateName: string | null }) {
       <View style={styles.lockNote}>
         <Icon name="lock" size={14} color={colors.textSubtle} />
         <Text style={styles.lockText}>
-          Nie deine Eintraege, Stimmungen oder genauen Daten.
+          Nie deine Einträge, Stimmungen oder genauen Daten.
         </Text>
       </View>
     </View>

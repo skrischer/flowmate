@@ -55,7 +55,7 @@ export function CalendarScreen() {
     return (
       <View style={styles.center}>
         {error ? (
-          <Text style={styles.errorText}>Kalender nicht verfuegbar.</Text>
+          <Text style={styles.errorText}>Kalender nicht verfügbar.</Text>
         ) : (
           <ActivityIndicator color={colors.primary} />
         )}

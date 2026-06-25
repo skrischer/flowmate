@@ -24,7 +24,7 @@ export function MoodRow({ selectedMood, onSelect, onOpenDetail }: MoodRowProps) 
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.heading}>Wie fuehlst du dich heute?</Text>
+        <Text style={styles.heading}>Wie fühlst du dich heute?</Text>
         <Pressable onPress={onOpenDetail} hitSlop={8} accessibilityRole="button">
           <Text style={styles.detailLink}>Stimmung</Text>
         </Pressable>

@@ -107,8 +107,8 @@ function AttunementSection({ data, connected, isLoading, error, flowerName }: Se
   if (error !== null) {
     return (
       <View style={styles.errorCard}>
-        <Text style={styles.errorTitle}>Gerade nicht verfuegbar</Text>
-        <Text style={styles.bodyMuted}>Bitte spaeter erneut versuchen.</Text>
+        <Text style={styles.errorTitle}>Gerade nicht verfügbar</Text>
+        <Text style={styles.bodyMuted}>Bitte später erneut versuchen.</Text>
       </View>
     );
   }

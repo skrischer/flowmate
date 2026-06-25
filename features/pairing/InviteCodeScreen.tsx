@@ -79,7 +79,7 @@ export function InviteCodeScreen() {
       <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.lede}>
         Teile diesen Code mit deinem Mate. Er sieht danach nur deine Phase und
-        sanfte Hinweise — nie deine Eintraege.
+        sanfte Hinweise — nie deine Einträge.
       </Text>
 
       <View style={[styles.codeCard, expired && styles.codeCardExpired]}>
@@ -97,12 +97,12 @@ export function InviteCodeScreen() {
               <View style={styles.statusRow}>
                 <Icon name="clock" size={13} color={colors.danger} />
                 <Text style={styles.expiredText}>
-                  Code abgelaufen · nicht mehr gueltig
+                  Code abgelaufen · nicht mehr gültig
                 </Text>
               </View>
             ) : (
               <Text style={styles.validCaption}>
-                Gueltig 24 Stunden · nur einmal verwendbar
+                Gültig 24 Stunden · nur einmal verwendbar
               </Text>
             )}
           </>

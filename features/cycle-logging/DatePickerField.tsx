@@ -86,13 +86,13 @@ export function DatePickerField({
         onPress={openPicker}
         disabled={disabled}
         accessibilityRole="button"
-        accessibilityLabel={`${label}: ${value ? relativeLabel(value) : 'Datum waehlen'}`}
+        accessibilityLabel={`${label}: ${value ? relativeLabel(value) : 'Datum wählen'}`}
       >
         <Icon name="calendar" size={18} color={colors.textSubtle} />
         <Text style={value ? styles.fieldText : styles.placeholder}>
           {value
             ? `${relativeLabel(value)} · ${formatIso(value)}`
-            : 'Datum waehlen'}
+            : 'Datum wählen'}
         </Text>
         <Icon name="chevron" size={18} color={colors.textSubtle} />
       </Pressable>
@@ -103,7 +103,7 @@ export function DatePickerField({
           <Pressable
             style={styles.backdrop}
             onPress={() => setOpen(false)}
-            accessibilityLabel="Schliessen"
+            accessibilityLabel="Schließen"
           />
           <View style={styles.sheet}>
             <View style={styles.header}>
@@ -184,7 +184,7 @@ export function DatePickerField({
                 style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}
                 onPress={() => setOpen(false)}
               >
-                <Text style={styles.closeText}>Schliessen</Text>
+                <Text style={styles.closeText}>Schließen</Text>
               </Pressable>
             </View>
           </View>

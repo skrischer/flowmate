@@ -44,7 +44,7 @@ const DAYS_PER_WEEK = 7;
 const MONTH_NAMES = [
   'Januar',
   'Februar',
-  'Maerz',
+  'März',
   'April',
   'Mai',
   'Juni',

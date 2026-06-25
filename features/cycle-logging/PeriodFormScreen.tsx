@@ -81,11 +81,11 @@ export function PeriodFormScreen() {
 
   const validate = (): string | null => {
     if (!isValidIso(startDate)) {
-      return 'Bitte ein gueltiges Startdatum eingeben.';
+      return 'Bitte ein gültiges Startdatum eingeben.';
     }
     const trimmedEnd = endDate.trim();
     if (trimmedEnd && !isValidIso(trimmedEnd)) {
-      return 'Bitte ein gueltiges Enddatum eingeben.';
+      return 'Bitte ein gültiges Enddatum eingeben.';
     }
     if (trimmedEnd && !isOnOrAfter(startDate, trimmedEnd)) {
       return 'Das Enddatum darf nicht vor dem Startdatum liegen.';
@@ -131,7 +131,7 @@ export function PeriodFormScreen() {
       await publishSharedState();
       router.back();
     } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : 'Loeschen fehlgeschlagen.');
+      setError(cause instanceof Error ? cause.message : 'Löschen fehlgeschlagen.');
       setIsBusy(false);
     }
   };
@@ -155,7 +155,7 @@ export function PeriodFormScreen() {
         <Pressable
           style={({ pressed }) => [styles.closeBtn, pressed && styles.closeBtnPressed]}
           onPress={() => router.back()}
-          accessibilityLabel="Schliessen"
+          accessibilityLabel="Schließen"
           hitSlop={10}
         >
           <Icon name="close" size={22} color={colors.text} />
@@ -170,7 +170,7 @@ export function PeriodFormScreen() {
       {/* Intro line */}
       <Text style={styles.intro}>
         {isEdit
-          ? 'Passe den Zeitraum dieser Periode an oder loesche den Eintrag.'
+          ? 'Passe den Zeitraum dieser Periode an oder lösche den Eintrag.'
           : 'Trag den Beginn deiner Periode ein. Das Enddatum ist optional.'}
       </Text>
 
@@ -184,7 +184,7 @@ export function PeriodFormScreen() {
           value={startDate}
           onChange={setStartDate}
           disabled={isBusy}
-          hint="Auch vergangene Tage moeglich (Historie nachtragen)."
+          hint="Auch vergangene Tage möglich (Historie nachtragen)."
         />
 
         <DatePickerField
@@ -206,7 +206,7 @@ export function PeriodFormScreen() {
             disabled={isBusy}
           >
             <Icon name="trash" size={18} color={colors.danger} />
-            <Text style={styles.deleteBtnText}>Periode loeschen</Text>
+            <Text style={styles.deleteBtnText}>Periode löschen</Text>
           </Pressable>
         ) : null}
       </ScrollView>

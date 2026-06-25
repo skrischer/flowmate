@@ -27,8 +27,8 @@ const PHASE_LABELS: Record<Phase, string> = {
 
 // Phase-derived attunement hint -- "informed, not instructed". Gentle, no task.
 const PHASE_HINTS: Record<Phase, string> = {
-  menstrual: 'Ihre Periode laeuft gerade. Etwas Ruhe und Waerme tun jetzt gut.',
-  follicular: 'Energie steigt -- eine gute Zeit fuer gemeinsame Plaene.',
+  menstrual: 'Ihre Periode läuft gerade. Etwas Ruhe und Wärme tun jetzt gut.',
+  follicular: 'Energie steigt -- eine gute Zeit für gemeinsame Pläne.',
   ovulation: 'Rund um den Eisprung -- oft besonders energiegeladen.',
   luteal: 'Vor der Periode kann mehr Ruhe und Geduld guttun.',
 };
