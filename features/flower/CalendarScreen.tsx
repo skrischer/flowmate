@@ -268,6 +268,10 @@ const styles = StyleSheet.create({
   loggedText: { color: '#2A1E22' },
   predictedCell: { borderColor: colors.period },
   predictedText: { color: PREDICTED_TEXT },
+  // Caramel outline (secondary tone) — distinct from the fertile fill; the
+  // estimated ovulation day reads within the "fruchtbar" legend group.
+  ovulationCell: { borderColor: colors.secondary },
+  ovulationText: { color: FERTILE_TEXT },
   fertileCell: { backgroundColor: FERTILE_TINT, borderColor: 'transparent' },
   fertileText: { color: FERTILE_TEXT },
   today: { borderColor: colors.primary },
@@ -314,6 +318,7 @@ const styles = StyleSheet.create({
 const markerStyles: Record<DayMarker, StyleProp<ViewStyle>> = {
   logged: styles.loggedCell,
   predicted: styles.predictedCell,
+  ovulation: styles.ovulationCell,
   fertile: styles.fertileCell,
   none: null,
 };
@@ -321,6 +326,7 @@ const markerStyles: Record<DayMarker, StyleProp<ViewStyle>> = {
 const textStyles: Record<DayMarker, StyleProp<TextStyle>> = {
   logged: styles.loggedText,
   predicted: styles.predictedText,
+  ovulation: styles.ovulationText,
   fertile: styles.fertileText,
   none: null,
 };
