@@ -7,7 +7,7 @@
 //   <BrandMark size={72} /> // larger variant for Auth
 //
 // Design reference: docs/design.md (Heather Dark) + Paper artboard "Shared · Auth".
-// Composition: rounded-square container (surface-raised bg, primary border) with
+// Composition: rounded-square container (surface-raised bg, ring border) with
 // a pulse/wave icon in primary — matches the tilde mark visible in Paper designs.
 import { StyleSheet, View } from 'react-native';
 
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.ring,
     borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
