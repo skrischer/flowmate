@@ -5,7 +5,8 @@ export const colors = {
   bg: '#1A1620',
   surface: '#221D2B',
   surfaceRaised: '#2C2538',
-  hairline: '#3A3247',
+  hairline: '#2F2839', // card/field/button border (design.md: Color tokens · hairline)
+  ring: '#3A3247', // avatar/brandmark ring — lighter than the card hairline
   primary: '#B3A0D9',
   primaryPress: '#9F8BCB',
   onPrimary: '#231C2C',
