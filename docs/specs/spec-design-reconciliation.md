@@ -97,9 +97,9 @@ What is true when this work is done?
 | Token findings are design-authoritative → code→design — **but the border token must be SPLIT, not swapped.** Today `colors.hairline = #3A3247` serves two distinct design roles: (a) card/field/button **borders**, where the design wants `#2F2839`, and (b) the **avatar/brandmark ring**, where `#3A3247` is the correct Soll. The fix repoints role (a) to `#2F2839` and keeps role (b) at `#3A3247` under a distinct token (e.g. `ring`/`avatarBorder`), repointing usages accordingly. A blanket `hairline := #2F2839` is WRONG — it would regress the avatar/brandmark borders. Type scale (design.md §Type scale), chip/badge surfaces, and radii follow the same code→design rule per role. | design.md + Paper agree per role; the single-token collision is a code-structuring defect, not an open question. | 2026-06-25 |
 | ASCII-umlaut substitutions in visible German copy are defects → fix to real Unicode. | Constitution: German UI; the substitutions are unambiguous errors. | 2026-06-25 |
 | Issues are grouped by fix-area (central tokens first, then per-surface), not one-per-finding; each issue cites the findings doc. | 283 findings; one-per-finding is unworkable, central fixes close many at once. | 2026-06-25 |
-| OPEN — `/mate-preview`: keep the #156 split (separate "Was mein Mate sieht" screen) and give it a Paper artboard + a nav entry from Pairing-Management, **or** fold the visibility card back onto Pairing-Management (per current `docs/design.md`) and drop the screen? | resolved at the spec-acceptance gate | — |
-| OPEN — Zyklus-Historie entry point: keep it as a row in Flower · Profil (and add it to the design's 4→5 rows), **or** move it (e.g. to the Kalender header) and keep Profil at the designed 4 rows? | resolved at the spec-acceptance gate | — |
-| OPEN — Mate · Eingestimmt (beendet) extras (the "Code eingeben" re-pair CTA + the sovereignty-note card, both in code but not in the artboard): keep them as the better UX and add them to the design, **or** remove them to match the artboard? | resolved at the spec-acceptance gate | — |
+| DECIDED — `/mate-preview` **keeps the #156 split** (stays a separate "Was mein Mate sieht" screen). Add the missing nav entry from Pairing-Management to it; create a Paper artboard + a `docs/design.md` Surfaces entry for it (design→code); unify the header copy to "Was mein Mate sieht". | Honors the recent #156 decision; the design follows the kept implementation. | 2026-06-25 |
+| DECIDED — the Zyklus-Historie entry **moves to the Kalender** (a "Verlauf" header link/toggle on the Kalender tab); the Flower · Profil row added in #150 is **removed** so Profil matches the designed 4 rows. **No new tab** — keeps the 3-tab nav and the data-minimal vision; the Kalender is the temporally-coherent home. `docs/design.md` Kalender surface gains the entry (design→code). | Discoverable at the right mental place without nav weight or a 2nd temporal tab. | 2026-06-25 |
+| DECIDED — **keep** the "Code eingeben" re-pair CTA + the sovereignty-note card on Mate · Eingestimmt (beendet); add them to the artboard + `docs/design.md` (design→code). | They give a disconnected Mate a path back — better UX than the bare artboard. | 2026-06-25 |
 
 ## Tracking
 
@@ -153,3 +153,8 @@ milestone-QA gate (UI smoke against the Paper artboards). Done when:
   Defined the design→code recording location in `docs/design.md`. Scoped the
   umlaut check to the findings doc's enumerated strings (not a blind digraph
   grep).
+- 2026-06-25 (acceptance gate): three forks resolved — (1) `/mate-preview` keeps
+  the #156 split (+ nav entry from Pairing-Management, + artboard/design.md);
+  (2) the Zyklus-Historie entry moves to the Kalender "Verlauf" header and the
+  #150 Profil row is removed (no new tab); (3) the Mate-ended re-pair CTA +
+  sovereignty note are kept and added to the design. Human prerequisites: none.
