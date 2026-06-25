@@ -1,19 +1,37 @@
-// 4-segment weighted phase track (docs/design.md Components: "Phase track:
-// 4 weighted segments (menstrual/follicular/ovulation/luteal), inactive #352C42,
-// active primary"). The segment weights are legibility-first per the measured
-// artboard A5-0 (~24% / 32% / 17% / 27%), deliberately trading literal cycle
-// durations for labels that fit (see spec-design-reconciliation-2, #152). The
-// active segment is filled with the primary lavender accent; inactive segments
-// use the inactive token. Labels alternate around the bar — Menstruation +
-// Eisprung below, Follikel + Luteal above — so each renders in full without
-// crowding or wrapping (see spec-design-reconciliation-2, #228).
-// Reusable by the Mate surface — pass the same currentPhase prop.
+// 4-segment weighted phase track shared by the Flower home and the Mate
+// attunement surface (docs/design.md Components: "Phase track"). ONE component
+// with a per-surface segment variant — joined bar (Flower, default) or
+// individual pills (Mate). The segment weights are legibility-first per the
+// measured artboard A5-0 (~24% / 32% / 17% / 27%), deliberately trading literal
+// cycle durations for labels that fit (see spec-design-reconciliation-2,
+// #152/#241). The active segment is filled with the primary lavender accent and
+// its label is highlighted (semibold + primary) for both variants; everything
+// else uses the inactive/subtle tokens. Labels alternate around the bar —
+// Menstruation + Eisprung below, Follikel + Luteal above — and each is
+// positioned absolutely within its slot so the full German label renders on one
+// line, free of wrapping, truncation, or ellipsis (overflow:visible alone does
+// not stop RN wrapping a Text constrained by a flex slot).
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Phase } from '../lib/prediction';
-import { colors, typography } from '../lib/theme';
+import { colors, fonts, radii, typography } from '../lib/theme';
 
 const PHASE_INACTIVE = '#352C42';
+
+// Gap between pill segments (and the matching pill label rows so columns line
+// up); spacing between joined bar segments; bar outer-end corner radius.
+const PILL_GAP = 5;
+const BAR_SEGMENT_SPACING = 2;
+const BAR_END_RADIUS = 4;
+// Vertical gap between the three rows (above-labels / track / below-labels).
+// The pills surface (Mate) sits a touch looser than the bar surface (Flower),
+// matching each artboard.
+const BAR_ROW_GAP = 6;
+const PILL_ROW_GAP = 8;
+// Explicit height for each label row so it does not collapse now that the
+// labels are absolutely positioned (out of normal flow). ~the caption
+// line-height (15), rounded up.
+const LABEL_ROW_HEIGHT = 16;
 
 type Placement = 'above' | 'below';
 
@@ -29,43 +47,49 @@ const SEGMENTS: readonly {
   { key: 'luteal', label: 'Luteal', weight: 8, placement: 'above' },
 ] as const;
 
-const TOTAL_WEIGHT = SEGMENTS.reduce((sum, s) => sum + s.weight, 0);
+type PhaseTrackVariant = 'bar' | 'pills';
 
 export interface PhaseTrackProps {
   /**
-   * The current cycle phase. The matching segment is rendered in the primary
-   * lavender color; all others are inactive.
+   * The current cycle phase. The matching segment and its label are rendered in
+   * the primary lavender color; all others are inactive.
    */
   currentPhase: Phase;
+  /**
+   * Segment treatment. `'bar'` (default, Flower) is a joined bar with rounded
+   * outer ends; `'pills'` (Mate) is individually pill-rounded segments with a
+   * row gap.
+   */
+  variant?: PhaseTrackVariant;
 }
 
 /**
- * One row of labels. Every segment gets a flex slot so columns line up across
+ * One row of labels. Every segment keeps a flex slot so columns line up across
  * rows and with the bar, but only the segments assigned to this row's placement
- * are filled — the rest are empty spacers preserving horizontal alignment.
+ * are filled. The label is absolutely positioned (`left: 0`, plus `top: 0` for
+ * the below row / `bottom: 0` for the above row) so it sizes to its intrinsic
+ * width on one line and overflows freely into the adjacent empty slot.
  */
 function LabelRow({
   placement,
   currentPhase,
+  gap,
 }: {
   placement: Placement;
   currentPhase: Phase;
+  gap: number;
 }) {
+  const edgeStyle = placement === 'below' ? styles.labelBelow : styles.labelAbove;
   return (
-    <View style={styles.labels}>
+    <View style={[styles.labelRow, { gap }]}>
       {SEGMENTS.map((seg) => (
-        <View
-          key={seg.key}
-          style={[styles.labelSlot, { flex: seg.weight / TOTAL_WEIGHT }]}
-        >
+        <View key={seg.key} style={[styles.labelSlot, { flex: seg.weight }]}>
           {seg.placement === placement ? (
             <Text
               style={[
                 styles.label,
-                {
-                  color:
-                    seg.key === currentPhase ? colors.primary : colors.textSubtle,
-                },
+                edgeStyle,
+                seg.key === currentPhase ? styles.labelActive : styles.labelInactive,
               ]}
             >
               {seg.label}
@@ -77,51 +101,75 @@ function LabelRow({
   );
 }
 
-/** 4-segment weighted phase bar with German labels alternating around it. */
-export function PhaseTrack({ currentPhase }: PhaseTrackProps) {
+/** The segment row itself — joined bar or individual pills per the variant. */
+function Track({
+  currentPhase,
+  variant,
+}: {
+  currentPhase: Phase;
+  variant: PhaseTrackVariant;
+}) {
+  const isPills = variant === 'pills';
   return (
-    <View style={styles.container}>
-      <LabelRow placement="above" currentPhase={currentPhase} />
-      <View style={styles.track}>
-        {SEGMENTS.map((seg, idx) => {
-          const isActive = seg.key === currentPhase;
-          const flex = seg.weight / TOTAL_WEIGHT;
-          const isFirst = idx === 0;
-          const isLast = idx === SEGMENTS.length - 1;
-          return (
-            <View
-              key={seg.key}
-              style={[
-                styles.segment,
-                {
-                  flex,
-                  backgroundColor: isActive ? colors.primary : PHASE_INACTIVE,
-                  borderTopLeftRadius: isFirst ? 4 : 0,
-                  borderBottomLeftRadius: isFirst ? 4 : 0,
-                  borderTopRightRadius: isLast ? 4 : 0,
-                  borderBottomRightRadius: isLast ? 4 : 0,
-                  marginRight: isLast ? 0 : 2,
-                },
-              ]}
-            />
-          );
-        })}
-      </View>
-      <LabelRow placement="below" currentPhase={currentPhase} />
+    <View style={[styles.track, isPills ? styles.trackPills : styles.trackBar]}>
+      {SEGMENTS.map((seg, idx) => {
+        const isActive = seg.key === currentPhase;
+        const isFirst = idx === 0;
+        const isLast = idx === SEGMENTS.length - 1;
+        return (
+          <View
+            key={seg.key}
+            style={[
+              isPills ? styles.segmentPill : styles.segmentBar,
+              {
+                flex: seg.weight,
+                backgroundColor: isActive ? colors.primary : PHASE_INACTIVE,
+              },
+              isPills
+                ? null
+                : {
+                    borderTopLeftRadius: isFirst ? BAR_END_RADIUS : 0,
+                    borderBottomLeftRadius: isFirst ? BAR_END_RADIUS : 0,
+                    borderTopRightRadius: isLast ? BAR_END_RADIUS : 0,
+                    borderBottomRightRadius: isLast ? BAR_END_RADIUS : 0,
+                    marginRight: isLast ? 0 : BAR_SEGMENT_SPACING,
+                  },
+            ]}
+          />
+        );
+      })}
+    </View>
+  );
+}
+
+/** 4-segment weighted phase track with German labels alternating around it. */
+export function PhaseTrack({ currentPhase, variant = 'bar' }: PhaseTrackProps) {
+  const isPills = variant === 'pills';
+  const gap = isPills ? PILL_GAP : 0;
+  return (
+    <View style={isPills ? styles.containerPills : styles.containerBar}>
+      <LabelRow placement="above" currentPhase={currentPhase} gap={gap} />
+      <Track currentPhase={currentPhase} variant={variant} />
+      <LabelRow placement="below" currentPhase={currentPhase} gap={gap} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 6 },
-  track: { flexDirection: 'row', height: 6 },
-  segment: { height: 6 },
-  labels: { flexDirection: 'row' },
-  // overflow: 'visible' lets a label overrun its (narrow) segment slot instead
-  // of being clipped by RN's default overflow: 'hidden' — the design allows the
-  // full label to extend past its segment start (artboard A5-0, #152).
-  labelSlot: { overflow: 'visible' },
-  label: {
-    ...typography.caption,
-  },
+  containerBar: { gap: BAR_ROW_GAP },
+  containerPills: { gap: PILL_ROW_GAP },
+  track: { flexDirection: 'row' },
+  trackBar: { height: 6 },
+  trackPills: { height: 7, gap: PILL_GAP },
+  segmentBar: { height: 6 },
+  segmentPill: { height: 7, borderRadius: radii.pill },
+  labelRow: { flexDirection: 'row', height: LABEL_ROW_HEIGHT },
+  labelSlot: { position: 'relative' },
+  // Absolute positioning sizes the label to its intrinsic single-line width and
+  // lets it overflow its (narrow) slot into the adjacent empty one — no wrap.
+  label: { ...typography.caption, position: 'absolute', left: 0 },
+  labelAbove: { bottom: 0 },
+  labelBelow: { top: 0 },
+  labelActive: { fontFamily: fonts.bodySemiBold, color: colors.primary },
+  labelInactive: { color: colors.textSubtle },
 });
