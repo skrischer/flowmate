@@ -1,6 +1,5 @@
 // Flower "Profil" tab — settings-rows section per Heather Dark design (issue #104).
 // Identity header uses Avatar component. Settings are grouped in a single card:
-//   Zyklus-Historie → /periods (the Flower's own cycle history / Verlauf)
 //   Mein Mate → /pairing (manage/revoke the pairing; "Verbunden" badge when paired)
 //   Was mein Mate sieht → /mate-preview (read-only TransparencyCard preview)
 //   Erscheinungsbild → placeholder row (dark-only app, no theme switch in v1)
@@ -63,13 +62,6 @@ export default function ProfileTab() {
       </View>
 
       <SettingsGroup>
-        <SettingsRow
-          iconName="clock"
-          label="Zyklus-Historie"
-          showChevron
-          onPress={() => router.push('/periods')}
-          isLast={false}
-        />
         <SettingsRow
           iconName="pairing"
           label="Mein Mate"
@@ -169,7 +161,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: {
     paddingHorizontal: spacing.screen,
-    paddingTop: 24,
+    paddingTop: 14,
     paddingBottom: 32,
     gap: 24,
   },
