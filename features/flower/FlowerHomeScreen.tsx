@@ -19,10 +19,11 @@ import { MoodRow } from '../../components/MoodRow';
 import { useAuth } from '../auth/AuthProvider';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 import { getOwnProfile } from '../../lib/data/profiles';
-import { getDailyLog, listDailyLogs, listPeriods, upsertDailyLog, type Mood } from '../../lib/data';
+import { getDailyLog, listDailyLogs, listPeriods, upsertDailyLog, type Mood, type Period } from '../../lib/data';
 import type { DateRange, Prediction } from '../../lib/prediction';
 import { daysBetween } from '../../lib/prediction/dates';
 import { formatRangeShortDe } from '../cycle-logging/date';
+import { findOngoingPeriod } from '../cycle-logging/ongoing-period';
 import { useFlowerPrediction } from './useFlowerPrediction';
 import type { FlowerPrediction } from './prediction';
 import { loggedDays } from './calendar';
@@ -42,8 +43,8 @@ import { todayIso } from './today';
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-/** Primary "Periode eintragen" CTA: SVG plus glyph + label, gap 10 (design). */
-function LogCta({ onPress }: { onPress: () => void }) {
+/** Primary period CTA (design). An ongoing period flips the label to "Periode-Ende eintragen" (spec-period-range-picker). */
+function LogCta({ ongoing, onPress }: { ongoing: boolean; onPress: () => void }) {
   return (
     <Pressable
       style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
@@ -51,7 +52,7 @@ function LogCta({ onPress }: { onPress: () => void }) {
       accessibilityRole="button"
     >
       <Icon name="plus" size={20} color={colors.onPrimary} />
-      <Text style={styles.ctaText}>Periode eintragen</Text>
+      <Text style={styles.ctaText}>{ongoing ? 'Periode-Ende eintragen' : 'Periode eintragen'}</Text>
     </Pressable>
   );
 }
@@ -178,6 +179,7 @@ export function FlowerHomeScreen() {
   const [moodDates, setMoodDates] = useState<ReadonlySet<string>>(new Set());
   const [cycleStart, setCycleStart] = useState<string | null>(null);
   const [periodCount, setPeriodCount] = useState(0);
+  const [ongoing, setOngoing] = useState<Period | null>(null);
 
   const today = todayIso();
   const hour = new Date().getHours();
@@ -201,6 +203,7 @@ export function FlowerHomeScreen() {
         // Most recent period start for cycle-day calculation in the phase card.
         const sorted = [...periods].sort((a, b) => b.start_date.localeCompare(a.start_date));
         setCycleStart(sorted[0]?.start_date ?? null);
+        setOngoing(findOngoingPeriod(periods));
       });
     }, [session?.user.id, today]),
   );
@@ -238,7 +241,7 @@ export function FlowerHomeScreen() {
           periodCount={periodCount}
         />
 
-        <LogCta onPress={() => router.push('/period-form')} />
+        <LogCta ongoing={ongoing !== null} onPress={() => router.push(ongoing ? { pathname: '/period-form', params: { id: ongoing.id } } : '/period-form')} />
 
         <WeekGlance days={weekDays} onCalendar={() => router.push('/calendar')} />
 

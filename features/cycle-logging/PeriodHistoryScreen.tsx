@@ -23,6 +23,7 @@ import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
 import { Icon } from '../../components/Icon';
 import { TopBar } from '../../components/TopBar';
 import { formatDateRange } from './date';
+import { findOngoingPeriod } from './ongoing-period';
 
 // ---------------------------------------------------------------------------
 // Derived stats helpers
@@ -88,6 +89,8 @@ export function PeriodHistoryScreen() {
   const periodStarts = (periods ?? []).map((p) => ({ startDate: p.start_date }));
   const stats = cycleLengthStats(periodStarts);
   const avgPeriod = periods ? avgPeriodLength(periods) : null;
+  // Context-aware CTA: the most recent open period, if any, drives the label.
+  const ongoing = periods ? findOngoingPeriod(periods) : null;
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
@@ -131,13 +134,22 @@ export function PeriodHistoryScreen() {
         />
       )}
 
-      {/* #94 CTA at bottom per design */}
+      {/* #94 CTA at bottom per design — context-aware (spec-period-range-picker):
+          "Periode-Ende eintragen" editing the ongoing period, else a fresh log. */}
       <View style={styles.ctaWrap}>
         <Pressable
           style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
-          onPress={() => router.push('/period-form')}
+          onPress={() =>
+            router.push(
+              ongoing
+                ? { pathname: '/period-form', params: { id: ongoing.id } }
+                : '/period-form',
+            )
+          }
         >
-          <Text style={styles.ctaText}>Periode eintragen</Text>
+          <Text style={styles.ctaText}>
+            {ongoing ? 'Periode-Ende eintragen' : 'Periode eintragen'}
+          </Text>
         </Pressable>
       </View>
     </SafeAreaView>
