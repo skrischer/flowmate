@@ -7,8 +7,15 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../../components/Icon';
 import { PhaseChip } from '../../components/PhaseChip';
 import type { Phase } from '../../lib/prediction';
-import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
+import { colors, radii, typography } from '../../lib/theme';
 import type { MateAttunement } from './attunement-view';
+
+// Heads-up chip surface and text (docs/design.md "Mate · Eingestimmt" artboard):
+// one-off dark tokens not in the shared palette. The chip sits on the slightly
+// darker #2A2233 with #D7D1DC text — a touch brighter than colors.label, the
+// same brighter-label literal MoodLogScreen uses.
+const HEADS_UP_SURFACE = '#2A2233';
+const HEADS_UP_TEXT = '#D7D1DC';
 
 // Warm headline builders per phase -- "informed, not instructed" (design.md).
 // Each is a function accepting the Flower's name so the substitution is
@@ -45,7 +52,7 @@ export function AttunementCard({ data, flowerName }: AttunementCardProps) {
 
       {data.headsUp !== null ? (
         <View style={styles.headsUpChip}>
-          <Icon name="clock" size={14} color={colors.secondary} />
+          <Icon name="clock" size={14} color={HEADS_UP_TEXT} />
           <Text style={styles.headsUpText}>{data.headsUp}</Text>
         </View>
       ) : null}
@@ -58,9 +65,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
-    borderRadius: radii.lg,
-    padding: spacing.screen,
-    gap: 14,
+    // AttunementCard treatment per the artboard: radius 26, padding 24, gap 16 —
+    // one step warmer than the shared radii.lg/spacing.screen card defaults.
+    borderRadius: 26,
+    padding: 24,
+    gap: 16,
   },
   // Warm headline: DM Sans 600 27/32 per the artboard (between H2 22 and H1 34).
   warmHeadline: {
@@ -78,17 +87,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radii.pill,
-    paddingVertical: 6,
+    backgroundColor: HEADS_UP_SURFACE,
+    // Rounded-rect, not a pill: radius 14 (radii.md) per the artboard.
+    borderRadius: radii.md,
+    paddingVertical: 13,
     paddingHorizontal: 12,
-    gap: 6,
+    gap: 10,
   },
-  // Heads-up chip text: Inter 500 14/18 per the artboard (not Label Inter 600 13).
+  // Heads-up chip text: Inter 600 13 (typography.label) per the artboard.
   headsUpText: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    lineHeight: 18,
-    color: colors.secondary,
+    ...typography.label,
+    color: HEADS_UP_TEXT,
   },
 });
