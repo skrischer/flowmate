@@ -86,7 +86,7 @@ export function AcceptInviteScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.brandRow}>
-          <BrandMark />
+          <BrandMark size={64} />
         </View>
 
         <View style={styles.intro}>
@@ -95,7 +95,6 @@ export function AcceptInviteScreen() {
             Gib den Einladungscode ein, den dein Flower mit dir geteilt hat, um
             dich zu verbinden.
           </Text>
-          <TrustRow caption="Dein Flower entscheidet, was du siehst — und kann die Verbindung jederzeit beenden." />
         </View>
 
         <View style={styles.fieldGroup}>
@@ -130,6 +129,11 @@ export function AcceptInviteScreen() {
             <Text style={styles.ctaText}>Verbinden</Text>
           )}
         </Pressable>
+
+        {/* Trust line as footer below the CTA per the design (not between lede and input). */}
+        <View style={styles.footer}>
+          <TrustRow caption="Du siehst nur Phase und Hinweise — nie ihre Einträge." />
+        </View>
       </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -140,16 +144,24 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
   content: {
     flexGrow: 1,
-    padding: spacing.screen,
-    gap: 24,
+    paddingHorizontal: 26, // horizontal padding per the artboard (not spacing.screen 22)
+    paddingVertical: spacing.screen,
+    gap: 36, // content-section gap per the artboard (not 24)
     justifyContent: 'center',
   },
   brandRow: { alignItems: 'center' },
-  intro: { gap: 10 },
-  heading: { color: colors.text, fontSize: 30, fontWeight: '600' },
-  lede: { color: colors.textMuted, fontSize: 15, lineHeight: 22 },
+  // Heading + lede centered per the artboard (not left-aligned).
+  intro: { gap: 10, alignItems: 'center' },
+  heading: {
+    color: colors.text,
+    fontSize: 30,
+    fontWeight: '600',
+    letterSpacing: -0.75, // -0.025em × 30 per the artboard
+    textAlign: 'center',
+  },
+  lede: { color: colors.textMuted, fontSize: 15, lineHeight: 18, textAlign: 'center' },
   fieldGroup: { gap: 8 },
-  label: { color: colors.label, fontSize: 13, fontWeight: '600' },
+  label: { color: colors.label, fontSize: 13, fontWeight: '600', textAlign: 'center' },
   input: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
@@ -157,10 +169,12 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     padding: 16,
     color: colors.text,
-    fontSize: 18,
-    letterSpacing: 2,
+    fontSize: 19, // input font size per the artboard (not 18)
+    letterSpacing: 0.12 * 19, // 0.12em per the artboard
+    textAlign: 'center', // centered input per the artboard
   },
-  error: { color: colors.danger, fontSize: 14 },
+  error: { color: colors.danger, fontSize: 14, textAlign: 'center' },
+  footer: { alignItems: 'center' },
   cta: {
     backgroundColor: colors.primary,
     borderRadius: 15,
