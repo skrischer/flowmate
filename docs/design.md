@@ -76,11 +76,16 @@ Paper file's theme tiles if the theme is revisited.
   1.5px `primary` border.
 - **Chip:** pill; **selected** = `primary` fill + `on-primary` text; **default**
   = `#241F2E` + `#322B3D` border; **phase chip** = `surface-raised` + dot.
-- **Phase track:** 4 weighted segments (menstrual/follicular/ovulation/luteal),
-  inactive `#352C42`, active `primary`.
+- **Phase track:** 4 segments (menstrual/follicular/ovulation/luteal) with
+  legibility-first proportions ≈ `7/10/5/8`, inactive `#352C42`, active
+  `primary`. Labels **alternate above/below** the bar — Menstruation + Eisprung
+  **below**, Follikel + Luteal **above** — so each renders in full without
+  crowding or wrapping (no ellipsis); each label aligns to its segment.
 - **Disclaimer:** 14px circled "i" (`#463C54` border) + caption — rendered on
   **every** prediction/fertility surface (constitution).
 - **Bottom nav:** `#1E1926` bg, `#2A2433` top border; active item `primary`.
+  **Symmetric vertical padding** — equal breathing room above the icons and
+  below the labels — added on top of the device safe-area bottom inset.
 
 ## Surfaces
 
@@ -93,10 +98,10 @@ prefix; listed state variants are separate artboards.
 |---|---|---|
 | Shared · Auth | `spec-foundation-auth.md` | Wordmark, email+password, trust note; "Registrieren" link |
 | Shared · Onboarding | `spec-pairing.md` | First-run fork after sign-up: "Eigenen Zyklus tracken" → Flower shell; "Partner:in folgen" → Mate · Code eingeben. **Navigation-only, never a stored role.** Artboard: `docs/design-assets/shared-onboarding.png` |
-| Flower · Home | `spec-flower-experience.md` | Phase card + **fertile window** + week glance + mood row + **"Periode eintragen" CTA** |
+| Flower · Home | `spec-flower-experience.md` | Phase card + **fertile window** (one inline caramel `Fruchtbares Fenster · <month-name range>` row) + week glance + mood row + **"Periode eintragen" CTA**. The "Diese Woche" **today cell** is a full-column lavender container enclosing weekday + number + indicator dots; the period (rose) and mood indicator dots stay **colour-distinguishable** on the lavender fill (period keeps its rose tone, mood uses a distinct on-primary tone — never both collapsed to one colour). |
 | Flower · Home (keine Prognose) | `spec-flower-experience.md` | `confidence: none` variant — backfill prompt, **no fabricated window**, CTA |
 | Flower · Home (niedrige Sicherheit) | `spec-flower-experience.md` | `confidence: low` variant — prediction (`~`) + a **low-confidence caveat** distinct from the disclaimer |
-| Flower · Kalender | `spec-flower-experience.md` | **Header**: month-nav arrows **flank the title** on the left (`‹ Juni 2026 ›`); the **"Verlauf" link sits top-right** (Home section-header convention — title-area left, nav-link right; no touch-target collision) → Flower · Zyklus-Historie (`/periods`) — the Zyklus-Historie entry lives off the Kalender, not Profil and not a new tab (spec-design-reconciliation F2). Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** affordance. (design→code, spec-design-reconciliation-2 — mirror in artboard `HV-0`.) |
+| Flower · Kalender | `spec-flower-experience.md` | **Header**: month-nav arrows **flank the title** on the left (`‹ Juni 2026 ›`) with the title in a **fixed-width slot** (sized to the longest month name, e.g. "September 2026") so the forward arrow keeps a **stable tap target** as months change; the **"Verlauf" link sits top-right** (Home section-header convention — title-area left, nav-link right; no touch-target collision) → Flower · Zyklus-Historie (`/periods`) — the Zyklus-Historie entry lives off the Kalender, not Profil and not a new tab (spec-design-reconciliation F2). Markers: logged **solid**; the **predicted next period as a multi-day band** (`nextPeriodDate` .. +`MENSTRUAL_DAYS`−1, outlined); the **ovulation day = fertile fill + a distinct caramel outline** (not outline-only); the rest of the fertile window as the **caramel fill**; disclaimer; **tap-a-day to log** affordance. Marker precedence: logged > predicted > ovulation > fertile. (design→code, spec-design-reconciliation-2 — mirror in artboard `HV-0`.) |
 | Flower · Periode eintragen | `spec-cycle-logging.md` | Log/edit sheet: start-date picker (**past-date backfill**), optional end-date, **delete** |
 | Flower · Zyklus-Historie | `spec-cycle-logging.md` | Chronological period list (descending) + stats; row → edit/delete. KPI values are **bare numbers** (Ø Zyklus `28`, Ø Periode `5`, Einträge `6`) — the unit lives in the label, no "T" suffix (`—` fallback when null). A **"Periode eintragen" CTA** sits at the bottom (design→code, spec-design-reconciliation-2 5.2 — the `TB-0` artboard lacked it; the kept implementation leads and the design follows). |
 | Flower · Invite-Code | `spec-pairing.md` | Single-use code, 24h; **"Neuen Code generieren"**; "nie deine Einträge" |
