@@ -107,7 +107,7 @@ prefix; listed state variants are separate artboards.
 | Flower · Profil | `spec-foundation-auth.md` | Identity + setting rows + sign out; "Mein Mate ›" row opens Flower · Pairing-Management |
 | Mate · Code eingeben | `spec-pairing.md` | Mate accept screen — enter code → `accept_invite` |
 | Mate · Eingestimmt | `spec-mate-push.md` | Phase + heads-up + attunement hint, **no raw data, no calendar** |
-| Mate · Eingestimmt (beendet) | `spec-mate-push.md` | Revoked/empty state — "Verbindung beendet", no phase data |
+| Mate · Eingestimmt (beendet) | `spec-mate-push.md` | Revoked/empty state — header eyebrow "Zuletzt eingestimmt auf", "Verbindung beendet" headline (H2), muted **Getrennt** badge (`#241F2E`), 74px icon ring, no phase data. Plus a **"Code eingeben" re-pair CTA** and a **sovereignty-note card** ("… teilt nur, was sie möchte.") — the path back for a disconnected Mate (design→code, spec-design-reconciliation F3 — design follows the kept implementation) |
 | Mate · Profil | `spec-mate-push.md` | Follower identity, Abmelden, **push on/off toggle**; Eingestimmt/Profil nav |
 
 ## Design rules (from the foundation docs)
@@ -130,7 +130,10 @@ prefix; listed state variants are separate artboards.
 - **Pairing is Flower-managed** — the Flower invites, regenerates the code, and
   revokes ("Mate entfernen"); the Mate only enters a code and toggles push. v1 has
   **no follower-initiated leave** (Flower-only sovereignty; Phase 8). The revoked
-  state is designed on both sides (Pairing-Management + the empty Mate-View).
+  state is designed on both sides (Pairing-Management + the empty Mate-View); the
+  empty Mate-View keeps a **"Code eingeben" re-pair CTA** plus a sovereignty-note
+  card so a disconnected Mate has a path back (design→code, spec-design-reconciliation
+  F3 — the kept implementation, not removed to match the bare artboard).
 - **The Mate path is reachable** — a first-run onboarding fork (after sign-up)
   routes "Partner:in folgen" to Mate · Code eingeben; without it the Mate role is
   designed but unreachable from the default Flower shell. The fork sets **navigation
