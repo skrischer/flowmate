@@ -112,10 +112,10 @@ const styles = StyleSheet.create({
   dayPillToday: {
     backgroundColor: colors.primary,
   },
-  // Day numbers: DM Sans 600 15 per the artboard (not Inter 400 14).
+  // Day numbers: DM Sans 600 15, color #C9C2CF (colors.label) per the artboard.
   dayNumber: {
     ...typography.sectionTitle,
-    color: colors.text,
+    color: colors.label,
   },
   dayNumberToday: {
     color: colors.onPrimary,

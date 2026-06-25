@@ -23,15 +23,16 @@ export function PredictionDisclaimer() {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  // Circled "i": 14px mark with a 1.4px #463C54 border (design.md · Disclaimer).
   mark: {
-    width: 18,
-    height: 18,
+    width: 14,
+    height: 14,
     borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.hairline,
+    borderWidth: 1.4,
+    borderColor: '#463C54',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markText: { color: colors.textSubtle, fontSize: 11, fontWeight: '600' },
+  markText: { color: colors.textSubtle, fontSize: 9, fontWeight: '600' },
   caption: { color: colors.textSubtle, fontSize: 12 },
 });
