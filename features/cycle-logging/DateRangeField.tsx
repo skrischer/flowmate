@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   fieldPressed: { opacity: 0.7 },
   fieldDisabled: { opacity: 0.5 },
-  // Field value: Inter 500 16/20 per the artboard (matches DatePickerField).
+  // Field value: Inter 500 16/20 per the artboard.
   fieldText: { color: colors.text, fontFamily: fonts.bodyMedium, fontSize: 16, lineHeight: 20, flex: 1 },
   placeholder: { color: colors.textMuted, fontSize: 16, flex: 1 },
   hint: { color: colors.textSubtle, fontSize: 12 },

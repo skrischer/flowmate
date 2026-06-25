@@ -1,14 +1,15 @@
-// Flower · Periode eintragen (docs/design.md, spec-cycle-logging.md): the
-// log/edit sheet. Presented as a modal sheet (headerShown: false on the route).
-// Create a new period or edit an existing one (by `id` param),
-// with a past-date-capable start, an optional end, and delete when editing.
-// All persistence goes through lib/data; no direct Supabase calls here.
+// Flower · Periode eintragen (docs/design.md, spec-cycle-logging.md,
+// spec-period-range-picker.md): the log/edit sheet. Presented as a modal sheet
+// (headerShown: false on the route). Create a new period or edit an existing one
+// (by `id` param) through a SINGLE range picker (start + optional end over one
+// month calendar) — a past-date-capable start, an open end ("läuft noch") as the
+// default resting state, and delete when editing. All persistence goes through
+// lib/data; no direct Supabase calls here.
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
@@ -27,9 +28,10 @@ import {
   updatePeriod,
 } from '../../lib/data';
 import { Icon } from '../../components/Icon';
-import { colors, radii, spacing, typography } from '../../lib/theme';
-import { DatePickerField } from './DatePickerField';
+import { colors } from '../../lib/theme';
+import { DateRangeField } from './DateRangeField';
 import { isOnOrAfter, isValidIso, todayIso } from './date';
+import { styles } from './PeriodFormScreen.styles';
 
 export function PeriodFormScreen() {
   const router = useRouter();
@@ -40,7 +42,8 @@ export function PeriodFormScreen() {
   const isEdit = typeof id === 'string' && id.length > 0;
 
   const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  // null end = open period ("läuft noch") — the default resting state.
+  const [endDate, setEndDate] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -56,7 +59,7 @@ export function PeriodFormScreen() {
         setStartDate(
           paramStartDate && isValidIso(paramStartDate) ? paramStartDate : todayIso(),
         );
-        setEndDate('');
+        setEndDate(null);
         setIsLoaded(true);
         return;
       }
@@ -65,7 +68,7 @@ export function PeriodFormScreen() {
           if (!active) return;
           const row = rows.find((p) => p.id === id);
           setStartDate(row?.start_date ?? todayIso());
-          setEndDate(row?.end_date ?? '');
+          setEndDate(row?.end_date ?? null);
           setIsLoaded(true);
         })
         .catch((cause: unknown) => {
@@ -83,12 +86,13 @@ export function PeriodFormScreen() {
     if (!isValidIso(startDate)) {
       return 'Bitte ein gültiges Startdatum eingeben.';
     }
-    const trimmedEnd = endDate.trim();
-    if (trimmedEnd && !isValidIso(trimmedEnd)) {
-      return 'Bitte ein gültiges Enddatum eingeben.';
-    }
-    if (trimmedEnd && !isOnOrAfter(startDate, trimmedEnd)) {
-      return 'Das Enddatum darf nicht vor dem Startdatum liegen.';
+    if (endDate !== null) {
+      if (!isValidIso(endDate)) {
+        return 'Bitte ein gültiges Enddatum eingeben.';
+      }
+      if (!isOnOrAfter(startDate, endDate)) {
+        return 'Das Enddatum darf nicht vor dem Startdatum liegen.';
+      }
     }
     return null;
   };
@@ -107,12 +111,11 @@ export function PeriodFormScreen() {
     }
     setError(null);
     setIsBusy(true);
-    const end = endDate.trim() ? endDate.trim() : null;
     try {
       if (isEdit) {
-        await updatePeriod(id, { start_date: startDate, end_date: end });
+        await updatePeriod(id, { start_date: startDate, end_date: endDate });
       } else {
-        await createPeriod({ start_date: startDate, end_date: end });
+        await createPeriod({ start_date: startDate, end_date: endDate });
       }
       await publishSharedState();
       router.back();
@@ -179,20 +182,15 @@ export function PeriodFormScreen() {
         contentContainerStyle={styles.fields}
         keyboardShouldPersistTaps="handled"
       >
-        <DatePickerField
-          label="Startdatum"
-          value={startDate}
-          onChange={setStartDate}
-          disabled={isBusy}
-        />
-
-        <DatePickerField
-          label="Enddatum · optional"
-          value={endDate}
-          onChange={setEndDate}
-          optional
-          minDate={startDate || undefined}
-          placeholderLabel="Läuft noch"
+        <DateRangeField
+          label="Zeitraum"
+          startValue={startDate}
+          endValue={endDate}
+          onChange={(start, end) => {
+            setStartDate(start);
+            setEndDate(end);
+          }}
+          hint="Lass das Ende offen, solange die Periode noch läuft."
           disabled={isBusy}
         />
 
@@ -232,94 +230,3 @@ export function PeriodFormScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.bg },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-
-  // Sheet header
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.screen,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  // Close control: 38×38 rounded-square r12, inputDisabled bg + chipBorder border
-  // (design.md) — matches the shared TopBar back-affordance.
-  closeBtn: {
-    width: 38,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-    backgroundColor: colors.inputDisabled,
-    borderColor: colors.chipBorder,
-    borderWidth: 1,
-  },
-  closeBtnPressed: { opacity: 0.7 },
-  // Sheet title: DM Sans 600 18/22, ls -0.02em per the artboard (not Title 16).
-  sheetTitle: {
-    ...typography.title,
-    fontSize: 18,
-    lineHeight: 22,
-    letterSpacing: -0.02 * 18,
-    color: colors.text,
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerSpacer: { width: 38 },
-
-  // Intro line: Inter 400 15/22 per the artboard (not bodySm 14/20).
-  intro: {
-    ...typography.bodySm,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-    paddingHorizontal: spacing.screen,
-    paddingBottom: 8,
-  },
-
-  // Scrollable field area
-  scrollArea: { flex: 1 },
-  fields: {
-    paddingHorizontal: spacing.screen,
-    paddingTop: 16,
-    paddingBottom: 24,
-    gap: 20,
-  },
-  error: { color: colors.danger, fontSize: 14 },
-
-  // Delete (edit-only)
-  deleteBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
-    borderWidth: 1,
-    borderRadius: radii.md,
-    padding: 17,
-    marginTop: 8,
-  },
-  deleteBtnPressed: { opacity: 0.7 },
-  deleteBtnText: { color: colors.danger, fontSize: 16, fontWeight: '600' },
-
-  // Pinned footer + CTA — no top divider (design.md), top 16 / bottom 30.
-  footer: {
-    paddingHorizontal: spacing.screen,
-    paddingTop: 16,
-    paddingBottom: 30,
-    backgroundColor: colors.bg,
-  },
-  cta: {
-    backgroundColor: colors.primary,
-    borderRadius: radii.md,
-    padding: 17,
-    alignItems: 'center',
-  },
-  ctaPressed: { backgroundColor: colors.primaryPress },
-  ctaDisabled: { opacity: 0.6 },
-  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
-});
