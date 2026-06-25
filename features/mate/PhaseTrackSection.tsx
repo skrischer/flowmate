@@ -10,7 +10,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '../../components/Icon';
-import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
+import { colors, fonts, radii, typography } from '../../lib/theme';
 import type { Phase } from '../../lib/prediction';
 
 // Inactive segment fill (docs/design.md Phase track) — a one-off dark token not
@@ -38,9 +38,7 @@ export function PhaseTrackSection({ phase, flowerName }: PhaseTrackSectionProps)
   return (
     <View style={styles.section}>
       <Text style={styles.sectionLabel}>{sectionLabel}</Text>
-      <View style={styles.trackCard}>
-        <MatePhaseTrack phase={phase} />
-      </View>
+      <MatePhaseTrack phase={phase} />
       <ReassuranceCard />
     </View>
   );
@@ -93,21 +91,15 @@ function ReassuranceCard() {
 }
 
 const styles = StyleSheet.create({
-  section: { gap: 12 },
+  section: { gap: 10 },
+  // Section label "WO … IST" per the artboard: Inter 600 12px, tracking 0.06em
+  // (0.72dp) — distinct from the caption token (Inter 500 11px).
   sectionLabel: {
-    ...typography.caption,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 12,
+    lineHeight: 16,
     color: colors.textSubtle,
-    // All-caps section labels use wider tracking than body captions.
-    // 0.08em × 11px = 0.88dp (twice the caption token's 0.04em base).
-    // design.md caption spec range: 0.04–0.16em; 0.08em is mid-range for labels.
-    letterSpacing: 0.08 * 11,
-  },
-  trackCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
-    borderWidth: 1,
-    borderRadius: radii.lg,
-    padding: spacing.screen,
+    letterSpacing: 0.06 * 12,
   },
   track: { flexDirection: 'row', gap: 5, height: 7 },
   segment: { height: 7, borderRadius: radii.pill },
@@ -121,9 +113,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
-    borderRadius: radii.lg,
+    // Reassurance card per the artboard: radius 18, paddingHorizontal 18.
+    borderRadius: 18,
     paddingVertical: 16,
-    paddingHorizontal: spacing.screen,
+    paddingHorizontal: 18,
   },
   reassuranceText: {
     ...typography.bodySm,
