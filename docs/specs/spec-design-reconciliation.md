@@ -1,0 +1,136 @@
+# Spec: Design-fidelity reconciliation
+
+> Created: 2026-06-25
+
+Reconcile the 18 implemented Flowmate screens with the design contract
+(`docs/design.md` + the Paper file), closing the 283 deviations found in the
+design/code gap analysis — **bidirectionally**: code is corrected to the design
+where the design leads, and the design is updated to the code where the
+implementation is demonstrably better. This spec carries no lifecycle state —
+acceptance is the spec merged on `main` with a milestone and issues.
+
+Evidence base (full per-screen findings, `file:line`, Soll/Ist):
+`docs/specs/design-reconciliation-findings.md`.
+
+## Outcome
+
+What is true when this work is done?
+
+- [ ] The systematic root causes are fixed once, centrally: the card-border
+      token equals the design value, the type-scale tokens map to the design
+      roles, German UI copy uses real Unicode umlauts (no `ae`/`ue`/`ss`), and
+      a shared back-button matches the design.
+- [ ] Every audited screen either matches its design artboard, or — where the
+      implementation was kept as the better solution — `docs/design.md` (and,
+      where practical, the Paper artboard) is updated to match the
+      implementation, with the rationale recorded.
+- [ ] No remaining **high**- or **medium**-severity deviation from the findings
+      doc is left unaddressed (fixed in code, or consciously adopted into the
+      design); **low**-severity polish is closed or explicitly deferred.
+- [ ] The three open product forks (`/mate-preview`, the Zyklus-Historie entry
+      point, the Mate-ended extras) are resolved per the spec-acceptance gate and
+      reflected in both code and `docs/design.md`.
+- [ ] `npm run verify` and `npm test` stay green; each reconciled surface
+      renders correctly in the local web/emulator smoke.
+
+## Scope
+
+### In scope
+
+- The 18 audited surfaces (Shared/Flower/Mate) and the shared components they use
+  (`Avatar`, `BrandMark`, `PhaseChip`, `PhaseTrack`, `WeekGlance`, `MoodRow`,
+  `TrustRow`, `PredictionDisclaimer`, the settings-row pattern) plus
+  `lib/theme`.
+- Both directions of reconciliation: code→design (the default) and design→code
+  (the exception, by updating `docs/design.md`).
+- Resolving the three open forks and wiring the missing navigation entry to
+  `/mate-preview` if that screen is kept.
+
+### Out of scope
+
+- New features or screens beyond reconciling what exists.
+- The open phase-track proportions/label work — already tracked as **#152**
+  (`needs:planning`); this spec defers to it and does not duplicate it.
+- Editing the Paper file is best-effort only: `docs/design.md` is the committed
+  source of truth (per its own contract); Paper-artboard touch-ups are a
+  convenience, optionally a later `/loopkit:design` pass.
+- Live/release concerns (Phase 7).
+
+## Constraints
+
+- `docs/design.md` is the design source of truth (its own contract: "the
+  committed file here is the source of truth; the Paper file is the editor").
+  Its **Color tokens**, **Type scale**, **Radii & spacing**, and **Components**
+  tables are authoritative for the code→design direction.
+- No emojis; German UI copy, English code/comments/commits (constitution).
+- TypeScript strict; no `any`/`as unknown as`/`@ts-ignore` without a `TODO(...)`
+  (constitution). Functions ≤ 50 lines, files ≤ 300 lines.
+- Token/typography fixes are centralized in `lib/theme` first to avoid
+  per-screen drift; screen issues depend on the central fixes.
+- Mate surfaces must keep showing **no raw health data / no day-calendar**
+  (constitution) — reconciliation is visual, never a data-exposure change.
+
+## Prior art
+
+- `none relevant` — this is internal design/code reconciliation against the
+  project's own `docs/design.md` contract; `docs/prior-art.md` (competitor
+  landscape) does not bear on it.
+
+## Human prerequisites
+
+- `none` — all work is local (code + `docs/design.md`); no secrets, accounts, or
+  external provisioning.
+
+## Prior decisions
+
+| Decision | Rationale | Date |
+|---|---|---|
+| **Reconciliation is bidirectional, with a default and an exception.** Default: **code→design** — when the design clearly leads, or a discrepancy is unjustifiable, the code is changed to match `docs/design.md`/Paper. Exception: **design→code** — when the implemented solution is demonstrably better, the design is updated (edit `docs/design.md`; optionally the Paper artboard) and the rationale recorded in the Decision log. | The user's directive; matches `docs/design.md` being the contract while allowing the build to inform it. | 2026-06-25 |
+| Token findings (card border `#2F2839`, type scale per design.md §Type scale, chip/badge surfaces, radii) are **design-authoritative → code→design**. `lib/theme.colors.hairline` is `#3A3247` but `docs/design.md` specifies `#2F2839`; the code value is the defect. | The documented contract and the Paper artboards agree; the code diverges. Not an open question. | 2026-06-25 |
+| ASCII-umlaut substitutions in visible German copy are defects → fix to real Unicode. | Constitution: German UI; the substitutions are unambiguous errors. | 2026-06-25 |
+| Issues are grouped by fix-area (central tokens first, then per-surface), not one-per-finding; each issue cites the findings doc. | 283 findings; one-per-finding is unworkable, central fixes close many at once. | 2026-06-25 |
+| OPEN — `/mate-preview`: keep the #156 split (separate "Was mein Mate sieht" screen) and give it a Paper artboard + a nav entry from Pairing-Management, **or** fold the visibility card back onto Pairing-Management (per current `docs/design.md`) and drop the screen? | resolved at the spec-acceptance gate | — |
+| OPEN — Zyklus-Historie entry point: keep it as a row in Flower · Profil (and add it to the design's 4→5 rows), **or** move it (e.g. to the Kalender header) and keep Profil at the designed 4 rows? | resolved at the spec-acceptance gate | — |
+| OPEN — Mate · Eingestimmt (beendet) extras (the "Code eingeben" re-pair CTA + the sovereignty-note card, both in code but not in the artboard): keep them as the better UX and add them to the design, **or** remove them to match the artboard? | resolved at the spec-acceptance gate | — |
+
+## Tracking
+
+The decomposition into steps lives as GitHub issues — one per fix-area, grouped
+under the milestone, each citing this spec and the findings doc.
+
+- Milestone: Design-fidelity reconciliation (created on acceptance)
+- Issues: created from this spec once merged
+
+## Verification
+
+The project Test command covers little UI; most checks are the human
+milestone-QA gate (UI smoke against the Paper artboards). Done when:
+
+- [ ] `npm run verify` green (eslint + tsc) and `npm test` green.
+- [ ] Central tokens: `colors.hairline === #2F2839`; type-scale tokens map to the
+      design roles; no ASCII-umlaut copy remains (grep clean for `ae`/`ue`/`ss`
+      in visible strings); the shared back-button renders on the four affected
+      screens.
+- [ ] Each audited screen, captured at 390px, matches its Paper artboard — or
+      `docs/design.md` records the kept-impl deviation with rationale. (Re-run
+      the gap-capture pipeline as the QA evidence.)
+- [ ] Invite-Code shows a short formatted code with no horizontal overflow.
+- [ ] The three forks are implemented as accepted, and `/mate-preview` (if kept)
+      is reachable from Pairing-Management.
+- [ ] No high/medium finding from the findings doc remains unaddressed.
+
+## Risks and mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Central token changes cause wide visual regressions across screens. | Land token issues first, re-capture all screens, eyeball before per-screen issues build on them. |
+| Bidirectional ambiguity → implementer guesses direction. | The default is code→design; only the three enumerated forks are open and resolved at the gate. Any new ambiguity an implementer hits is escalated `needs:planning`, never guessed. |
+| Editing the Paper file is awkward from code. | `docs/design.md` is the committed source of truth; updating it satisfies design→code. Paper touch-ups are optional/later. |
+| Scope creep (treating low-severity polish as blocking). | Low-severity is a single sweep issue, explicitly deferrable. |
+
+## Decision log
+
+- 2026-06-25: Spec created from the design/code gap analysis (283 findings).
+  Bidirectional policy adopted; token/typo/umlaut findings classified as
+  design-authoritative (code→design); three product forks marked OPEN for the
+  spec-acceptance gate.
