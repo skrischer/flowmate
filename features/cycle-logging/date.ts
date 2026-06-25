@@ -50,3 +50,34 @@ export function formatIso(value: string): string {
   const [year, month, day] = value.split('-');
   return `${day ?? ''}.${month ?? ''}.${year ?? ''}`;
 }
+
+// German full month names, indexed 0–11. Long-date display only — the stored
+// representation stays the ISO `DATE` string.
+const DE_MONTHS = [
+  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+] as const;
+
+// German weekday abbreviations indexed by JS `Date.getDay()` (Sunday = 0).
+const DE_WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] as const;
+
+/**
+ * Renders an ISO day as a German long date, e.g. "15. Juni 2026". With
+ * `withWeekday` it prefixes the weekday abbreviation: "Do · 15. Juni 2026".
+ * Passthrough if the value is not a valid ISO day.
+ */
+export function formatLongDe(value: string, withWeekday = false): string {
+  if (!isValidIso(value)) {
+    return value;
+  }
+  const parts = value.split('-');
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  const longDate = `${day}. ${DE_MONTHS[month - 1] ?? ''} ${year}`;
+  if (!withWeekday) {
+    return longDate;
+  }
+  const weekday = DE_WEEKDAYS[new Date(year, month - 1, day).getDay()] ?? '';
+  return `${weekday} · ${longDate}`;
+}
