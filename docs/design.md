@@ -99,7 +99,6 @@ prefix; listed state variants are separate artboards.
 | Flower · Kalender | `spec-flower-experience.md` | Logged solid vs **predicted outlined**; fertile band; disclaimer; **tap-a-day to log** affordance; a **"Verlauf" header link → Flower · Zyklus-Historie** (`/periods`) — the Zyklus-Historie entry lives off the Kalender, not Profil and not a new tab (spec-design-reconciliation F2) |
 | Flower · Periode eintragen | `spec-cycle-logging.md` | Log/edit sheet: start-date picker (**past-date backfill**), optional end-date, **delete** |
 | Flower · Zyklus-Historie | `spec-cycle-logging.md` | Chronological period list (descending) + stats; row → edit/delete |
-| Flower · Mood-Logging | `spec-flower-experience.md` | 6-mood set, past-date backfill chip — **mood-only, no free-text note** |
 | Flower · Invite-Code | `spec-pairing.md` | Single-use code, 24h; **"Neuen Code generieren"**; "nie deine Einträge" |
 | Flower · Invite-Code (abgelaufen) | `spec-pairing.md` | Expired/used state — greyed code, "Code abgelaufen", regenerate as primary |
 | Flower · Pairing-Management | `spec-pairing.md` | Connected status + **"Mate entfernen"/revoke** + re-invite + "Was Tom sieht" (from Flower · Profil "Mein Mate ›") |
@@ -143,4 +142,5 @@ prefix; listed state variants are separate artboards.
   activation rule) — and acts as a gate, not a wizard (an abandoned "folgen" choice
   re-shows it on relaunch). The shell otherwise stays derived from the pairing edge.
 - **Mood logging is mood-only** — the curated set of 6, no free-text note and no
-  symptoms (data minimization + the vision's no-quantified-self non-goal).
+  symptoms (data minimization + the vision's no-quantified-self non-goal). Mood is
+  logged inline-for-today on the Home mood row; there is no standalone screen.

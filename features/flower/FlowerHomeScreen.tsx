@@ -242,11 +242,7 @@ export function FlowerHomeScreen() {
 
         <WeekGlance days={weekDays} onCalendar={() => router.push('/calendar')} />
 
-        <MoodRow
-          selectedMood={selectedMood}
-          onSelect={handleMoodSelect}
-          onOpenDetail={() => router.push('/mood-log')}
-        />
+        <MoodRow selectedMood={selectedMood} onSelect={handleMoodSelect} />
       </ScrollView>
     </SafeAreaView>
   );
