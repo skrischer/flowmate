@@ -81,6 +81,10 @@ What is true when this work is done?
 - TypeScript strict; no `any`/`as unknown as`/`@ts-ignore` without `TODO(...)`;
   functions ≤ 50 lines, files ≤ 300 lines. German UI copy, English
   code/comments/commits. No emojis.
+- File-size heads-up: `PeriodFormScreen.tsx` is already ~326 lines (over the cap)
+  and `DatePickerField.tsx` ~285. The refactor must land every touched file ≤ 300
+  — extract the pure range-selection model into its own module and keep the range
+  field a separate component, so the screen nets smaller, not larger.
 
 ## Prior art
 
@@ -95,7 +99,10 @@ What is true when this work is done?
 - [Couple / partner-awareness model](../prior-art.md#couple--partner-awareness-model)
   — the commercial references (Flo, Clue) surface an explicit ongoing-period
   state and a dedicated "end your period" action; this backs the context-aware
-  "Periode-Ende eintragen" CTA over hiding end-entry inside a modal.
+  "Periode-Ende eintragen" CTA over hiding end-entry inside a modal. As with
+  drip/Periodical, this ongoing/end-action finding is from the products
+  themselves — `docs/prior-art.md`'s entry documents the partner-awareness
+  model, not the logging UX.
 
 ## Human prerequisites
 
@@ -112,6 +119,7 @@ Decisions already made that the implementor must respect.
 | **Open end ("läuft noch") is the default resting state** — a fresh log starts with start = today (or the tapped calendar day) and end open; no forced second tap. The acute/ongoing case needs no picker interaction at all. | Keeps the most common (acute) logging case as friction-free as the current two-field form — parity, not regression (the user's explicit concern). | 2026-06-25 |
 | **Context-aware CTA:** when the most recent period has no `end_date`, Flower · Home and Flower · Zyklus-Historie show **"Periode-Ende eintragen"**, routing to the edit form of that ongoing period with the picker anchored on its start; otherwise "Periode eintragen". | Flo/Clue pattern (explicit ongoing state + a dedicated end action); reuses the existing edit route; the label is the visible ongoing signal. | 2026-06-25 |
 | **Per-day painting (drip/Periodical) is NOT adopted.** | It would break our `start_date`/`end_date` range model; the range picker fits the model and is the smaller change. | 2026-06-25 |
+| The "Periode-Ende eintragen" entry **reuses the existing edit sheet as-is** — title "Periode bearbeiten", intro "Passe den Zeitraum …". The end-entry framing lives on the CTA, not in a new sheet header. | The sheet genuinely edits the period to add an end; a separate header variant is needless ceremony. | 2026-06-25 |
 | OPEN — calendar behavior after the end is tapped: keep the calendar **open** with explicit "Fertig" / "Läuft noch" actions (correctable, true range-picker feel), or **auto-close** on the second tap (like the current single picker). | resolved at the spec-acceptance gate | — |
 
 ## Tracking
@@ -146,7 +154,8 @@ the rest is the human milestone-QA gate (UI smoke). Done when:
 - [ ] The pure range-selection model and the ongoing-period detection helper are
       unit-tested (jest).
 - [ ] `docs/design.md` describes the range picker and the context-aware end-CTA,
-      with a Decision-log cross-reference.
+      with an inline `spec-period-range-picker` cross-reference (design.md's
+      convention — it has no Decision-log section).
 
 ## Risks and mitigations
 
@@ -169,3 +178,9 @@ the rest is the human milestone-QA gate (UI smoke). Done when:
   existing `start_date`/`end_date` data model.
 - 2026-06-25: Left open — calendar behavior after the end tap (keep open +
   "Fertig"/"Läuft noch" vs auto-close); resolved at the spec-acceptance gate.
+- 2026-06-25 (spec review): tightened the Flo/Clue prior-art claim (ongoing/end
+  action is from the products, not `docs/prior-art.md`); added a file-size
+  heads-up (`PeriodFormScreen.tsx` already ~326 lines — touched files must land
+  ≤ 300 via the model/component extraction); recorded that the end-entry reuses
+  the existing edit sheet as-is; reworded the design.md verification item to an
+  inline cross-reference (no Decision-log section in design.md).
