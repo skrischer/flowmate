@@ -1,8 +1,9 @@
 // Flower · Zyklus-Historie (docs/design.md, spec-cycle-logging.md): the
 // chronological list of logged periods, descending by start date, each row
-// showing a colored dot, compact date range, and period-length meta. A
-// stats card at the top shows Ø cycle length, Ø period length, and entry
-// count. All data flows through lib/data — no direct Supabase calls.
+// showing a colored dot, a month-name date range ("12.–17. Juni 2026"), and
+// period-length meta ("6 Tage · Zyklus 29 Tage"). A stats card at the top
+// shows Ø cycle length, Ø period length, and entry count. All data flows
+// through lib/data — no direct Supabase calls.
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -21,7 +22,7 @@ import { cycleLengthStats } from '../../lib/prediction/cycle-stats';
 import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
 import { Icon } from '../../components/Icon';
 import { TopBar } from '../../components/TopBar';
-import { formatIso } from './date';
+import { isValidIso } from './date';
 
 // ---------------------------------------------------------------------------
 // Derived stats helpers
@@ -189,19 +190,17 @@ function PeriodRow({
   cycleLength: number | null;
   onPress: () => void;
 }) {
-  // Compact date: "22.06." for start; "22.06. - 26.06." when end_date present.
-  const startShort = compactDate(period.start_date);
-  const dateLabel = period.end_date
-    ? `${startShort} - ${compactDate(period.end_date)}`
-    : startShort;
+  // Month-name range per design: "12.–17. Juni 2026" (en dash), or the single
+  // start day when no end_date is set yet.
+  const dateLabel = formatDateRange(period.start_date, period.end_date);
 
   const pLen = periodLengthDays(period);
   const periodMeta = pLen !== null ? `${pLen} ${pLen === 1 ? 'Tag' : 'Tage'}` : null;
   const cycleMeta =
     cycleLength !== null
-      ? `Zyklus: ${cycleLength} T`
+      ? `Zyklus ${cycleLength} ${cycleLength === 1 ? 'Tag' : 'Tage'}`
       : 'Aktueller Zyklus';
-  const meta = periodMeta ? `${periodMeta}  ·  ${cycleMeta}` : cycleMeta;
+  const meta = periodMeta ? `${periodMeta} · ${cycleMeta}` : cycleMeta;
 
   return (
     <Pressable
@@ -223,12 +222,52 @@ function PeriodRow({
   );
 }
 
-/** Short date "DD.MM." — no year to save space in the row. */
-function compactDate(iso: string): string {
-  const formatted = formatIso(iso); // "DD.MM.YYYY"
-  const parts = formatted.split('.');
-  // parts = ["DD", "MM", "YYYY"]
-  return `${parts[0] ?? ''}.${parts[1] ?? ''}.`;
+// German full month names, indexed 0–11 (kept local so other screens are
+// unaffected — this is the row-label format, not a shared date utility).
+const DE_MONTHS = [
+  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+] as const;
+
+interface DateParts {
+  day: number;
+  month: number; // 1-12
+  year: number;
+}
+
+function isoParts(iso: string): DateParts | null {
+  if (!isValidIso(iso)) return null;
+  const [year, month, day] = iso.split('-');
+  return { day: Number(day), month: Number(month), year: Number(year) };
+}
+
+/** Single day with month name and year, e.g. "17. Juni 2026". */
+function formatDay({ day, month, year }: DateParts): string {
+  return `${day}. ${DE_MONTHS[month - 1] ?? ''} ${year}`;
+}
+
+/**
+ * Period date range with month names and an en dash per design:
+ * - same month + year:  "12.–17. Juni 2026"
+ * - same year:          "28. Mai – 3. Juni 2026"
+ * - crossing years:     "28. Dezember 2025 – 3. Januar 2026"
+ * Without an end_date the single start day is shown ("17. Juni 2026").
+ * Falls back to the raw ISO strings when a value is not a valid date.
+ */
+function formatDateRange(startIso: string, endIso: string | null): string {
+  const start = isoParts(startIso);
+  if (!start) return endIso ? `${startIso} – ${endIso}` : startIso;
+  if (!endIso) return formatDay(start);
+  const end = isoParts(endIso);
+  if (!end) return formatDay(start);
+
+  if (start.year === end.year && start.month === end.month) {
+    return `${start.day}.–${end.day}. ${DE_MONTHS[start.month - 1] ?? ''} ${end.year}`;
+  }
+  if (start.year === end.year) {
+    return `${start.day}. ${DE_MONTHS[start.month - 1] ?? ''} – ${formatDay(end)}`;
+  }
+  return `${formatDay(start)} – ${formatDay(end)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -248,7 +287,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
-    borderRadius: radii.md,
+    // 16px is the high end of the design.md md radius range (14–16) — the
+    // StatsCard sits at 16 per the artboard.
+    borderRadius: 16,
     paddingVertical: 18,
     marginBottom: 22,
   },
@@ -292,7 +333,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    gap: 12,
+    gap: 14,
   },
   rowPressed: { opacity: 0.7 },
   dotWrap: { justifyContent: 'center', alignItems: 'center', width: 10 },
