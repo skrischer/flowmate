@@ -1,7 +1,7 @@
 // Initials-based circular avatar — no image upload exists in v1.
 // Derives a single initial from a display name, falling back to a single
 // letter from the email or a placeholder bullet when neither is available.
-// Token-driven: background from `surfaceRaised`, text from `primary`.
+// Token-driven: background from `surfaceRaised`, 1px `ring` border, text `#C3B3E6`.
 // Reused by the Flower header (#80) and any partner-identity surface.
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -57,10 +57,13 @@ export function Avatar({ displayName, fallback, size = 44 }: AvatarProps) {
 const styles = StyleSheet.create({
   circle: {
     backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
+    borderColor: colors.ring,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    color: colors.primary,
+    // Avatar-specific initial colour per design.md (lighter than `primary`).
+    color: '#C3B3E6',
   },
 });

@@ -24,15 +24,15 @@ export const styles = StyleSheet.create({
   identityInfo: { flex: 1, gap: 6 },
   badgeRow: { flexDirection: 'row' },
   badge: {
-    backgroundColor: colors.successTint,
-    borderColor: colors.success,
+    backgroundColor: colors.successSurface,
+    borderColor: colors.successSurface,
     borderWidth: 1,
     borderRadius: radii.pill,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
   // "Verbunden" badge: Inter 600 12/16 per the artboard (not Caption Inter 500 11).
-  badgeText: { color: colors.success, fontFamily: typography.label.fontFamily, fontSize: 12, lineHeight: 16 },
+  badgeText: { color: colors.successText, fontFamily: typography.label.fontFamily, fontSize: 12, lineHeight: 16 },
   revokeSection: { gap: 8 },
   revoke: {
     backgroundColor: colors.surfaceRaised,
