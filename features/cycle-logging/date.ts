@@ -81,3 +81,38 @@ export function formatLongDe(value: string, withWeekday = false): string {
   const weekday = DE_WEEKDAYS[new Date(year, month - 1, day).getDay()] ?? '';
   return `${weekday} · ${longDate}`;
 }
+
+interface DateParts {
+  day: number;
+  month: number; // 1-12
+  year: number;
+}
+
+function isoParts(iso: string): DateParts | null {
+  if (!isValidIso(iso)) return null;
+  const [year, month, day] = iso.split('-');
+  return { day: Number(day), month: Number(month), year: Number(year) };
+}
+
+/**
+ * Renders a date range with German month names but WITHOUT the year, for the
+ * compact Flower-Home fertile-window row:
+ * - same month:    "22.–28. Juni"   (en dash, single month name)
+ * - cross-month:   "28. Mai – 3. Juni"
+ * Mirrors PeriodHistoryScreen's year-bearing range form; year-less by design
+ * (spec-design-reconciliation-2, "Fertile window (Home)"). Falls back to the
+ * raw ISO strings when a value is not a valid date.
+ */
+export function formatRangeShortDe(startIso: string, endIso: string): string {
+  const start = isoParts(startIso);
+  const end = isoParts(endIso);
+  if (!start || !end) {
+    return `${startIso} – ${endIso}`;
+  }
+  if (start.month === end.month && start.year === end.year) {
+    return `${start.day}.–${end.day}. ${DE_MONTHS[start.month - 1] ?? ''}`;
+  }
+  const startDay = `${start.day}. ${DE_MONTHS[start.month - 1] ?? ''}`;
+  const endDay = `${end.day}. ${DE_MONTHS[end.month - 1] ?? ''}`;
+  return `${startDay} – ${endDay}`;
+}

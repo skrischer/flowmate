@@ -22,7 +22,7 @@ import { getOwnProfile } from '../../lib/data/profiles';
 import { getDailyLog, listDailyLogs, listPeriods, upsertDailyLog, type Mood } from '../../lib/data';
 import type { DateRange, Prediction } from '../../lib/prediction';
 import { daysBetween } from '../../lib/prediction/dates';
-import { formatIso } from '../cycle-logging/date';
+import { formatRangeShortDe } from '../cycle-logging/date';
 import { useFlowerPrediction } from './useFlowerPrediction';
 import type { FlowerPrediction } from './prediction';
 import { loggedDays } from './calendar';
@@ -75,16 +75,19 @@ function BackfillCard({ loggedCount }: { loggedCount: number }) {
   );
 }
 
-/** Fertile window as a single inline row: dot + label + date (design). */
+/**
+ * Fertile window as one inline caramel row: "Fruchtbares Fenster · <range>"
+ * with a month-name, year-less range (design). The low-confidence "~ " approx
+ * prefix stays on the range value where applicable.
+ */
 function FertileWindow({ window, approx }: { window: DateRange | null; approx: string }) {
   if (window === null) return null;
   return (
     <View style={styles.fertileRow}>
       <View style={[styles.dot, { backgroundColor: colors.secondary }]} />
-      <Text style={styles.fertileLabel}>Fruchtbares Fenster</Text>
-      <Text style={styles.fertileValue}>
-        {approx}
-        {formatIso(window.start)} – {formatIso(window.end)}
+      <Text style={styles.fertileLabel}>
+        Fruchtbares Fenster · {approx}
+        {formatRangeShortDe(window.start, window.end)}
       </Text>
     </View>
   );
@@ -287,11 +290,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   caveatText: { ...typography.bodySm, color: colors.secondary, flex: 1 },
-  // Fertile window: one inline row — dot + label + date.
+  // Fertile window: one inline caramel row — dot + "label · range".
   fertileRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 8, height: 8, borderRadius: radii.pill },
-  fertileLabel: { ...typography.label, color: colors.secondary },
-  fertileValue: { ...typography.bodySm, color: colors.text },
+  fertileLabel: { ...typography.label, color: colors.secondary, flex: 1 },
   // Primary CTA: row layout for the plus glyph + label (gap 10, design).
   cta: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, backgroundColor: colors.primary, borderRadius: 15, padding: 17 },
   ctaPressed: { backgroundColor: colors.primaryPress },
