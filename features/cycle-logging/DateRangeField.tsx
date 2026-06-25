@@ -39,9 +39,10 @@ type Props = {
   disabled?: boolean;
 };
 
-// Soft lavender tint for the days strictly between the two endpoints — primary at
-// ~15 % opacity (8-digit RGBA hex), mirroring the calendar's local tint consts.
-const RANGE_FILL = '#B3A0D926';
+// Soft lavender tint for the days strictly between the two endpoints — the
+// primary token at ~15 % opacity (8-digit RGBA alpha), derived from the token so
+// it tracks any palette change, mirroring lib/theme's `successTint`.
+const RANGE_FILL = `${colors.primary}26`;
 
 // The collapsed field label: the formatted range, or start + "läuft noch" for an
 // open end (the default resting state). Empty start falls back to the placeholder.
