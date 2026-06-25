@@ -86,7 +86,9 @@ export function CalendarScreen() {
         <View style={styles.monthNav}>
           <View style={styles.navGroup}>
             <NavButton direction="back" onPress={() => setMonthStart(shiftMonth(visibleMonth, -1))} />
-            <Text style={styles.monthTitle}>{monthTitle(grid)}</Text>
+            <Text style={styles.monthTitle} numberOfLines={1}>
+              {monthTitle(grid)}
+            </Text>
             <NavButton direction="forward" onPress={() => setMonthStart(shiftMonth(visibleMonth, 1))} />
           </View>
           <Pressable onPress={() => router.push('/periods')} hitSlop={8}>
@@ -234,10 +236,20 @@ const styles = StyleSheet.create({
   content: { padding: spacing.screen, gap: 14 },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   // DM Sans SemiBold; fontSize 24 matches the artboard (h2 spec: 22–24).
-  // #229: centered fixed-width slot keeps the flanking forward arrow stable.
-  monthTitle: { ...typography.h2, fontSize: 24, color: colors.text, width: MONTH_TITLE_SLOT, textAlign: 'center' },
-  // #214: back-arrow + title + forward-arrow grouped (‹ Juni 2026 ›) on the left.
-  navGroup: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  // #229: centered fixed-width slot keeps the flanking forward arrow stable
+  // across months. flexShrink lets the slot yield (the title ellipsizes via
+  // numberOfLines) on cramped widths so it never collides with "Verlauf".
+  monthTitle: {
+    ...typography.h2,
+    fontSize: 24,
+    color: colors.text,
+    width: MONTH_TITLE_SLOT,
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  // #214: back-arrow + title + forward-arrow grouped (‹ Juni 2026 ›) on the left;
+  // flexShrink keeps the group within the row before "Verlauf" on narrow screens.
+  navGroup: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 },
   // #171/#214: Verlauf link mirrors the WeekGlance "Kalender" affordance (navLink + primary).
   historyLink: { ...typography.navLink, color: colors.primary },
   navButton: {
