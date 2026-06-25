@@ -159,9 +159,9 @@ function StatsCard({
 }) {
   return (
     <View style={styles.card}>
-      <StatItem label="Ø Zyklus" value={avgCycle !== null ? `${avgCycle} T` : '—'} />
+      <StatItem label="Ø Zyklus" value={avgCycle !== null ? String(avgCycle) : '—'} />
       <View style={styles.cardDivider} />
-      <StatItem label="Ø Periode" value={avgPeriod !== null ? `${avgPeriod} T` : '—'} />
+      <StatItem label="Ø Periode" value={avgPeriod !== null ? String(avgPeriod) : '—'} />
       <View style={styles.cardDivider} />
       <StatItem label="Einträge" value={String(entryCount)} />
     </View>
