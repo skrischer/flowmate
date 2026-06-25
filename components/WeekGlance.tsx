@@ -57,11 +57,9 @@ function DayCell({ day }: { day: WeekDay }) {
       <Text style={[styles.weekLabel, day.isToday && styles.weekLabelToday]}>{day.weekLabel}</Text>
       <Text style={[styles.dayNumber, day.isToday && styles.dayNumberToday]}>{day.day}</Text>
       <View style={styles.dotRow}>
-        {day.hasPeriodLog ? (
-          <View style={[styles.dot, day.isToday ? styles.dotToday : styles.dotPeriod]} />
-        ) : null}
+        {day.hasPeriodLog ? <View style={[styles.dot, styles.dotPeriod]} /> : null}
         {day.hasMoodLog ? (
-          <View style={[styles.dot, day.isToday ? styles.dotToday : styles.dotMood]} />
+          <View style={[styles.dot, day.isToday ? styles.dotMoodToday : styles.dotMood]} />
         ) : null}
         {!hasIndicator ? <View style={styles.dotPlaceholder} /> : null}
       </View>
@@ -138,9 +136,10 @@ const styles = StyleSheet.create({
   dotMood: {
     backgroundColor: colors.primary,
   },
-  // On the filled today column the period/mood dots would lose contrast on the
-  // primary fill, so they render in the on-primary tone instead.
-  dotToday: {
+  // On the filled today column the period dot keeps its rose tone while the mood
+  // dot switches to the on-primary tone, so both stay legible on the primary
+  // fill and remain distinguishable from each other.
+  dotMoodToday: {
     backgroundColor: colors.onPrimary,
   },
   dotPlaceholder: {
