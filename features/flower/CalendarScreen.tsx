@@ -74,17 +74,14 @@ export function CalendarScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* #87: title left, both nav arrows grouped on the right */}
+        {/* #214: arrows flank the title on the left (‹ Juni 2026 ›); the #171
+            "Verlauf" link → /periods sits top-right (Home section-header convention). */}
         <View style={styles.monthNav}>
-          <Text style={styles.monthTitle}>{monthTitle(grid)}</Text>
           <View style={styles.navGroup}>
             <NavButton direction="back" onPress={() => setMonthStart(shiftMonth(visibleMonth, -1))} />
+            <Text style={styles.monthTitle}>{monthTitle(grid)}</Text>
             <NavButton direction="forward" onPress={() => setMonthStart(shiftMonth(visibleMonth, 1))} />
           </View>
-        </View>
-
-        {/* #171: the Zyklus-Historie entry lives here — a header "Verlauf" link to /periods. */}
-        <View style={styles.historyRow}>
           <Pressable onPress={() => router.push('/periods')} hitSlop={8}>
             <Text style={styles.historyLink}>Verlauf</Text>
           </Pressable>
@@ -171,7 +168,7 @@ function DayView({ cell, onPress }: { cell: DayCell; onPress: (date: string) => 
   );
 }
 
-// #87: both arrows grouped right; direction prop drives which icon to render.
+// #214: arrows flank the title; direction prop drives which icon to render.
 function NavButton({ direction, onPress }: { direction: 'back' | 'forward'; onPress: () => void }) {
   return (
     <Pressable
@@ -231,9 +228,9 @@ const styles = StyleSheet.create({
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   // DM Sans SemiBold; fontSize 24 matches the artboard (h2 spec: 22–24).
   monthTitle: { ...typography.h2, fontSize: 24, color: colors.text },
-  navGroup: { flexDirection: 'row', gap: 8 },
-  // #171: Verlauf link mirrors the WeekGlance "Kalender" affordance (navLink + primary).
-  historyRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: -6 },
+  // #214: back-arrow + title + forward-arrow grouped (‹ Juni 2026 ›) on the left.
+  navGroup: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  // #171/#214: Verlauf link mirrors the WeekGlance "Kalender" affordance (navLink + primary).
   historyLink: { ...typography.navLink, color: colors.primary },
   navButton: {
     width: 38,
