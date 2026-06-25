@@ -55,23 +55,28 @@ export function MateAttunementScreen() {
   );
 }
 
-// Header: eyebrow "Eingestimmt auf" + Flower name + connection badge (#107).
+// Header: eyebrow + Flower name + connection badge (#107). When ended, the
+// eyebrow reads "Zuletzt eingestimmt auf" — the pairing is over, not active.
 function Header({ flowerName, isEnded }: { flowerName: string | null; isEnded: boolean }) {
+  const eyebrow = headerEyebrow(flowerName, isEnded);
   return (
     <View style={styles.header}>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
-          {flowerName !== null ? (
-            <Text style={styles.eyebrow}>Eingestimmt auf</Text>
-          ) : (
-            <Text style={styles.eyebrow}>Eingestimmt</Text>
-          )}
+          <Text style={styles.eyebrow}>{eyebrow}</Text>
           <Text style={styles.title}>{flowerName ?? 'Flowmate'}</Text>
         </View>
         <ConnectionBadge isEnded={isEnded} />
       </View>
     </View>
   );
+}
+
+function headerEyebrow(flowerName: string | null, isEnded: boolean): string {
+  if (flowerName === null) {
+    return 'Eingestimmt';
+  }
+  return isEnded ? 'Zuletzt eingestimmt auf' : 'Eingestimmt auf';
 }
 
 // Pill badge: sage "Verbunden" (with a green status dot) when connected, muted
@@ -191,7 +196,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.success,
   },
   badgeConnected: { backgroundColor: colors.successSurface },
-  badgeEnded: { backgroundColor: colors.surfaceRaised },
+  // Getrennt badge surface — the muted #241F2E per the artboard (design.md
+  // Surfaces · Mate · Eingestimmt beendet), distinct from the sage Verbunden.
+  badgeEnded: { backgroundColor: colors.inputDisabled },
   badgeText: { ...typography.caption },
   badgeTextConnected: { color: colors.successText },
   badgeTextEnded: { color: colors.textMuted },
