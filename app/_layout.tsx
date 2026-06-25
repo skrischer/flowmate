@@ -73,16 +73,16 @@ function AppStack({ shell }: { shell: AppShell }) {
       <Stack.Protected guard={shell === 'onboarding'}>
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Screen name="periods" options={{ title: 'Verlauf' }} />
+      <Stack.Screen name="periods" options={{ headerShown: false }} />
       <Stack.Screen
         name="period-form"
         options={{ presentation: 'modal', headerShown: false }}
       />
       <Stack.Screen name="mood-log" options={{ headerShown: false }} />
       <Stack.Screen name="mate-preview" options={{ title: 'Was dein Mate sieht' }} />
-      <Stack.Screen name="invite" options={{ title: 'Mate einladen' }} />
-      <Stack.Screen name="accept-invite" options={{ title: 'Code eingeben' }} />
-      <Stack.Screen name="pairing" options={{ title: 'Mein Mate' }} />
+      <Stack.Screen name="invite" options={{ headerShown: false }} />
+      <Stack.Screen name="accept-invite" options={{ headerShown: false }} />
+      <Stack.Screen name="pairing" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -20,6 +20,7 @@ import { daysBetween } from '../../lib/prediction/dates';
 import { cycleLengthStats } from '../../lib/prediction/cycle-stats';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 import { Icon } from '../../components/Icon';
+import { TopBar } from '../../components/TopBar';
 import { formatIso } from './date';
 
 // ---------------------------------------------------------------------------
@@ -89,6 +90,7 @@ export function PeriodHistoryScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
+      <TopBar title="Verlauf" />
       {periods === null ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />

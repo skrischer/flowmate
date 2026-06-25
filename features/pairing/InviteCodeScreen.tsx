@@ -20,6 +20,7 @@ import {
 
 import { TrustRow } from '../../components/TrustRow';
 import { Icon } from '../../components/Icon';
+import { TopBar } from '../../components/TopBar';
 import { createInvite, type Invite } from '../../lib/data';
 import { colors, radii, spacing, typography } from '../../lib/theme';
 
@@ -73,7 +74,9 @@ export function InviteCodeScreen() {
   const generateIsPrimary = !invite || expired;
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <View style={styles.screen}>
+      <TopBar title="Mate einladen" />
+      <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.lede}>
         Teile diesen Code mit deinem Mate. Er sieht danach nur deine Phase und
         sanfte Hinweise — nie deine Eintraege.
@@ -168,7 +171,8 @@ export function InviteCodeScreen() {
       </Pressable>
 
       <TrustRow caption="Du kannst die Verbindung jederzeit widerrufen." />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

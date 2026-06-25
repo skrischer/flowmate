@@ -22,6 +22,7 @@ import { acceptInvite } from '../../lib/data';
 import { colors, radii, spacing } from '../../lib/theme';
 import { BrandMark } from '../../components/BrandMark';
 import { TrustRow } from '../../components/TrustRow';
+import { TopBar } from '../../components/TopBar';
 
 export function AcceptInviteScreen() {
   const router = useRouter();
@@ -74,10 +75,12 @@ export function AcceptInviteScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <View style={styles.flex}>
+      <TopBar />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -128,7 +131,8 @@ export function AcceptInviteScreen() {
           )}
         </Pressable>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 

@@ -32,6 +32,7 @@ import {
 import { colors } from '../../lib/theme';
 import { Avatar } from '../../components/Avatar';
 import { Icon } from '../../components/Icon';
+import { TopBar } from '../../components/TopBar';
 import { styles } from './PairingManagementScreen.styles';
 
 /** Renders an ISO timestamp as a de-DE long date (e.g. 12. Mai 2026). */
@@ -101,7 +102,9 @@ export function PairingManagementScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <View style={styles.screen}>
+      <TopBar title="Mein Mate" />
+      <ScrollView contentContainerStyle={styles.content}>
       {pairings === null ? (
         <View style={styles.card}>
           <ActivityIndicator color={colors.primary} />
@@ -126,7 +129,8 @@ export function PairingManagementScreen() {
       )}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
