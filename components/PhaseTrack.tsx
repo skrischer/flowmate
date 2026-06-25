@@ -23,6 +23,11 @@ const PHASE_INACTIVE = '#352C42';
 const PILL_GAP = 5;
 const BAR_SEGMENT_SPACING = 2;
 const BAR_END_RADIUS = 4;
+// Vertical gap between the three rows (above-labels / track / below-labels).
+// The pills surface (Mate) sits a touch looser than the bar surface (Flower),
+// matching each artboard.
+const BAR_ROW_GAP = 6;
+const PILL_ROW_GAP = 8;
 // Explicit height for each label row so it does not collapse now that the
 // labels are absolutely positioned (out of normal flow). ~the caption
 // line-height (15), rounded up.
@@ -139,9 +144,10 @@ function Track({
 
 /** 4-segment weighted phase track with German labels alternating around it. */
 export function PhaseTrack({ currentPhase, variant = 'bar' }: PhaseTrackProps) {
-  const gap = variant === 'pills' ? PILL_GAP : 0;
+  const isPills = variant === 'pills';
+  const gap = isPills ? PILL_GAP : 0;
   return (
-    <View style={styles.container}>
+    <View style={isPills ? styles.containerPills : styles.containerBar}>
       <LabelRow placement="above" currentPhase={currentPhase} gap={gap} />
       <Track currentPhase={currentPhase} variant={variant} />
       <LabelRow placement="below" currentPhase={currentPhase} gap={gap} />
@@ -150,7 +156,8 @@ export function PhaseTrack({ currentPhase, variant = 'bar' }: PhaseTrackProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 6 },
+  containerBar: { gap: BAR_ROW_GAP },
+  containerPills: { gap: PILL_ROW_GAP },
   track: { flexDirection: 'row' },
   trackBar: { height: 6 },
   trackPills: { height: 7, gap: PILL_GAP },
