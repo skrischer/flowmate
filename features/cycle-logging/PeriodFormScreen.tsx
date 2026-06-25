@@ -171,7 +171,7 @@ export function PeriodFormScreen() {
       <Text style={styles.intro}>
         {isEdit
           ? 'Passe den Zeitraum dieser Periode an oder lösche den Eintrag.'
-          : 'Trag den Beginn deiner Periode ein. Das Enddatum ist optional.'}
+          : 'Trag den Beginn deiner Periode ein – auch eine vergangene lässt sich nachtragen.'}
       </Text>
 
       <ScrollView
@@ -184,15 +184,15 @@ export function PeriodFormScreen() {
           value={startDate}
           onChange={setStartDate}
           disabled={isBusy}
-          hint="Auch vergangene Tage möglich (Historie nachtragen)."
         />
 
         <DatePickerField
-          label="Enddatum (optional)"
+          label="Enddatum · optional"
           value={endDate}
           onChange={setEndDate}
           optional
           minDate={startDate || undefined}
+          placeholderLabel="Läuft noch"
           disabled={isBusy}
         />
 
@@ -242,27 +242,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.screen,
-    paddingVertical: 14,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
+  // Close control: 38×38 rounded-square r12, inputDisabled bg + chipBorder border
+  // (design.md) — matches the shared TopBar back-affordance.
   closeBtn: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radii.pill,
-    backgroundColor: colors.surfaceRaised,
+    borderRadius: 12,
+    backgroundColor: colors.inputDisabled,
+    borderColor: colors.chipBorder,
+    borderWidth: 1,
   },
   closeBtnPressed: { opacity: 0.7 },
-  // Sheet title: DM Sans 600 18/22 per the artboard (not Title 16).
+  // Sheet title: DM Sans 600 18/22, ls -0.02em per the artboard (not Title 16).
   sheetTitle: {
     ...typography.title,
     fontSize: 18,
     lineHeight: 22,
+    letterSpacing: -0.02 * 18,
     color: colors.text,
     flex: 1,
     textAlign: 'center',
   },
-  headerSpacer: { width: 36 },
+  headerSpacer: { width: 38 },
 
   // Intro line: Inter 400 15/22 per the artboard (not bodySm 14/20).
   intro: {
@@ -300,12 +306,11 @@ const styles = StyleSheet.create({
   deleteBtnPressed: { opacity: 0.7 },
   deleteBtnText: { color: colors.danger, fontSize: 16, fontWeight: '600' },
 
-  // Pinned footer + CTA
+  // Pinned footer + CTA — no top divider (design.md), top 16 / bottom 30.
   footer: {
     paddingHorizontal: spacing.screen,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.hairline,
+    paddingTop: 16,
+    paddingBottom: 30,
     backgroundColor: colors.bg,
   },
   cta: {

@@ -29,6 +29,8 @@ type Props = {
   optional?: boolean;
   /** Days before this ISO day are not selectable (e.g. end >= start). */
   minDate?: string;
+  /** Empty-state text shown when no day is selected (default: 'Datum wählen'). */
+  placeholderLabel?: string;
   /** A short helper line under the field. */
   hint?: string;
   disabled?: boolean;
@@ -54,6 +56,7 @@ export function DatePickerField({
   onChange,
   optional,
   minDate,
+  placeholderLabel = 'Datum wählen',
   hint,
   disabled,
 }: Props) {
@@ -86,13 +89,13 @@ export function DatePickerField({
         onPress={openPicker}
         disabled={disabled}
         accessibilityRole="button"
-        accessibilityLabel={`${label}: ${value ? relativeLabel(value) : 'Datum wählen'}`}
+        accessibilityLabel={`${label}: ${value ? relativeLabel(value) : placeholderLabel}`}
       >
         <Icon name="calendar" size={18} color={colors.textSubtle} />
         <Text style={value ? styles.fieldText : styles.placeholder}>
           {value
             ? `${relativeLabel(value)} · ${formatIso(value)}`
-            : 'Datum wählen'}
+            : placeholderLabel}
         </Text>
         <Icon name="chevron" size={18} color={colors.textSubtle} />
       </Pressable>
@@ -196,7 +199,7 @@ export function DatePickerField({
 
 const styles = StyleSheet.create({
   fieldGroup: { gap: 8 },
-  label: { color: colors.label, fontSize: 13, fontWeight: '600' },
+  label: { color: colors.textSubtle, fontSize: 13, fontWeight: '600' },
   field: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
   fieldDisabled: { opacity: 0.5 },
   // Field value: Inter 500 16/20 per the artboard (not 15, no weight).
   fieldText: { color: colors.text, fontFamily: fonts.bodyMedium, fontSize: 16, lineHeight: 20, flex: 1 },
-  placeholder: { color: colors.textSubtle, fontSize: 16, flex: 1 },
+  placeholder: { color: colors.textMuted, fontSize: 16, flex: 1 },
   hint: { color: colors.textSubtle, fontSize: 12 },
   modalRoot: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   backdrop: {
