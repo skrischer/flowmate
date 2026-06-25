@@ -36,6 +36,14 @@ n:m-capable from the start (see `docs/constitution.md`). The data-sovereignty
 reframing it implies (each person becomes both data subject and observer) is an
 open product decision deferred to when Phase 8 is planned.
 
+## Cross-cutting
+
+Not sequenced phases — work that spans surfaces built in Phases 1–6.
+
+| Theme | Spec | Milestone |
+|---|---|---|
+| Design-fidelity reconciliation — reconcile the implemented screens with the design contract, bidirectionally (code→design default; design→code where the build is better) | [spec](specs/spec-design-reconciliation.md) | [#7](https://github.com/skrischer/flowmate/milestone/7) |
+
 ## North star
 
 A couple where she logs effortlessly and he stays attuned without managing —
