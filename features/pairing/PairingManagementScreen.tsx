@@ -7,14 +7,13 @@
 // access is cut on revoke. All access goes through lib/data; no raw health data
 // on this surface.
 //
-// Changes (issues #101, #102, #103, #177):
-//   #101 — "Was [Mate] sieht" TransparencyCard moved to its own /mate-preview
-//          screen (#156); this screen is management/revoke only.
+// Changes (issues #101, #102, #103, #177, #212):
+//   #101 — "Was [Mate] sieht" TransparencyCard: data-sovereignty centrepiece.
 //   #102 — Mate identity: Avatar + name + "Verbunden" pill badge via getPartnerProfile.
 //   #103 — Remove duplicate "Mein Mate" heading; add trash icon to revoke; add caption.
-//   #177 — Design-fidelity: mate-card + remove-button + "seit"-date tokens; add the
-//          nav row to /mate-preview ("Was mein Mate sieht") — F1: the visibility card
-//          stays on that separate screen, this is only the link to it.
+//   #177 — Design-fidelity: mate-card + remove-button + "seit"-date tokens.
+//   #212 — Re-merge "Mein Mate" (reverses round-1 F1): the TransparencyCard renders
+//          inline here again (artboard VX-0); the round-1 preview split is gone.
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -36,6 +35,7 @@ import { colors } from '../../lib/theme';
 import { Avatar } from '../../components/Avatar';
 import { Icon } from '../../components/Icon';
 import { TopBar } from '../../components/TopBar';
+import { TransparencyCard } from './TransparencyCard';
 import { styles } from './PairingManagementScreen.styles';
 
 /** Renders an ISO timestamp as a de-DE long date (e.g. 12. Mai 2026). */
@@ -130,7 +130,7 @@ export function PairingManagementScreen() {
               }}
             />
           ))}
-          <PreviewNavRow onPress={() => router.push('/mate-preview')} />
+          <TransparencyCard mateName={partnerProfile?.displayName ?? null} />
         </>
       )}
 
@@ -155,22 +155,6 @@ function EmptyState({ onInvite }: { onInvite: () => void }) {
         <Text style={styles.ctaText}>Mate einladen</Text>
       </Pressable>
     </View>
-  );
-}
-
-// Nav entry to the separate "Was mein Mate sieht" preview (/mate-preview, #156):
-// the visibility/transparency card lives on that screen, not here — this row is
-// the link to it (acceptance-gate F1).
-function PreviewNavRow({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.navRow, pressed && styles.secondaryPressed]}
-      onPress={onPress}
-    >
-      <Icon name="eye" size={20} color={colors.primary} />
-      <Text style={styles.navRowText}>Was mein Mate sieht</Text>
-      <Icon name="chevron" size={18} color={colors.textSubtle} />
-    </Pressable>
   );
 }
 

@@ -101,8 +101,7 @@ prefix; listed state variants are separate artboards.
 | Flower · Zyklus-Historie | `spec-cycle-logging.md` | Chronological period list (descending) + stats; row → edit/delete |
 | Flower · Invite-Code | `spec-pairing.md` | Single-use code, 24h; **"Neuen Code generieren"**; "nie deine Einträge" |
 | Flower · Invite-Code (abgelaufen) | `spec-pairing.md` | Expired/used state — greyed code, "Code abgelaufen", regenerate as primary |
-| Flower · Pairing-Management | `spec-pairing.md` | Connected status + **"Mate entfernen"/revoke** + re-invite + "Was Tom sieht" (from Flower · Profil "Mein Mate ›") |
-| Flower · Mate-preview | `spec-pairing.md` | "Was mein Mate sieht" — the **#156 split** read-only TransparencyCard preview (phase + heads-up + attunement hint only, never raw logs). Reached from Flower · Profil "Was mein Mate sieht ›" and the Pairing-Management nav row. Shared back-button + intro lede; a defined **empty/unpaired** state when no Mate edge is active (design→code, spec-design-reconciliation F1 — design follows the kept implementation) |
+| Flower · Pairing-Management | `spec-pairing.md` | Reached from Flower · Profil "Mein Mate ›". Mate identity + **"Mate entfernen"/revoke** + re-invite, then the **inline "Was [Mate] sieht" TransparencyCard** (phase + heads-up + attunement hint only, never raw logs) — artboard `VX-0`; re-merged from the round-1 `/mate-preview` split (spec-design-reconciliation-2, reverses round-1 F1) |
 | Flower · Profil | `spec-foundation-auth.md` | Identity + setting rows + sign out; "Mein Mate ›" row opens Flower · Pairing-Management |
 | Mate · Code eingeben | `spec-pairing.md` | Mate accept screen — enter code → `accept_invite` |
 | Mate · Eingestimmt | `spec-mate-push.md` | Phase + heads-up + attunement hint, **no raw data, no calendar** |
