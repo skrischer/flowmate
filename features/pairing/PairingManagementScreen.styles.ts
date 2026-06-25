@@ -11,15 +11,15 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
-    borderRadius: radii.lg,
-    padding: 22,
+    borderRadius: 18,
+    padding: 18,
     gap: 14,
   },
   // Mate-name title: DM Sans 600 18/22 per the artboard (not H2 22).
   cardTitle: { color: colors.text, ...typography.h2, fontSize: 18, lineHeight: 22 },
   bodyMuted: { color: colors.textMuted, ...typography.bodySm },
-  // "seit [date]": Inter 400 13/16 per the artboard (not bodySm 14/20).
-  since: { color: colors.textMuted, fontFamily: typography.body.fontFamily, fontSize: 13, lineHeight: 16 },
+  // "seit [date]": Inter 400 13/16 in textSubtle per the artboard (not textMuted bodySm 14/20).
+  since: { color: colors.textSubtle, fontFamily: typography.body.fontFamily, fontSize: 13, lineHeight: 16 },
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   identityInfo: { flex: 1, gap: 6 },
   badgeRow: { flexDirection: 'row' },
@@ -33,13 +33,36 @@ export const styles = StyleSheet.create({
   },
   // "Verbunden" badge: Inter 600 12/16 per the artboard (not Caption Inter 500 11).
   badgeText: { color: colors.successText, fontFamily: typography.label.fontFamily, fontSize: 12, lineHeight: 16 },
-  revokeSection: { gap: 8 },
-  revoke: {
-    backgroundColor: colors.surfaceRaised,
+  // Nav row to /mate-preview ("Was mein Mate sieht"): card-styled tappable row,
+  // matching the Profil settings-row affordance (eye icon + label + chevron).
+  navRow: {
+    backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
-    borderRadius: radii.md,
-    padding: 16,
+    borderRadius: 18,
+    paddingVertical: 17,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  navRowText: {
+    flex: 1,
+    color: colors.text,
+    fontFamily: typography.body.fontFamily,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  revokeSection: { gap: 8 },
+  // Remove button per the artboard: no fill, danger-tinted border #5A3A40, radius 12,
+  // fixed 52px height (not surfaceRaised fill + hairline border + radii.md/pad-16).
+  revoke: {
+    backgroundColor: 'transparent',
+    borderColor: '#5A3A40',
+    borderWidth: 1,
+    borderRadius: 12,
+    height: 52,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
