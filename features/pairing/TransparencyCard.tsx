@@ -5,7 +5,9 @@
 // illustrative labels, not live data. Lock footnote makes the guarantee explicit.
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, typography } from '../../lib/theme';
+import { colors, radii, spacing, typography } from '../../lib/theme';
+// spacing.screen (22) doubles as the card padding token — matches the design's
+// 22–24px card padding and replaces the previous hardcoded literal.
 import { Icon } from '../../components/Icon';
 
 function TransparencyRow({ label, value }: { label: string; value: string }) {
@@ -18,7 +20,9 @@ function TransparencyRow({ label, value }: { label: string; value: string }) {
 }
 
 export function TransparencyCard({ mateName }: { mateName: string | null }) {
-  const label = mateName ?? 'dein Mate';
+  // Unified self-referential copy ("mein Mate") — the Flower views her own
+  // sharing surface, never "dein Mate" (findings: /mate-preview header copy).
+  const label = mateName ?? 'mein Mate';
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -48,16 +52,18 @@ const styles = StyleSheet.create({
     borderColor: colors.hairline,
     borderWidth: 1,
     borderRadius: radii.lg,
-    padding: 22,
+    padding: spacing.screen,
     gap: 14,
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  title: { color: colors.text, ...typography.h2 },
+  title: { color: colors.text, ...typography.h2, flex: 1 },
   list: { gap: 10 },
+  // flex-start so a value that wraps to two lines stays top-aligned with its
+  // label instead of vertically centering against it (findings: row alignment).
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 8,
   },
   rowLabel: { color: colors.textMuted, ...typography.bodySm, flex: 1 },
