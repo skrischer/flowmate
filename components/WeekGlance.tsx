@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionTitle: {
-    ...typography.title,
+    ...typography.sectionTitle,
     color: colors.text,
   },
   calendarLink: {
-    ...typography.bodySm,
+    ...typography.navLink,
     color: colors.primary,
   },
   strip: {
@@ -112,8 +112,9 @@ const styles = StyleSheet.create({
   dayPillToday: {
     backgroundColor: colors.primary,
   },
+  // Day numbers: DM Sans 600 15 per the artboard (not Inter 400 14).
   dayNumber: {
-    ...typography.bodySm,
+    ...typography.sectionTitle,
     color: colors.text,
   },
   dayNumberToday: {

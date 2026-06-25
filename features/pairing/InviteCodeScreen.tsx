@@ -199,10 +199,13 @@ const styles = StyleSheet.create({
     borderColor: colors.danger,
     opacity: 0.7,
   },
+  // "DEIN EINLADUNGS-CODE": Inter 600 12, ls 0.16em per the artboard (not Caption 11 500).
   codeLabel: {
     ...typography.caption,
+    fontFamily: typography.label.fontFamily,
+    fontSize: 12,
     color: colors.textSubtle,
-    letterSpacing: 0.08 * 11, // wider than base caption — matches all-caps artboard label
+    letterSpacing: 0.16 * 12,
   },
   // No token for large code display; DM Sans between h2 (22) and h1 (32).
   code: {

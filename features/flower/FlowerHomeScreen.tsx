@@ -240,7 +240,8 @@ const styles = StyleSheet.create({
   },
   headerText: { gap: 2 },
   greetingLabel: { ...typography.bodySm, color: colors.textMuted },
-  nameLabel: { ...typography.h2, color: colors.text },
+  // Greeting name: DM Sans 600 24/30 per the artboard (between H2 22 and H1 34).
+  nameLabel: { ...typography.h2, fontSize: 24, lineHeight: 30, color: colors.text },
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
@@ -253,7 +254,8 @@ const styles = StyleSheet.create({
   bodyMuted: { ...typography.bodySm, color: colors.textMuted },
   chipRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cycleDayLabel: { ...typography.label, color: colors.textMuted },
-  displayHeadline: { ...typography.display, color: colors.text },
+  // Phase-card headline: H1 (DM Sans 600 ~34/36), not Display (40) — per design.
+  displayHeadline: { ...typography.h1, color: colors.text },
   reassurance: { ...typography.bodySm, color: colors.textMuted },
   caveat: { ...typography.bodySm, color: colors.secondary },
   fertileBlock: { gap: 4 },

@@ -231,7 +231,7 @@ function PairingCard({
           </View>
         </View>
       </View>
-      <Text style={styles.bodyMuted}>seit {formatDate(pairing.created_at)}</Text>
+      <Text style={styles.since}>seit {formatDate(pairing.created_at)}</Text>
       {isPending ? (
         <InlineConfirm
           displayLabel={displayLabel}

@@ -170,8 +170,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerText: { gap: 2, flex: 1 },
-  eyebrow: { ...typography.bodySm, color: colors.textMuted },
-  title: { ...typography.h1, color: colors.text },
+  // Eyebrow "Eingestimmt auf": Inter 400 13/16 per the artboard (not bodySm 14/20).
+  eyebrow: { ...typography.bodySm, fontSize: 13, lineHeight: 16, color: colors.textMuted },
+  // Flower-name title: DM Sans 600 24/30 per the artboard (not H1 34).
+  title: { ...typography.h2, fontSize: 24, lineHeight: 30, color: colors.text },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',

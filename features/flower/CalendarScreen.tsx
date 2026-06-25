@@ -230,7 +230,8 @@ const styles = StyleSheet.create({
   navButtonPressed: { opacity: 0.7 },
   gridBlock: { gap: 6 },
   weekdays: { flexDirection: 'row' },
-  weekday: { ...typography.caption, flex: 1, textAlign: 'center', color: colors.textSubtle },
+  // Weekday labels: Inter 600 per the artboard (not Caption Inter 500).
+  weekday: { ...typography.caption, fontFamily: typography.label.fontFamily, flex: 1, textAlign: 'center', color: colors.textSubtle },
   grid: { gap: 6 },
   week: { flexDirection: 'row', gap: 6 },
   cell: {

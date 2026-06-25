@@ -20,7 +20,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { Avatar } from '../../components/Avatar';
 import { Icon } from '../../components/Icon';
 import { signOut } from '../../lib/data';
-import { colors, radii, spacing, typography } from '../../lib/theme';
+import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
 import { useMateProfile } from './useMateProfile';
 
 // Identity card: Avatar + own display name + attuned-to line.
@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     gap: 16,
   },
-  pageTitle: { ...typography.h2, color: colors.text },
+  // "Profil" page title: DM Sans 600 24/30 per the artboard (not H2 22).
+  pageTitle: { ...typography.h2, fontSize: 24, lineHeight: 30, color: colors.text },
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
@@ -155,7 +156,8 @@ const styles = StyleSheet.create({
   },
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   identityText: { flex: 1, gap: 3 },
-  displayName: { ...typography.title, color: colors.text },
+  // Display name: DM Sans 600 20/26 per the artboard (not Title 16).
+  displayName: { ...typography.title, fontSize: 20, lineHeight: 26, color: colors.text },
   attunedLine: { ...typography.bodySm, color: colors.textMuted },
   settingRow: {
     flexDirection: 'row',
@@ -165,7 +167,8 @@ const styles = StyleSheet.create({
   },
   settingLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   notifTextCol: { gap: 2 },
-  settingLabel: { ...typography.body, color: colors.text },
+  // Settings-row label: Inter 500 15/20 per the artboard (not Body Inter 400 16).
+  settingLabel: { fontFamily: fonts.bodyMedium, fontSize: 15, lineHeight: 20, color: colors.text },
   notifCaption: { ...typography.caption, color: colors.textSubtle },
   divider: { height: 1, backgroundColor: colors.hairline },
   signOutRow: {

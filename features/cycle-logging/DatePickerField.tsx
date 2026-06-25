@@ -17,7 +17,7 @@ import {
   type DayCell,
 } from '../flower/calendar';
 import { Icon } from '../../components/Icon';
-import { colors, radii } from '../../lib/theme';
+import { colors, fonts, radii } from '../../lib/theme';
 import { formatIso, todayIso } from './date';
 
 type Props = {
@@ -210,8 +210,9 @@ const styles = StyleSheet.create({
   },
   fieldPressed: { opacity: 0.7 },
   fieldDisabled: { opacity: 0.5 },
-  fieldText: { color: colors.text, fontSize: 15, flex: 1 },
-  placeholder: { color: colors.textSubtle, fontSize: 15, flex: 1 },
+  // Field value: Inter 500 16/20 per the artboard (not 15, no weight).
+  fieldText: { color: colors.text, fontFamily: fonts.bodyMedium, fontSize: 16, lineHeight: 20, flex: 1 },
+  placeholder: { color: colors.textSubtle, fontSize: 16, flex: 1 },
   hint: { color: colors.textSubtle, fontSize: 12 },
   modalRoot: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   backdrop: {

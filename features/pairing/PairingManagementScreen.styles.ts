@@ -15,8 +15,11 @@ export const styles = StyleSheet.create({
     padding: 22,
     gap: 14,
   },
-  cardTitle: { color: colors.text, ...typography.h2 },
+  // Mate-name title: DM Sans 600 18/22 per the artboard (not H2 22).
+  cardTitle: { color: colors.text, ...typography.h2, fontSize: 18, lineHeight: 22 },
   bodyMuted: { color: colors.textMuted, ...typography.bodySm },
+  // "seit [date]": Inter 400 13/16 per the artboard (not bodySm 14/20).
+  since: { color: colors.textMuted, fontFamily: typography.body.fontFamily, fontSize: 13, lineHeight: 16 },
   identityRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   identityInfo: { flex: 1, gap: 6 },
   badgeRow: { flexDirection: 'row' },
@@ -28,7 +31,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
-  badgeText: { color: colors.success, ...typography.caption },
+  // "Verbunden" badge: Inter 600 12/16 per the artboard (not Caption Inter 500 11).
+  badgeText: { color: colors.success, fontFamily: typography.label.fontFamily, fontSize: 12, lineHeight: 16 },
   revokeSection: { gap: 8 },
   revoke: {
     backgroundColor: colors.surfaceRaised,
@@ -41,7 +45,8 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  revokeText: { color: colors.danger, ...typography.title },
+  // "Mate entfernen": Inter 600 16/20 per the artboard (not Title DM Sans).
+  revokeText: { color: colors.danger, fontFamily: typography.label.fontFamily, fontSize: 16, lineHeight: 20 },
   revokeCaption: { color: colors.textSubtle, ...typography.caption, textAlign: 'center' },
   confirm: { gap: 14 },
   confirmText: { color: colors.text, ...typography.bodySm },
