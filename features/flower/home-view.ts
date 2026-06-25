@@ -66,9 +66,9 @@ export function periodHeadline(days: number): string {
 
 /** One-line reassurance text per confidence state. */
 export function reassuranceLine(confidence: Confidence): string {
-  if (confidence === 'none') return 'Noch zu wenige Zyklen fuer eine Prognose.';
-  if (confidence === 'low') return 'Unregelmaessige Zyklen — Prognose mit Vorbehalt.';
-  return 'Dein Zyklus laeuft ruhig und regelmaessig.';
+  if (confidence === 'none') return 'Noch zu wenige Zyklen für eine Prognose.';
+  if (confidence === 'low') return 'Unregelmäßige Zyklen — Prognose mit Vorbehalt.';
+  return 'Dein Zyklus läuft ruhig und regelmäßig.';
 }
 
 /** German display label for each cycle phase. */
@@ -110,7 +110,7 @@ export function nextPeriodLabel(days: number): string {
  */
 export function confidenceCaveat(confidence: Confidence): string | null {
   if (confidence === 'low') {
-    return 'Unregelmaessige Zyklen — diese Prognose ist weniger sicher.';
+    return 'Unregelmäßige Zyklen — diese Prognose ist weniger sicher.';
   }
   return null;
 }

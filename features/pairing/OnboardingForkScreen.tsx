@@ -29,7 +29,7 @@ const CHOICES: readonly Choice[] = [
     key: 'track',
     icon: 'calendar',
     title: 'Eigenen Zyklus tracken',
-    body: 'Du loggst deinen Zyklus und behaeltst die volle Hoheit ueber deine Daten.',
+    body: 'Du loggst deinen Zyklus und behältst die volle Hoheit über deine Daten.',
   },
   {
     key: 'follow',

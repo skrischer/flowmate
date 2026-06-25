@@ -17,10 +17,10 @@ export function EndedView({ flowerName }: EndedViewProps) {
   const router = useRouter();
   const bodyText =
     flowerName !== null
-      ? `${flowerName} teilt aktuell keine Einstimmung mehr mit dir. Du erhaeltst keine Hinweise, bis sie dich erneut einlaedt.`
-      : 'Aktuell wird keine Einstimmung mit dir geteilt. Du erhaeltst keine Hinweise, bis du erneut eingeladen wirst.';
+      ? `${flowerName} teilt aktuell keine Einstimmung mehr mit dir. Du erhältst keine Hinweise, bis sie dich erneut einlädt.`
+      : 'Aktuell wird keine Einstimmung mit dir geteilt. Du erhältst keine Hinweise, bis du erneut eingeladen wirst.';
   const sovereigntyNote =
-    flowerName !== null ? `${flowerName} teilt nur, was sie moechte.` : null;
+    flowerName !== null ? `${flowerName} teilt nur, was sie möchte.` : null;
 
   return (
     <View style={styles.hero}>

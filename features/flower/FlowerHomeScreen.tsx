@@ -46,7 +46,7 @@ function BackfillCard({ onLog }: { onLog: () => void }) {
       <Text style={styles.cardTitle}>Noch keine Prognose</Text>
       <Text style={styles.bodyMuted}>
         Trage mindestens drei Zyklen ein, damit Flowmate Phase und fruchtbares
-        Fenster schaetzen kann.
+        Fenster schätzen kann.
       </Text>
       <Pressable
         style={({ pressed }) => [styles.inlineCta, pressed && styles.ctaPressed]}
@@ -126,8 +126,8 @@ function PredictionSection({ data, isLoading, error, cycleStart, router }: Secti
   if (error || !data) {
     return (
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Prognose nicht verfuegbar</Text>
-        <Text style={styles.bodyMuted}>Bitte spaeter erneut versuchen.</Text>
+        <Text style={styles.cardTitle}>Prognose nicht verfügbar</Text>
+        <Text style={styles.bodyMuted}>Bitte später erneut versuchen.</Text>
       </View>
     );
   }

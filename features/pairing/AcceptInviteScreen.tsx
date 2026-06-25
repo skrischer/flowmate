@@ -47,7 +47,7 @@ export function AcceptInviteScreen() {
       setError(
         cause instanceof Error
           ? cause.message
-          : 'Der Code ist ungueltig, abgelaufen oder bereits genutzt.',
+          : 'Der Code ist ungültig, abgelaufen oder bereits genutzt.',
       );
       setIsBusy(false);
     }
