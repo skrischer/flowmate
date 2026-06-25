@@ -61,37 +61,41 @@ const DE_MONTHS = [
 // German weekday abbreviations indexed by JS `Date.getDay()` (Sunday = 0).
 const DE_WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] as const;
 
-/**
- * Renders an ISO day as a German long date, e.g. "15. Juni 2026". With
- * `withWeekday` it prefixes the weekday abbreviation: "Do · 15. Juni 2026".
- * Passthrough if the value is not a valid ISO day.
- */
-export function formatLongDe(value: string, withWeekday = false): string {
-  if (!isValidIso(value)) {
-    return value;
-  }
-  const parts = value.split('-');
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
-  const longDate = `${day}. ${DE_MONTHS[month - 1] ?? ''} ${year}`;
-  if (!withWeekday) {
-    return longDate;
-  }
-  const weekday = DE_WEEKDAYS[new Date(year, month - 1, day).getDay()] ?? '';
-  return `${weekday} · ${longDate}`;
-}
-
 interface DateParts {
   day: number;
   month: number; // 1-12
   year: number;
 }
 
+/** Splits a validated ISO day into numeric parts; null when not a valid date. */
 function isoParts(iso: string): DateParts | null {
   if (!isValidIso(iso)) return null;
   const [year, month, day] = iso.split('-');
   return { day: Number(day), month: Number(month), year: Number(year) };
+}
+
+/** Single day with month name and year, e.g. "17. Juni 2026". */
+function formatDay({ day, month, year }: DateParts): string {
+  return `${day}. ${DE_MONTHS[month - 1] ?? ''} ${year}`;
+}
+
+/**
+ * Renders an ISO day as a German long date, e.g. "15. Juni 2026". With
+ * `withWeekday` it prefixes the weekday abbreviation: "Do · 15. Juni 2026".
+ * Passthrough if the value is not a valid ISO day.
+ */
+export function formatLongDe(value: string, withWeekday = false): string {
+  const parts = isoParts(value);
+  if (!parts) {
+    return value;
+  }
+  const longDate = formatDay(parts);
+  if (!withWeekday) {
+    return longDate;
+  }
+  const weekday =
+    DE_WEEKDAYS[new Date(parts.year, parts.month - 1, parts.day).getDay()] ?? '';
+  return `${weekday} · ${longDate}`;
 }
 
 /**
@@ -99,7 +103,7 @@ function isoParts(iso: string): DateParts | null {
  * compact Flower-Home fertile-window row:
  * - same month:    "22.–28. Juni"   (en dash, single month name)
  * - cross-month:   "28. Mai – 3. Juni"
- * Mirrors PeriodHistoryScreen's year-bearing range form; year-less by design
+ * Mirrors the year-bearing `formatDateRange` form; year-less by design
  * (spec-design-reconciliation-2, "Fertile window (Home)"). Falls back to the
  * raw ISO strings when a value is not a valid date.
  */
@@ -115,4 +119,29 @@ export function formatRangeShortDe(startIso: string, endIso: string): string {
   const startDay = `${start.day}. ${DE_MONTHS[start.month - 1] ?? ''}`;
   const endDay = `${end.day}. ${DE_MONTHS[end.month - 1] ?? ''}`;
   return `${startDay} – ${endDay}`;
+}
+
+/**
+ * Period date range with month names and an en dash per design (Zyklus-Historie
+ * rows):
+ * - same month + year:  "12.–17. Juni 2026"
+ * - same year:          "28. Mai – 3. Juni 2026"
+ * - crossing years:     "28. Dezember 2025 – 3. Januar 2026"
+ * Without an end_date the single start day is shown ("17. Juni 2026").
+ * Falls back to the raw ISO strings when a value is not a valid date.
+ */
+export function formatDateRange(startIso: string, endIso: string | null): string {
+  const start = isoParts(startIso);
+  if (!start) return endIso ? `${startIso} – ${endIso}` : startIso;
+  if (!endIso) return formatDay(start);
+  const end = isoParts(endIso);
+  if (!end) return formatDay(start);
+
+  if (start.year === end.year && start.month === end.month) {
+    return `${start.day}.–${end.day}. ${DE_MONTHS[start.month - 1] ?? ''} ${end.year}`;
+  }
+  if (start.year === end.year) {
+    return `${start.day}. ${DE_MONTHS[start.month - 1] ?? ''} – ${formatDay(end)}`;
+  }
+  return `${formatDay(start)} – ${formatDay(end)}`;
 }

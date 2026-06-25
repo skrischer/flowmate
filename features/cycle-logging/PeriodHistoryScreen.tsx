@@ -22,7 +22,7 @@ import { cycleLengthStats } from '../../lib/prediction/cycle-stats';
 import { colors, fonts, radii, spacing, typography } from '../../lib/theme';
 import { Icon } from '../../components/Icon';
 import { TopBar } from '../../components/TopBar';
-import { isValidIso } from './date';
+import { formatDateRange } from './date';
 
 // ---------------------------------------------------------------------------
 // Derived stats helpers
@@ -222,54 +222,6 @@ function PeriodRow({
   );
 }
 
-// German full month names, indexed 0–11 (kept local so other screens are
-// unaffected — this is the row-label format, not a shared date utility).
-const DE_MONTHS = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
-] as const;
-
-interface DateParts {
-  day: number;
-  month: number; // 1-12
-  year: number;
-}
-
-function isoParts(iso: string): DateParts | null {
-  if (!isValidIso(iso)) return null;
-  const [year, month, day] = iso.split('-');
-  return { day: Number(day), month: Number(month), year: Number(year) };
-}
-
-/** Single day with month name and year, e.g. "17. Juni 2026". */
-function formatDay({ day, month, year }: DateParts): string {
-  return `${day}. ${DE_MONTHS[month - 1] ?? ''} ${year}`;
-}
-
-/**
- * Period date range with month names and an en dash per design:
- * - same month + year:  "12.–17. Juni 2026"
- * - same year:          "28. Mai – 3. Juni 2026"
- * - crossing years:     "28. Dezember 2025 – 3. Januar 2026"
- * Without an end_date the single start day is shown ("17. Juni 2026").
- * Falls back to the raw ISO strings when a value is not a valid date.
- */
-function formatDateRange(startIso: string, endIso: string | null): string {
-  const start = isoParts(startIso);
-  if (!start) return endIso ? `${startIso} – ${endIso}` : startIso;
-  if (!endIso) return formatDay(start);
-  const end = isoParts(endIso);
-  if (!end) return formatDay(start);
-
-  if (start.year === end.year && start.month === end.month) {
-    return `${start.day}.–${end.day}. ${DE_MONTHS[start.month - 1] ?? ''} ${end.year}`;
-  }
-  if (start.year === end.year) {
-    return `${start.day}. ${DE_MONTHS[start.month - 1] ?? ''} – ${formatDay(end)}`;
-  }
-  return `${formatDay(start)} – ${formatDay(end)}`;
-}
-
 // ---------------------------------------------------------------------------
 // Styles
 // ---------------------------------------------------------------------------
@@ -281,47 +233,26 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: spacing.screen, paddingTop: 20, gap: 10 },
   listFooter: { height: 24 },
 
-  // Stats card (#92)
+  // Stats card (#92). borderRadius 16 is the high end of the design.md md
+  // radius range (14–16) — the StatsCard sits at 16 per the artboard.
   card: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
     borderColor: colors.hairline,
     borderWidth: 1,
-    // 16px is the high end of the design.md md radius range (14–16) — the
-    // StatsCard sits at 16 per the artboard.
     borderRadius: 16,
     paddingVertical: 18,
     marginBottom: 22,
   },
   statItem: { flex: 1, alignItems: 'center', gap: 4 },
   // Stat number: DM Sans 600 24/30 per the artboard (not Title 16).
-  statValue: {
-    ...typography.title,
-    fontSize: 24,
-    lineHeight: 30,
-    color: colors.text,
-  },
+  statValue: { ...typography.title, fontSize: 24, lineHeight: 30, color: colors.text },
   // Stat label: Inter 500 12/16 per the artboard (not Caption 11).
-  statLabel: {
-    ...typography.caption,
-    fontSize: 12,
-    lineHeight: 16,
-    color: colors.textMuted,
-    letterSpacing: 0,
-  },
-  cardDivider: {
-    width: 1,
-    backgroundColor: colors.hairline,
-    marginVertical: 4,
-  },
+  statLabel: { ...typography.caption, fontSize: 12, lineHeight: 16, color: colors.textMuted, letterSpacing: 0 },
+  cardDivider: { width: 1, backgroundColor: colors.hairline, marginVertical: 4 },
 
   // Section label (#94)
-  sectionLabel: {
-    ...typography.caption,
-    color: colors.textSubtle,
-    letterSpacing: 0.08 * 11,
-    marginBottom: 10,
-  },
+  sectionLabel: { ...typography.caption, color: colors.textSubtle, letterSpacing: 0.08 * 11, marginBottom: 10 },
 
   // Period row (#93)
   row: {
@@ -337,51 +268,18 @@ const styles = StyleSheet.create({
   },
   rowPressed: { opacity: 0.7 },
   dotWrap: { justifyContent: 'center', alignItems: 'center', width: 10 },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.period,
-  },
+  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.period },
   rowMain: { flex: 1 },
   // Date label: DM Sans 600 16/20 (Title) per the artboard (not Label Inter 13).
-  rowDate: {
-    ...typography.title,
-    lineHeight: 20,
-    color: colors.text,
-  },
+  rowDate: { ...typography.title, lineHeight: 20, color: colors.text },
   // Meta subtitle: Inter 400 13/16 per the artboard (not Caption Inter 500 11).
-  rowMeta: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    lineHeight: 16,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
+  rowMeta: { fontFamily: fonts.body, fontSize: 13, lineHeight: 16, color: colors.textMuted, marginTop: 2 },
 
   // CTA (#94 — bottom placement per design)
-  ctaWrap: {
-    paddingHorizontal: spacing.screen,
-    paddingTop: 12,
-    paddingBottom: 16,
-    backgroundColor: colors.bg,
-  },
-  cta: {
-    backgroundColor: colors.primary,
-    borderRadius: radii.md,
-    padding: 17,
-    alignItems: 'center',
-  },
+  ctaWrap: { paddingHorizontal: spacing.screen, paddingTop: 12, paddingBottom: 16, backgroundColor: colors.bg },
+  cta: { backgroundColor: colors.primary, borderRadius: radii.md, padding: 17, alignItems: 'center' },
   ctaPressed: { backgroundColor: colors.primaryPress },
-  ctaText: {
-    ...typography.title,
-    color: colors.onPrimary,
-  },
+  ctaText: { ...typography.title, color: colors.onPrimary },
 
-  empty: {
-    ...typography.bodySm,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginTop: 32,
-  },
+  empty: { ...typography.bodySm, color: colors.textMuted, textAlign: 'center', marginTop: 32 },
 });
