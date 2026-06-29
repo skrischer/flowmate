@@ -24,7 +24,7 @@ create or replace function public.notify_shared_state_phase_change()
   returns trigger
   language plpgsql
   security definer
-  set search_path = ''
+  set search_path = pg_catalog
 as $$
 declare
   v_secret text;
@@ -44,24 +44,30 @@ begin
     'http://kong:8000/functions/v1/push-dispatcher'
   );
 
-  perform net.http_post(
-    url := v_url,
-    body := jsonb_build_object(
-      'record', jsonb_build_object(
-        'owner_id', new.owner_id,
-        'current_phase', new.current_phase
+  -- The push webhook must never break the Flower's core logging: a pg_net
+  -- failure is downgraded to a warning so the shared_state write still commits.
+  begin
+    perform net.http_post(
+      url := v_url,
+      body := jsonb_build_object(
+        'record', jsonb_build_object(
+          'owner_id', new.owner_id,
+          'current_phase', new.current_phase
+        ),
+        'old_record', jsonb_build_object(
+          'owner_id', old.owner_id,
+          'current_phase', old.current_phase
+        )
       ),
-      'old_record', jsonb_build_object(
-        'owner_id', old.owner_id,
-        'current_phase', old.current_phase
-      )
-    ),
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || v_secret
-    ),
-    timeout_milliseconds := 5000
-  );
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || v_secret
+      ),
+      timeout_milliseconds := 5000
+    );
+  exception when others then
+    raise warning 'push-dispatcher webhook enqueue failed (owner_id=%): %', new.owner_id, sqlerrm;
+  end;
 
   return new;
 end;
